@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LavaApp</string>
+    <string name="AppTitle">LavaApp</string>
+
+    <string name="title_photo">Photo</string>
+    <string name="title_video">Video</string>
+    <string name="title_Cartoon">Cartoon</string>
+
+
+    <!--图片-->
+    <string name="photo_popular">流行</string>
+    <string name="photo_scenery">风景</string>
+    <string name="photo_portray">画像</string>
+
+    <!--视屏-->
+    <string name="video_popular">Popular</string>
+    <string name="video_funny">Funny</string>
+    <string name="video_sports">Sports</string>
+
+    <!--卡通-->
+    <string name="cartoon_popular">Popular</string>
+    <string name="cartoon_funny">Funny</string>
+    <string name="cartton_horror">Horror</string>
+
+</resources>

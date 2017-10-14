@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<com.rajesh.gallery.ui.view.gallery.DraftFinishView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/gallery_holder">
+
+    <com.rajesh.gallery.ui.view.gallery.ZoomImageView
+        android:id="@+id/image_image_zoom"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</com.rajesh.gallery.ui.view.gallery.DraftFinishView>

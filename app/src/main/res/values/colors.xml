@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#FF201F26</color>
+    <color name="colorPrimaryDark">#FF201F26</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+
+    <color name="colorAccent">#FF4081</color>
+
+
+
+    <color name="windowBackground">#FFFFFF</color>
+
+
+    <color name="activity_main_nav_radio_text">#000000</color>
+
+
+    <color name="activity_main_nav_radio_bg_check">#7A378B</color>
+    <color name="activity_main_nav_radio_bg">#FFFFFF</color>
+
+    <color name="activity_indicator_textColor_def">#FFFFFF</color>
+</resources>

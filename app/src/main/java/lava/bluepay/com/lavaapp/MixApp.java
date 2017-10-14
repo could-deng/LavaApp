@@ -1,0 +1,40 @@
+package lava.bluepay.com.lavaapp;
+
+import android.app.Application;
+import android.content.Context;
+import android.os.Build;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipelineConfig;
+
+/**
+ * Created by bluepay on 2017/10/14.
+ */
+
+public class MixApp extends Application {
+    Context context;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        context = this;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            initFresco();//facebook fresco框架
+        }else{
+            Fresco.initialize(this);//facebook fresco框架
+        }
+    }
+    /** 初始化facebook fresco*/
+    private void initFresco() {
+        /**
+         * oom android 5.0
+         * https://github.com/facebook/fresco/issues/1396
+         * */
+        //ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        ImagePipelineConfig imagePipelineConfig = ImagePipelineConfig
+                .newBuilder(getApplicationContext())
+                .setDownsampleEnabled(true)
+                //.setBitmapMemoryCacheParamsSupplier(new LollipopBitmapMemoryCacheParamsSupplier(activityManager))
+                .build();
+        Fresco.initialize(getApplicationContext(), imagePipelineConfig);
+    }
+}
