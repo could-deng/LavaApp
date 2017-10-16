@@ -1,7 +1,10 @@
 package lava.bluepay.com.lavaapp.view.adapter;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -10,6 +13,8 @@ import android.view.ViewGroup;
 import com.facebook.drawee.view.SimpleDraweeView;
 import java.util.List;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.ImageUtils;
+import lava.bluepay.com.lavaapp.common.ThreadManager;
 import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 
 /**
@@ -57,7 +62,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
-            PhotoBean data = mDatas.get(position);
+            final PhotoBean data = mDatas.get(position);
             if(data == null){
                 return;
             }
@@ -67,7 +72,29 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             if (TextUtils.isEmpty(data.getPictureImg())) {//默认
                 holder.imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
             } else {
-                holder.imageView.setImageURI(Uri.parse(data.getPictureImg()));
+                //正常显示
+//                holder.imageView.setImageURI(Uri.parse(data.getPictureImg()));
+                //模糊处理
+                ThreadManager.executeOnSubThread1(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Bitmap bm = ImageUtils.GetLocalOrNetBitmap(data.getPictureImg());
+                        Bitmap bb = null;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            bb = ImageUtils.blur(context,bm,holder.imageView.getWidth(),holder.imageView.getHeight());
+                        }else {
+                            bb = ImageUtils.newBlurToViewSize(bm, holder.imageView);
+                        }
+                        final Bitmap tempBm = bb;
+                        ((Activity)(context)).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                holder.imageView.setImageBitmap(tempBm);
+                            }
+                        });
+                    }
+                });
+
             }
 
 

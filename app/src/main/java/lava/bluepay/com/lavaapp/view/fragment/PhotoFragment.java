@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
@@ -120,12 +121,18 @@ public class PhotoFragment extends BaseFragment {
 
         Activity activity = getActivity();
         String[] titles;
-        if(getActivity()!=null){
+        if(activity!=null && activity instanceof MainActivity){
             titles = new String[]{getContext().getString(R.string.photo_popular),
             getContext().getString(R.string.photo_portray),getContext().getString(R.string.photo_scenery)};
             ((MainActivity)activity).setToolbar(false);
             ((MainActivity)activity).setIndicator(vp_photo,titles);
         }
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
     }
 }

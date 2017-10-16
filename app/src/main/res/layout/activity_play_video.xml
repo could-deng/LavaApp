@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <ProgressBar
+        android:id="@+id/pb_video"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"/>
+    <include layout="@layout/layout_toolbar"/>
+    <LinearLayout
+        android:id="@+id/ll_video_bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:background="@color/colorPrimaryDark"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_vertical">
+        <TextView
+            android:id="@+id/tv_video_bottom_played"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="00:00"
+            android:textColor="@color/textColorPrimary" />
+        <SeekBar
+            android:id="@+id/seekbar_video_bottom"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="10"
+            android:maxHeight="3dp"
+            android:minHeight="3dp"
+            android:paddingLeft="12dp"
+            android:paddingRight="12dp"
+            android:progressDrawable="@drawable/seekbar_style"
+            />
+        <TextView
+            android:id="@+id/tv_video_bottom_not_played"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="99:99"
+            android:textColor="@color/white_cloud_text"/>
+    </LinearLayout>
+</RelativeLayout>

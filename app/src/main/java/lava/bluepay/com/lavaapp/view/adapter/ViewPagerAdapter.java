@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by bluepay on 2017/10/12.
+ * 主界面viewpager适配器
  */
 
 public class ViewPagerAdapter extends PagerAdapter {

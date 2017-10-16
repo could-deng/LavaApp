@@ -42,11 +42,30 @@ public class MainActivity extends BaseActivity {
 
         initToolbar();
         initViews();
-
-        switchToFragment(FRAGMENT_PHOTO);
-        loadDataForPhotoFragment();
+//
+//        switchToFragment(FRAGMENT_PHOTO);
+//        loadDataForPhotoFragment();
     }
 
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
+        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
+            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+            if (fragment != null) {
+                if (currentNavIndex == -1) {
+                    if (rb_fragment_photo != null) {
+                        rb_fragment_photo.setChecked(true);
+                    }
+                } else {
+                    switchToFragment(FRAGMENT_PHOTO);
+                }
+            } else {
+                switchToFragment(FRAGMENT_PHOTO);
+                loadDataForPhotoFragment();
+            }
+        }
+    }
 
     /**
      * 设置toolbar中间viewpager指示字（用于fragment调用）
@@ -66,7 +85,7 @@ public class MainActivity extends BaseActivity {
         if(showBack){
             if(getSupportActionBar()!=null){
                 getSupportActionBar().setDisplayShowCustomEnabled(true);
-                getSupportActionBar().setHomeAsUpIndicator(R.mipmap.ic_launcher);//返回健
+                getSupportActionBar().setHomeAsUpIndicator(R.drawable.toolbar_back);//返回健
             }
         }else{
             if (getSupportActionBar() != null) {

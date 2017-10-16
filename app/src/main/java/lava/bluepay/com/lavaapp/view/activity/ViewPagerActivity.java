@@ -1,34 +1,49 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.image.ImageInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.ImageUtils;
+import lava.bluepay.com.lavaapp.common.ThreadManager;
+import lava.bluepay.com.lavaapp.view.adapter.DraweePagerAdapter;
 import lava.bluepay.com.lavaapp.view.widget.MultiTouchViewPager;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
 import lava.bluepay.com.lavaapp.view.widget.photodraweeview.PhotoDraweeView;
 
 
-public class ViewPagerActivity extends AppCompatActivity {
+public class ViewPagerActivity extends BaseActivity {
 
     MultiTouchViewPager viewPager;
     private LinearLayout dotContainer;
@@ -43,18 +58,23 @@ public class ViewPagerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viewpager);
-
-        ((Toolbar) findViewById(R.id.toolbar)).setNavigationOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onBackPressed();
-                    }
-                });
+        initToolbar();
+        setToolbar();
 
         dotContainer = (LinearLayout) findViewById(R.id.dot_container);
         viewPager = (MultiTouchViewPager) findViewById(R.id.view_pager);
-        pagerAdapter = new DraweePagerAdapter();
+        pagerAdapter = new DraweePagerAdapter(this);
+        pagerAdapter.setClickListener(new DraweePagerAdapter.OnCustomClickListener() {
+            @Override
+            public void onSingleTap() {
+                if (isActionBarShow) {
+                    hideActionBar();
+                } else {
+                    showActionBar();
+                }
+            }
+        });
+        viewPager.setClickable(true);
         viewPager.setAdapter(pagerAdapter);
         viewPager.addOnPageChangeListener(getPageChangeListener());
 
@@ -78,10 +98,12 @@ public class ViewPagerActivity extends AppCompatActivity {
                 dotContainer.addView(dot, params);
                 dotViewList.add(dot);
             }
+            dotContainer.setGravity(Gravity.CENTER);
             viewPager.setCurrentItem(0, false);
         }
 
     }
+
 
     private ViewPager.OnPageChangeListener getPageChangeListener() {
         if (listener == null) {
@@ -124,66 +146,72 @@ public class ViewPagerActivity extends AppCompatActivity {
        }
        return picData;
     }
-    public class DraweePagerAdapter extends PagerAdapter {
-
-        private List<String> picUrlList;
 
 
-        public void setPicUrlList(List<String> picUrlList){
-            this.picUrlList = picUrlList;
-            notifyDataSetChanged();
-        }
-        public List<String> getPicUrlList(){
-            return picUrlList;
-        }
-        @Override
-        public int getCount() {
-            if(picUrlList!=null && picUrlList.size()>0){
-                return picUrlList.size();
-            }
-            return 0;
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
-        @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object;
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView((View) object);
-        }
-
-        @Override
-        public Object instantiateItem(ViewGroup viewGroup, int position) {
-            if(picUrlList == null || picUrlList.size()<=0){
-                return null;
-            }
-            final PhotoDraweeView photoDraweeView = new PhotoDraweeView(viewGroup.getContext());
-            PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-            controller.setUri(Uri.parse(picUrlList.get(position)));
-//            controller.setUri(Uri.parse("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg"));
-            controller.setOldController(photoDraweeView.getController());
-            controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
-                @Override
-                public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
-                    super.onFinalImageSet(id, imageInfo, animatable);
-                    if (imageInfo == null) {
-                        return;
-                    }
-                    photoDraweeView.update(imageInfo.getWidth(), imageInfo.getHeight());
-                }
-            });
-            photoDraweeView.setController(controller.build());
-
-            try {
-                viewGroup.addView(photoDraweeView, ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return photoDraweeView;
-        }
     }
+
+
+    /**
+     * 标记ActionBar当前是否出现
+     */
+    private boolean isActionBarShow = true;
+
+    private void setToolbar(){
+        if (toolbar == null) return;
+        toolbar.setNavigationIcon(null);
+        toolbar.setNavigationOnClickListener(null);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeAsUpIndicator(R.drawable.toolbar_back);
+        }
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+    }
+
+    /**
+     * 动画隐藏actionbar
+     */
+    private void hideActionBar() {
+        isActionBarShow = false;
+        Animation hideAnim = AnimationUtils.loadAnimation(this, R.anim.action_bar_hide);
+        hideAnim.setFillAfter(true);
+        hideAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                toolbar.setVisibility(View.GONE);
+                toolbar.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        toolbar.startAnimation(hideAnim);
+    }
+    /**
+     * 动画展示actionbar
+     */
+    private void showActionBar() {
+        isActionBarShow = true;
+        toolbar.setVisibility(View.VISIBLE);
+        Animation startAnim = AnimationUtils.loadAnimation(this, R.anim.action_bar_show);
+        startAnim.setFillAfter(true);
+        toolbar.startAnimation(startAnim);
+    }
+
+
 }
