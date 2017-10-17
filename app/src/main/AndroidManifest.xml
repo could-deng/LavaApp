@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:name=".MixApp"
@@ -19,7 +21,8 @@
         <activity
             android:name=".view.activity.MainActivity"
             android:configChanges="orientation|keyboardHidden"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="sensorPortrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,10 +32,19 @@
         <activity android:name=".view.activity.GalleryActivity"
             android:configChanges="keyboardHidden|orientation"
             android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="sensorPortrait"
             />
         <activity android:name=".view.activity.ViewPagerActivity"
             android:configChanges="keyboardHidden|orientation"
             android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="sensorPortrait"
+            />
+        <activity android:name=".view.activity.PlayVideoActivity"
+            android:configChanges="screenSize|keyboardHidden|orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="sensorLandscape"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan"
             />
     </application>
 

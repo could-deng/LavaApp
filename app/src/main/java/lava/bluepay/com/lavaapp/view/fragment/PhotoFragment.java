@@ -119,6 +119,7 @@ public class PhotoFragment extends BaseFragment {
         ViewPagerAdapter adapter = new ViewPagerAdapter(views,getContext());
         vp_photo.setAdapter(adapter);
 
+        //todo bug
         Activity activity = getActivity();
         String[] titles;
         if(activity!=null && activity instanceof MainActivity){

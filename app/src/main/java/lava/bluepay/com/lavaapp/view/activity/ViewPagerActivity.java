@@ -1,46 +1,19 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.drawable.Animatable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.view.SimpleDraweeView;
-import com.facebook.imagepipeline.image.ImageInfo;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import lava.bluepay.com.lavaapp.R;
-import lava.bluepay.com.lavaapp.common.ImageUtils;
-import lava.bluepay.com.lavaapp.common.ThreadManager;
 import lava.bluepay.com.lavaapp.view.adapter.DraweePagerAdapter;
 import lava.bluepay.com.lavaapp.view.widget.MultiTouchViewPager;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
-import lava.bluepay.com.lavaapp.view.widget.photodraweeview.PhotoDraweeView;
 
 
 public class ViewPagerActivity extends BaseActivity {

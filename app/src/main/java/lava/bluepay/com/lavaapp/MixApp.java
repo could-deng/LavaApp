@@ -3,9 +3,10 @@ package lava.bluepay.com.lavaapp;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
-
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+
+import lava.bluepay.com.lavaapp.common.FileUtils;
 
 /**
  * Created by bluepay on 2017/10/14.
@@ -22,6 +23,7 @@ public class MixApp extends Application {
         }else{
             Fresco.initialize(this);//facebook fresco框架
         }
+        FileUtils.makeFolders(Config.PHOTO_PATH);
     }
     /** 初始化facebook fresco*/
     private void initFresco() {

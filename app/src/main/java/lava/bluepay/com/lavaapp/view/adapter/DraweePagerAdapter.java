@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.Animatable;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -83,7 +84,8 @@ public class DraweePagerAdapter extends PagerAdapter {
         final PhotoDraweeView photoDraweeView = new PhotoDraweeView(viewGroup.getContext());
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
 
-//            controller.setUri(Uri.parse(picUrlList.get(position)));
+        //订阅用户
+        controller.setUri(Uri.parse(picUrlList.get(position)));
 
         controller.setOldController(photoDraweeView.getController());
         controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
@@ -97,25 +99,29 @@ public class DraweePagerAdapter extends PagerAdapter {
             }
         });
         photoDraweeView.setController(controller.build());
-        ThreadManager.executeOnSubThread1(new Runnable() {
-            @Override
-            public void run() {
-                final Bitmap bm = ImageUtils.GetLocalOrNetBitmap(picUrlList.get(position));
-                Bitmap bb = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    bb = ImageUtils.blur(context,bm);
-                }else {
-                    bb = ImageUtils.newBlur(bm, photoDraweeView);
-                }
-                final Bitmap tempBm = bb;
-                ((Activity)(context)).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        photoDraweeView.setImageBitmap(tempBm);
-                    }
-                });
-            }
-        });
+
+        //非订阅用户
+
+//        ThreadManager.executeOnSubThread1(new Runnable() {
+//            @Override
+//            public void run() {
+//                final Bitmap bm = ImageUtils.GetLocalOrNetBitmap(picUrlList.get(position));
+//                Bitmap bb = null;
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//                    bb = ImageUtils.blur(context,bm);
+//                }else {
+//                    bb = ImageUtils.newBlur(bm, photoDraweeView);
+//                }
+//                final Bitmap tempBm = bb;
+//                ((Activity)(context)).runOnUiThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        photoDraweeView.setImageBitmap(tempBm);
+//                    }
+//                });
+//            }
+//        });
+
         try {
             viewGroup.addView(photoDraweeView, ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);

@@ -38,6 +38,7 @@ public class ImageUtils {
         bitmap = BitmapFactory.decodeFile(uri.toString(),options);
         return bitmap;
     }
+
     /**
      * 得到本地或者网络上的bitmap url - 网络或者本地图片的绝对路径,比如:
      *
@@ -74,6 +75,9 @@ public class ImageUtils {
             return null;
         }
     }
+
+
+    //region=====================自定义模糊化处理=========================
 
     /**
      * bitmap 模糊化处理
@@ -340,6 +344,12 @@ public class ImageUtils {
         return (bitmap);
     }
 
+    //endregion=====================自定义模糊化处理=========================
+
+
+
+    //region=====================sdk17以上的RenderScript模糊化处理=========================
+
 
 
     /**
@@ -358,7 +368,6 @@ public class ImageUtils {
      * @param image   需要模糊的图片
      * @return 模糊处理后的图片
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static Bitmap blur(Context context, Bitmap image) {
         Bitmap outputBitmap;
         // 计算图片缩小后的长宽
@@ -404,7 +413,6 @@ public class ImageUtils {
      * @param image   需要模糊的图片
      * @return 模糊处理后的图片
      */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static Bitmap blur(Context context, Bitmap image,int showWidth,int showHeight) {
         Bitmap outputBitmap;
         // 计算图片缩小后的长宽
@@ -465,4 +473,6 @@ public class ImageUtils {
         return blurScript;
     }
 
+
+    //endregion=====================sdk17以上的RenderScript模糊化处理=========================
 }

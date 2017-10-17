@@ -5,13 +5,16 @@
     <lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clickable="true"/>
     <ProgressBar
         android:id="@+id/pb_video"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_centerInParent="true"/>
-    <include layout="@layout/layout_toolbar"/>
+    <include
+        android:id="@+id/header_view"
+        layout="@layout/layout_toolbar"/>
     <LinearLayout
         android:id="@+id/ll_video_bottom_layout"
         android:layout_width="match_parent"
@@ -39,11 +42,29 @@
             android:progressDrawable="@drawable/seekbar_style"
             />
         <TextView
-            android:id="@+id/tv_video_bottom_not_played"
+            android:id="@+id/tv_video_bottom_total_size"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="99:99"
             android:textColor="@color/white_cloud_text"/>
     </LinearLayout>
+    <RelativeLayout
+        android:id="@+id/error_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/header_view"
+        android:layout_above="@id/ll_video_bottom_layout"
+
+        >
+        <ImageView
+            android:id="@+id/video_play_state"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/stop"
+            android:layout_centerInParent="true"
+            android:clickable="true"
+            />
+
+    </RelativeLayout>
 </RelativeLayout>

@@ -2,6 +2,7 @@ package lava.bluepay.com.lavaapp.common;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 
 /**
  * Created by bluepay on 2017/10/16.
@@ -9,6 +10,9 @@ import android.os.HandlerThread;
 
 public class ThreadManager {
     private static Handler SUB_THREAD1_HANDLER;
+
+    private static final Object mMainHandlerLock = new Object();
+    private static Handler mUiHandler;
     /**
      * 副线程2
      */
@@ -24,6 +28,16 @@ public class ThreadManager {
         }
         return SUB_THREAD1_HANDLER;
     }
+
+    public static Handler getMainHandler(){
+        if(mUiHandler == null){
+            synchronized (mMainHandlerLock) {
+                mUiHandler = new Handler(Looper.getMainLooper());
+            }
+        }
+        return mUiHandler;
+    }
+
     public static void executeOnSubThread1(Runnable run) {
         getSubThread1Handler().post(run);
     }
