@@ -1,14 +1,27 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.api.ApiUtils;
+import lava.bluepay.com.lavaapp.model.process.RequestManager;
+import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 import lava.bluepay.com.lavaapp.view.fragment.CartoonFragment;
 import lava.bluepay.com.lavaapp.view.fragment.PhotoFragment;
 import lava.bluepay.com.lavaapp.view.fragment.VideoFragment;
@@ -27,6 +40,11 @@ public class MainActivity extends BaseActivity {
     RadioGroup rg_select_fragment;
 
     private int currentNavIndex = -1;
+
+
+    private PhotoFragment photoFragment;
+    private CartoonFragment cartoonFragment;
+    private VideoFragment videoFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,23 +67,26 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onResumeFragments() {
+        Logger.i(Logger.DEBUG_TAG,"MainActivity,onResumeFragments()");
         super.onResumeFragments();
-        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
-            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
-            if (fragment != null) {
-                if (currentNavIndex == -1) {
-                    if (rb_fragment_photo != null) {
-                        rb_fragment_photo.setChecked(true);
-                    }
-                } else {
-                    switchToFragment(FRAGMENT_PHOTO);
-                }
-            } else {
-                switchToFragment(FRAGMENT_PHOTO);
-                loadDataForPhotoFragment();
-            }
-        }
+//        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
+//            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+//            if (fragment != null) {
+//                if (currentNavIndex == -1) {
+//                    if (rb_fragment_photo != null) {
+//                        rb_fragment_photo.setChecked(true);
+//                    }
+//                } else {
+//                    switchToFragment(FRAGMENT_PHOTO);
+//                }
+//            } else {
+//                switchToFragment(FRAGMENT_PHOTO);
+//                sendPhotoPopularListRequest();
+//            }
+//        }
     }
+
+
 
     /**
      * 设置toolbar中间viewpager指示字（用于fragment调用）
@@ -107,7 +128,6 @@ public class MainActivity extends BaseActivity {
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 if(checkedId == R.id.tv_fragment_photo){
                     switchToFragment(FRAGMENT_PHOTO);
-                    loadDataForPhotoFragment();
                 }else if(checkedId == R.id.tv_fragment_video){
                     switchToFragment(FRAGMENT_VIDEO);
                 }else if(checkedId == R.id.tv_fragment_cartoon){
@@ -117,13 +137,6 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    private void loadDataForPhotoFragment(){
-        //todo 网络请求
-//        PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
-//        if (fragment != null && fragment.isVisible()) {
-//            fragment.initPopularData();
-//        }
-    }
 
     /**
      * 切换fragment
@@ -143,7 +156,7 @@ public class MainActivity extends BaseActivity {
                 fragmentTag = PhotoFragment.TAG;
                 fragment = getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
                 if(fragment == null) {
-                    fragment = new PhotoFragment();
+                    fragment = getPhotoFragment();
                 }else{
                     return;
                 }
@@ -152,7 +165,7 @@ public class MainActivity extends BaseActivity {
                 fragmentTag = VideoFragment.TAG;
                 fragment = getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
                 if(fragment == null) {
-                    fragment = new VideoFragment();
+                    fragment = getVideoFragment();
                 }else{
                     return;
                 }
@@ -161,7 +174,7 @@ public class MainActivity extends BaseActivity {
                 fragmentTag = CartoonFragment.TAG;
                 fragment = getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
                 if(fragment == null) {
-                    fragment = new CartoonFragment();
+                    fragment = getCartoonFragment();
                 }else{
                     return;
                 }
@@ -196,6 +209,33 @@ public class MainActivity extends BaseActivity {
         this.currentNavIndex = pageIndex;
     }
 
+    private PhotoFragment getPhotoFragment(){
+        if(photoFragment == null){
+            photoFragment = new PhotoFragment();
+
+            if(ApiUtils.isNetWorkAvailable()) {
+//                sendPhotoPopularListRequest();
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"MainActivity,switchToFragment,photoFragment,net work not work");
+                //todo 提示网络不可用
+            }
+        }
+        return photoFragment;
+    }
+
+    private CartoonFragment getCartoonFragment(){
+        if(cartoonFragment == null){
+            cartoonFragment = new CartoonFragment();
+        }
+        return cartoonFragment;
+    }
+    private VideoFragment getVideoFragment(){
+        if(videoFragment == null){
+            videoFragment = new VideoFragment();
+        }
+        return videoFragment;
+    }
+
     private void checkIndex(int index){
         switch(index){
             case FRAGMENT_PHOTO:
@@ -216,7 +256,79 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 请求图片流行类数据
+     */
+    public void sendPhotoPopularListRequest(){
+        String sRequest = ApiUtils.getUrlPhotoPopularList();
+        RequestManager.getInstance().request(sRequest,getMyHandler(),ApiUtils.requestPhotoPopular);
+    }
 
+
+    @Override
+    protected void processRequest(Message msg) {
+        super.processRequest(msg);
+        String result = getMessgeResult(msg);
+        switch (msg.arg1){
+            case ApiUtils.requestPhotoPopular:
+                //通过gson转换为bean类
+                //todo 刷新数据
+//                List<PhotoBean> beanList = new ArrayList<>();
+//                MemExchange.getInstance().setPhotoPopularList(beanList);
+//                getPhotoFragment().refreshPopular();
+                break;
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            // 退出对话框
+            showExitDialog();
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+    /**
+     * 退出游戏、或者退出支付页面，需要调用Client.exit();方法释放资源
+     *
+     * */
+    public void showExitDialog() {
+        // 弹框确认是否退出
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Are you Exit LavaApp?");
+        builder.setTitle("tips");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                MainActivity.this.finish();
+                dialog.dismiss();
+                System.exit(0);
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        MemExchange.getInstance().clear();
+    }
+
+
+    //初始化脚本
 
 
 }

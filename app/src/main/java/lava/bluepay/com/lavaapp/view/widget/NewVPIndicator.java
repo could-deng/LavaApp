@@ -94,7 +94,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
 
         mPaint = new Paint();
         mPaint.setColor(mIndicatorColor);
-        mPaint.setStrokeWidth(mIndicatorHeight);
+        mPaint.setStrokeWidth(2 * mIndicatorHeight);
     }
 
     /**
@@ -212,7 +212,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         canvas.save();
-        canvas.translate(mTranslationX,getHeight()-2);
+        canvas.translate(mTranslationX,getHeight()-4);
         canvas.drawLine((mTabWidth - mIndicatorWidth) / 2, 0, (mTabWidth + mIndicatorWidth) / 2, 0, mPaint);
         canvas.restore();
     }

@@ -1,5 +1,9 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+import android.app.Activity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +13,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.base.WeakHandler;
+import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
 /**
@@ -66,6 +72,47 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    private MyHandler myHandler;
 
+    public MyHandler getMyHandler(){
+        if(myHandler == null){
+            myHandler = new MyHandler(this);
+        }
+        return myHandler;
+    }
+
+    protected static class MyHandler extends WeakHandler{
+
+        public MyHandler(Activity instance) {
+            super(instance);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            BaseActivity activity = (BaseActivity) getRefercence();
+            if(activity == null){
+                return;
+            }
+            switch (msg.what){
+                case RequestManager.MSG_REQUEST_FINISH:
+                    activity.processRequest(msg);
+                    break;
+            }
+        }
+    }
+
+    protected void processRequest(Message msg){
+    }
+    protected String getMessgeResult(Message message){
+        Bundle bundle = message.getData();
+        if(bundle == null){
+            return "";
+        }
+        String sResult = bundle.getString("resultString");
+        if(TextUtils.isEmpty(sResult)){
+            return "";
+        }
+        return sResult;
+    }
 
 }

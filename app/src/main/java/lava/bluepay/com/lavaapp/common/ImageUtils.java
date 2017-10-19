@@ -13,12 +13,16 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.text.TextUtils;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -73,6 +77,26 @@ public class ImageUtils {
         {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    /**
+     * 保存bitmap至本地文件
+     * @param bm
+     * @param localPath
+     */
+    public static void saveBitmap2File(Bitmap bm,String localPath){
+        if(bm == null || TextUtils.isEmpty(localPath)){
+            return;
+        }
+        try {
+            File file = new File(localPath);
+            FileOutputStream fos = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.JPEG,100,fos);//不管原文件的文件后缀，一律使用jpg格式.
+            fos.flush();
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

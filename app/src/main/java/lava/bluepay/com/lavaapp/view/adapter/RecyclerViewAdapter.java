@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,7 @@ import lava.bluepay.com.lavaapp.common.ImageUtils;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.common.ThreadManager;
 import lava.bluepay.com.lavaapp.common.fresco.FrescoHelper;
+import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 
 /**
@@ -32,6 +34,7 @@ import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
 
     private Context context;
+    private LayoutInflater mInflater;
     private List<PhotoBean> mDatas;
     private List<Integer> mHeights;//item的随机params
 
@@ -45,15 +48,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
 
-
+    /**
+     * 默认设置为缓存中的数据
+     * @param context
+     */
     public RecyclerViewAdapter(Context context) {
         this.context = context;
-    }
-
-    public RecyclerViewAdapter(Context context, List<PhotoBean> mDatas, List<Integer> mHeights) {
-        this.context = context;
-        this.mDatas = mDatas;
-        this.mHeights = mHeights;
+        mInflater = LayoutInflater.from(context);
+        mDatas = MemExchange.getInstance().getPhotoPopularList();
+        mHeights = MemExchange.getInstance().getPopularHeights();
     }
 
     public void setmDatas(List<PhotoBean> mDatas,List<Integer> mHeights) {
@@ -62,9 +65,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         notifyDataSetChanged();
     }
 
+
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        MyViewHolder myViewHolder = new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.activity_recyclerview_gridv_item,parent,false));
+        MyViewHolder myViewHolder = new MyViewHolder(mInflater.inflate(R.layout.activity_recyclerview_gridv_item,parent,false));
         return myViewHolder;
     }
 
@@ -93,28 +97,59 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //非订阅用户
 
 
+                //文件名称可能出现错误的情况
+                int tempSep = data.getPictureImg().lastIndexOf(File.separator);
+                if(tempSep == -1){
+                    Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,error");
+                    return;
+                }
+
                 //原图路径
-                String fileName = data.getPictureImg().substring(data.getPictureImg().lastIndexOf(File.separator));
-                final String localFilePath = Config.PHOTO_PATH + fileName;//绝对路径
+                final String localFilePath = Config.PHOTO_PATH + data.getPictureImg().substring(tempSep);//绝对路径
                 File localFile = new File(localFilePath);
+                //模糊图片路径
+                String localBufPath = localFilePath + ".buf";
+                File localBufFile = new File(localBufPath);
 
+                //如果模糊图片存在
+                if(localBufFile.exists()){
+                    Logger.i(Logger.DEBUG_TAG,"模糊图片存在,pos"+position);
+                    //todo 将图片File转为bitmap，bitmap大小拉升至控件的大小
+                    Bitmap temp;
+                    Uri uri = Uri.parse(localBufPath);
+                    temp = BitmapFactory.decodeFile(uri.toString());
+//                    float scaleWidth = holder.imageView.getMeasuredWidth() * 1.0f / temp.getWidth();
+//                    float scaleHeight = holder.imageView.getMeasuredHeight() * 1.0f /temp.getHeight();
+//                    if(scaleWidth <=0 || scaleHeight <=0){
+//                        Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,scaleWidth <=0 || scaleHeight <=0");
+//                        return;
+//                    }
+//                    Matrix matrix = new Matrix();
+//                    matrix.postScale(scaleWidth,scaleHeight);
+//                    Bitmap blur = Bitmap.createBitmap(temp, 0, 0, temp.getWidth(), temp.getHeight(), matrix, true);
+//                    temp.recycle();
+//                    setImageBlur(blur,holder.imageView);
+                    setImageBlur(temp,holder.imageView);
+                    return;
+                }
 
-                if(localFile.exists()){//原图本地路径
+                if(localFile.exists()){
+                    Logger.i(Logger.DEBUG_TAG,"原图片存在,模糊图片不存在,pos"+position);
                     //本地加载bitmap
                     final Bitmap blur;
                     Uri uri = Uri.parse(localFilePath);
                     Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         blur = ImageUtils.blur(context, bitmap);
-                    }else{
-                        blur = ImageUtils.newBlurToViewSize(bitmap,holder.imageView);
-                    }
+//                    }else{
+//                        blur = ImageUtils.newBlurToViewSize(bitmap,holder.imageView);
+//                    }
                     setImageBlur(blur,holder.imageView);
-
+                    ImageUtils.saveBitmap2File(blur,localBufPath);
                     //本地加载File绝对路径
 //                    holder.imageView.setImageURI(Uri.fromFile(localFile));
                 }else{
-
+                    Logger.i(Logger.DEBUG_TAG,"两图均不存在,pos"+position);
                     //保存缓存图片
                     ThreadManager.executeOnSubThread1(new Runnable() {
                         @Override

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.view.activity.GalleryActivity;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
@@ -41,8 +43,8 @@ public class PhotoFragment extends BaseFragment {
 
     private EmptyRecyclerView rvPopular;
     private RecyclerViewAdapter rvPopularAdapter;
-    private List<PhotoBean> popularDatas;
-    private List<Integer> popularHeights;
+//    private List<PhotoBean> popularDatas;
+//    private List<Integer> popularHeights;
 
 
     @Nullable
@@ -53,23 +55,31 @@ public class PhotoFragment extends BaseFragment {
 
     @Override
     public void onResume() {
+        Logger.i(Logger.DEBUG_TAG,"PhotoFragment,onResume()");
         super.onResume();
-        initPopularData();
+
+        //进行网络请求
+//        ((MainActivity)getActivity()).sendPhotoPopularListRequest();
     }
 
-    public void initPopularData(){
-        popularDatas = new ArrayList<>();
-        for (int i = 'A'; i < 'K'; i++)
-        {
-            popularDatas.add(new PhotoBean(""+(char)i,"http://photocdn.sohu.com/20121119/Img358016160.jpg"));
+
+    public void refreshPopular(){
+        if(getPopularList()!=null && getPopularList().size()>0){
+            List<Integer> popularHeights = new ArrayList<>();
+            for (int i = 0; i < getPopularList().size(); i++)
+            {
+                popularHeights.add( (int) (300 + Math.random() * 300));
+            }
+
+            rvPopularAdapter.setmDatas(getPopularList(),popularHeights);
         }
-        popularHeights = new ArrayList<>();
-        for (int i = 0; i < popularDatas.size(); i++)
-        {
-            popularHeights.add( (int) (300 + Math.random() * 300));
-        }
-        rvPopularAdapter.setmDatas(popularDatas,popularHeights);
     }
+
+
+    private List<PhotoBean> getPopularList(){
+        return MemExchange.getInstance().getPhotoPopularList();
+    }
+
 
     private View initView(LayoutInflater inflater, ViewGroup container){
         View view  = inflater.inflate(R.layout.fragment_photo,container,false);

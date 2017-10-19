@@ -13,7 +13,7 @@ import lava.bluepay.com.lavaapp.common.FileUtils;
  */
 
 public class MixApp extends Application {
-    Context context;
+    private static Context context;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -25,6 +25,12 @@ public class MixApp extends Application {
         }
         FileUtils.makeFolders(Config.PHOTO_PATH);
     }
+
+
+    public static Context getContext(){
+        return context;
+    }
+
     /** 初始化facebook fresco*/
     private void initFresco() {
         /**

@@ -9,6 +9,11 @@ import java.io.File;
  */
 
 public class Config {
+
+    public static final String API_HOST = "192.168.0.0.1";
+    public static final String API_PORT = ":8180";
+
+
     public static final String PRODUCT_DIC = "LavaApp";
     public static final String PATH_APP_STORRAGE = Environment
             .getExternalStorageDirectory().getAbsolutePath()
