@@ -13,10 +13,13 @@ import lava.bluepay.com.lavaapp.MixApp;
 
 public class ApiUtils {
 
-    //region=========不同数据请求的标示=====================
-
-    public static final int requestPhotoPopular = 10000;
-    public static final int requestPhotoScenery = 10001;
+    //region=========不同数据请求的唯一标示=====================
+    public static final int requestToken = 500;
+    public static final int requestInit = 501;
+    public static final int requestCheckSub = 502;
+    public static final int requestAllCategory = 10000;
+    public static final int requestPhotoPopular = 10001;
+    public static final int requestPhotoScenery = 10002;
 
     //endregion=========不同数据请求的标示=====================
 
@@ -81,15 +84,42 @@ public class ApiUtils {
         return sb.toString();
     }
 
+
+
+
     /**
-     * 获取流行图片列表
+     * 获取
+     * @param appid
+     * @param encrypt
      * @return
      */
-    public static String getUrlPhotoPopularList(){
-        return jointStrings(Config.API_HOST,Config.API_PORT,
-                "123?uid=", "1",
-                "&distance=", "2");
+    public static String getToken(String appid,String encrypt){
+        return jointStrings(Config.API_HOST_TEST,
+                "/v1/gettoken.api?appid=",appid,
+                "&encrypt=",encrypt);
+    }
 
+    /**
+     * 获取初始化url
+     * @return
+     */
+    public static String getInit(){
+        return Config.API_HOST_TEST+"/v1/getinit.api";
+    }
+
+    /**
+     * 查询用户订阅状态
+     * @return
+     */
+    public static String getCheckSub(){
+        return Config.API_HOST_TEST+"/v1/checksub.api";
+    }
+    /**
+     * 获取流行图片列表url
+     * @return
+     */
+    public static String getCategoryList(){
+        return Config.API_HOST_TEST+"/v1/category.api";
     }
 
 

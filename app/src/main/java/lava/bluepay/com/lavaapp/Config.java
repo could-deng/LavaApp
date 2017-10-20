@@ -10,8 +10,20 @@ import java.io.File;
 
 public class Config {
 
-    public static final String API_HOST = "192.168.0.0.1";
-    public static final String API_PORT = ":8180";
+    //todo 待删除
+    /** 当手机没插卡时的默认手机号   */
+    public static final String defaultTelNum = "13418638286";
+
+    public static final String API_HOST = "http://lava.BluePay.asia/";
+
+
+    public static final String API_HOST_TEST = "http://192.168.4.210:8168";
+
+
+    //todo 暂时写死,后面需要改
+    public static final String APPID = "wsgYatEx";
+    //todo app的密钥,后面需要改
+    public static final String APPSALT = "1xVBuoHwM7b01PuS3DWFyiGkRn0rXDfN";
 
 
     public static final String PRODUCT_DIC = "LavaApp";

@@ -1,6 +1,5 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -9,19 +8,24 @@ import android.os.Message;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
+import lava.bluepay.com.lavaapp.model.api.MD5Util;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
+import lava.bluepay.com.lavaapp.model.api.bean.InitData;
+import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
-import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 import lava.bluepay.com.lavaapp.view.fragment.CartoonFragment;
 import lava.bluepay.com.lavaapp.view.fragment.PhotoFragment;
 import lava.bluepay.com.lavaapp.view.fragment.VideoFragment;
@@ -60,6 +64,8 @@ public class MainActivity extends BaseActivity {
 
         initToolbar();
         initViews();
+        sendGetTokenRequest();
+
 //
 //        switchToFragment(FRAGMENT_PHOTO);
 //        loadDataForPhotoFragment();
@@ -69,21 +75,21 @@ public class MainActivity extends BaseActivity {
     protected void onResumeFragments() {
         Logger.i(Logger.DEBUG_TAG,"MainActivity,onResumeFragments()");
         super.onResumeFragments();
-//        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
-//            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
-//            if (fragment != null) {
-//                if (currentNavIndex == -1) {
-//                    if (rb_fragment_photo != null) {
-//                        rb_fragment_photo.setChecked(true);
-//                    }
-//                } else {
-//                    switchToFragment(FRAGMENT_PHOTO);
-//                }
-//            } else {
-//                switchToFragment(FRAGMENT_PHOTO);
+        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
+            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+            if (fragment != null) {
+                if (currentNavIndex == -1) {
+                    if (rb_fragment_photo != null) {
+                        rb_fragment_photo.setChecked(true);
+                    }
+                } else {
+                    switchToFragment(FRAGMENT_PHOTO);
+                }
+            } else {
+                switchToFragment(FRAGMENT_PHOTO);
 //                sendPhotoPopularListRequest();
-//            }
-//        }
+            }
+        }
     }
 
 
@@ -256,13 +262,57 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+
+
+
+
+
+    //region=======网络请求=================
+
+    /**
+     * 请求token
+     */
+    public void sendGetTokenRequest(){
+        String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid="+Config.APPID+Config.APPSALT));
+        RequestManager.getInstance().request(sRequest,getMyHandler(),ApiUtils.requestToken);
+    }
+
+    /**
+     * 请求初始化数据
+     * 客户端设备id 1安卓pad 2安卓手机 3ios手机 4iospad
+     * versionid 设备的版本
+     */
+    public void sendInitRequest(int dev, int versionid){
+        if(MemExchange.getInstance().getTokenData() == null){
+            return;
+        }
+        String sRequest = ApiUtils.getInit();
+        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getInitRequestBody(dev,versionid),ApiUtils.requestInit);
+    }
+
+    /**
+     * 请求查询用户订阅状态
+     * @param telNum
+     */
+    public void sendCheckSubRequest(String telNum){
+        if(MemExchange.getInstance().getTokenData() == null){
+            return;
+        }
+        String sRequest = ApiUtils.getCheckSub();
+        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCheckSubRequestBody(telNum),ApiUtils.requestCheckSub);
+    }
+
     /**
      * 请求图片流行类数据
      */
     public void sendPhotoPopularListRequest(){
-        String sRequest = ApiUtils.getUrlPhotoPopularList();
-        RequestManager.getInstance().request(sRequest,getMyHandler(),ApiUtils.requestPhotoPopular);
+//        if(MemExchange.getInstance().getTokenData() == null){
+//            return;
+//        }
+//        String sRequest = ApiUtils.getCategoryList();
+//        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCategoryRequestBody(),ApiUtils.requestAllCategory);
     }
+
 
 
     @Override
@@ -270,6 +320,34 @@ public class MainActivity extends BaseActivity {
         super.processRequest(msg);
         String result = getMessgeResult(msg);
         switch (msg.arg1){
+            case ApiUtils.requestToken:
+                TokenData tokenData = JsonHelper.getObject(result, TokenData.class);
+                if(tokenData == null){
+                    Logger.e(Logger.DEBUG_TAG,"TokenData null error");
+                    return;
+                }
+                MemExchange.getInstance().setTokenData(tokenData.getData());
+                Logger.e(Logger.DEBUG_TAG,"获取token成功");
+//                sendInitRequest(1,1);
+//                sendCheckSubRequest(TextUtils.isEmpty(Utils.getIMSI(MainActivity.this))?Config.defaultTelNum:Utils.getIMSI(MainActivity.this));
+                sendPhotoPopularListRequest();
+                break;
+            case ApiUtils.requestInit:
+                InitData initData = JsonHelper.getObject(result,InitData.class);
+                MemExchange.getInstance().setInitData(initData.getData());
+                Logger.e(Logger.DEBUG_TAG,"初始化成功");
+                break;
+
+            case ApiUtils.requestCheckSub:
+                CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
+                MemExchange.getInstance().setCheckSubData(subBean.getData());
+                Logger.e(Logger.DEBUG_TAG,"查询订阅状态成功");
+                break;
+            case ApiUtils.requestAllCategory:
+                CategoryListBean categoryListBean = JsonHelper.getObject(result, CategoryListBean.class);
+
+                Logger.e(Logger.DEBUG_TAG,"获取所有激活分类数据成功");
+                break;
             case ApiUtils.requestPhotoPopular:
                 //通过gson转换为bean类
                 //todo 刷新数据
@@ -279,6 +357,15 @@ public class MainActivity extends BaseActivity {
                 break;
         }
     }
+
+
+
+
+    //endregion=======网络请求=================
+
+
+
+
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -290,6 +377,9 @@ public class MainActivity extends BaseActivity {
 
         return super.onKeyDown(keyCode, event);
     }
+
+
+
     /**
      * 退出游戏、或者退出支付页面，需要调用Client.exit();方法释放资源
      *

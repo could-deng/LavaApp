@@ -86,6 +86,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
             ViewGroup.LayoutParams lp = holder.imageView.getLayoutParams();
             lp.height = mHeights.get(position);
+
+            int imageHeight = lp.height;
+            int imageWidth = lp.width;
+
             holder.imageView.setLayoutParams(lp);
             if (TextUtils.isEmpty(data.getPictureImg())) {//默认
                 holder.imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
@@ -118,34 +122,45 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     Bitmap temp;
                     Uri uri = Uri.parse(localBufPath);
                     temp = BitmapFactory.decodeFile(uri.toString());
-//                    float scaleWidth = holder.imageView.getMeasuredWidth() * 1.0f / temp.getWidth();
-//                    float scaleHeight = holder.imageView.getMeasuredHeight() * 1.0f /temp.getHeight();
+//                    float scaleWidth = imageWidth * 1.0f / temp.getWidth();
+//                    float scaleWidth = 1;
+//                    float scaleHeight = imageHeight * 1.0f /temp.getHeight();
 //                    if(scaleWidth <=0 || scaleHeight <=0){
-//                        Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,scaleWidth <=0 || scaleHeight <=0");
+//                        Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,scaleWidth <=0 || scaleHeight <=0"+imageWidth+","+imageHeight+","+temp.getWidth()+","+temp.getHeight());
 //                        return;
 //                    }
 //                    Matrix matrix = new Matrix();
 //                    matrix.postScale(scaleWidth,scaleHeight);
 //                    Bitmap blur = Bitmap.createBitmap(temp, 0, 0, temp.getWidth(), temp.getHeight(), matrix, true);
-//                    temp.recycle();
-//                    setImageBlur(blur,holder.imageView);
-                    setImageBlur(temp,holder.imageView);
+                    Bitmap blur = Bitmap.createScaledBitmap(temp,temp.getWidth(),imageHeight,true);
+                    temp.recycle();
+                    setImageBlur(blur,holder.imageView);
+
+//                    setImageBlur(temp,holder.imageView);
+
                     return;
                 }
 
                 if(localFile.exists()){
                     Logger.i(Logger.DEBUG_TAG,"原图片存在,模糊图片不存在,pos"+position);
-                    //本地加载bitmap
+                    //模糊处理得到相同大小的bitmap
                     final Bitmap blur;
                     Uri uri = Uri.parse(localFilePath);
                     Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
+
 //                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         blur = ImageUtils.blur(context, bitmap);
 //                    }else{
 //                        blur = ImageUtils.newBlurToViewSize(bitmap,holder.imageView);
 //                    }
-                    setImageBlur(blur,holder.imageView);
-                    ImageUtils.saveBitmap2File(blur,localBufPath);
+                    //拉伸至控件大小并存储和设置
+
+                    Bitmap bb = Bitmap.createScaledBitmap(blur,blur.getWidth(),imageHeight,true);
+
+                    blur.recycle();
+
+                    setImageBlur(bb,holder.imageView);
+                    ImageUtils.saveBitmap2File(bb,localBufPath);
                     //本地加载File绝对路径
 //                    holder.imageView.setImageURI(Uri.fromFile(localFile));
                 }else{
