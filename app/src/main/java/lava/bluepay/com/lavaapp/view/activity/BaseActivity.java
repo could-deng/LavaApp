@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
+import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
@@ -97,10 +98,16 @@ public class BaseActivity extends AppCompatActivity {
                 case RequestManager.MSG_REQUEST_FINISH:
                     activity.processRequest(msg);
                     break;
+                case RequestManager.MSG_REQUEST_ERROR:
+                    activity.processReqError(msg);
+                    break;
             }
         }
     }
 
+    protected  void processReqError(Message msg){
+        Logger.e(Logger.DEBUG_TAG,"processReqError(),result = "+msg.getData().getString("resultString"));
+    }
     protected void processRequest(Message msg){
     }
     protected String getMessgeResult(Message message){

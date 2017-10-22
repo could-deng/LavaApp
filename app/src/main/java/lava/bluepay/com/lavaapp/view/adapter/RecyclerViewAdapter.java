@@ -12,6 +12,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
@@ -60,6 +62,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     public void setmDatas(List<PhotoBean> mDatas,List<Integer> mHeights) {
+        if(mDatas == null || mDatas.size() == 0 || mHeights == null || mHeights.size() == 0){
+            Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,setmDatas(),error");
+            return;
+        }
         this.mDatas = mDatas;
         this.mHeights = mHeights;
         notifyDataSetChanged();
@@ -74,6 +80,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
+            if(mDatas == null || mDatas.size() == 0){
+                Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,onBindViewHolder(),mDatas error");
+                return;
+            }
             final PhotoBean data = mDatas.get(position);
             if(data == null || TextUtils.isEmpty(data.getPictureImg())){
                 return;
@@ -88,7 +98,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             lp.height = mHeights.get(position);
 
             int imageHeight = lp.height;
-            int imageWidth = lp.width;
 
             holder.imageView.setLayoutParams(lp);
             if (TextUtils.isEmpty(data.getPictureImg())) {//默认
@@ -240,6 +249,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void run() {
                 if(bitmap!=null){
+                    view.setScaleType(ImageView.ScaleType.FIT_XY);
                     view.setImageBitmap(bitmap);
                 }else{
                    Logger.e("TT","RecyclerViewAdapter,setImageBlur(),bitmap == null");

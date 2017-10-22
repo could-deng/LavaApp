@@ -105,7 +105,7 @@ public class MemExchange {
     }
 
     public List<PhotoBean> getPhotoPopularList(){
-        if(photoPopularList == null){
+        if(photoPopularList == null || photoPopularList.size() == 0){
             photoPopularList = new ArrayList<>();
             for (int i = 'A'; i < 'E'; i++)
             {
@@ -116,7 +116,7 @@ public class MemExchange {
         return photoPopularList;
     }
     public List<Integer> getPopularHeights(){
-        if(popularHeights == null) {
+        if(popularHeights == null || popularHeights.size() ==0) {
             popularHeights = new ArrayList<>();
             for (int i = 0; i < getPhotoPopularList().size(); i++) {
                 popularHeights.add((int) (300 + Math.random() * 300));

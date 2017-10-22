@@ -9,8 +9,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -23,7 +25,7 @@ public class RequestManager {
 
     /**请求结果为成功*/
     public static final int MSG_REQUEST_FINISH = 1000;
-
+    public static final int MSG_REQUEST_ERROR = 1001;
 
 
     private static ThreadPoolExecutor requestExecutor;
@@ -134,7 +136,19 @@ public class RequestManager {
 
 
     private void sendRequestResultMessage(String sResult,Handler handler,int iRequestType) {
-        sendResultMessage(sResult,handler,iRequestType,MSG_REQUEST_FINISH);
+        if(isHttpResultValid(sResult)) {
+            sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_FINISH);
+        }else{
+            sendResultMessage(sResult,handler,iRequestType,MSG_REQUEST_ERROR);
+        }
+    }
+
+    private boolean isHttpResultValid(String result){
+        BaseBean bean = JsonHelper.getObject(result, BaseBean.class);
+        if(bean.getCode() == 200){
+            return true;
+        }
+        return false;
     }
 
     private void sendResultMessage(String sResult, Handler handler, int iRequestType, int iMsgType){

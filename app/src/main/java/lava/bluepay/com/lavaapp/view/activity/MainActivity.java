@@ -313,7 +313,11 @@ public class MainActivity extends BaseActivity {
 //        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCategoryRequestBody(),ApiUtils.requestAllCategory);
     }
 
+    @Override
+    protected void processReqError(Message msg) {
+        super.processReqError(msg);
 
+    }
 
     @Override
     protected void processRequest(Message msg) {
