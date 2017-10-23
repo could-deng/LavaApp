@@ -6,4 +6,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="fragment_photo_scenery"/>
+    <Button
+        android:id="@+id/bt_to_video_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="toVideo"/>
 </LinearLayout>

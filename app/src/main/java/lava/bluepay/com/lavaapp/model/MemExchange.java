@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
@@ -27,7 +28,9 @@ public class MemExchange {
     //查阅是否订阅数据
     CheckSubBean.DataBean checkSubData;
 
-    private List<PhotoBean> photoPopularList;
+    private int photoPopularPageIndex = -1;
+    private CategoryBean photoPopularList;
+
     private List<Integer> popularHeights;
 
 
@@ -45,12 +48,21 @@ public class MemExchange {
     }
 
     public void clear(){
+        photoPopularPageIndex = -1;
         photoPopularList = null;
         popularHeights = null;
+
+
         tokenData = null;
         initData = null;
         checkSubData = null;
     }
+
+    public int getPhotoPopularPageIndex() {
+        return (photoPopularPageIndex == -1)?0:photoPopularPageIndex;
+    }
+
+
 
     public void setTokenData(TokenData.DataBean data){
         if(data == null){
@@ -88,9 +100,9 @@ public class MemExchange {
     }
 
 
-    public void setPhotoPopularList(List<PhotoBean> list){
+    public void setPhotoPopularList(CategoryBean list){
         if ((photoPopularList != null) && (list != photoPopularList)){
-            photoPopularList.clear();
+            photoPopularList = null;
         }
         photoPopularList = list;
 
@@ -98,28 +110,34 @@ public class MemExchange {
             popularHeights = new ArrayList<>();
         }
         popularHeights.clear();
-        for (int i = 0; i < photoPopularList.size(); i++) {
-            popularHeights.add((int) (300 + Math.random() * 300));
+        for (int i = 0; i < photoPopularList.getData().getData().size(); i++) {
+            popularHeights.add((int) (450 + Math.random() * 200));
         }
 
     }
 
-    public List<PhotoBean> getPhotoPopularList(){
-        if(photoPopularList == null || photoPopularList.size() == 0){
-            photoPopularList = new ArrayList<>();
-            for (int i = 'A'; i < 'E'; i++)
-            {
-                photoPopularList.add(new PhotoBean(""+(char)i,"http://photocdn.sohu.com/20121119/Img358016160.jpg"));
-            }
-
+    public CategoryBean getPhotoPopularList(){
+        if(photoPopularList == null){
+            photoPopularList = new CategoryBean();
         }
+//        if(photoPopularList.getData().getData().size() == 0){
+//            for (int i = 'A'; i < 'E'; i++)
+//            {
+//                photoPopularList.add(new CategoryBean(""+(char)i,"http://photocdn.sohu.com/20121119/Img358016160.jpg"));
+//            }
+//        }
+
+
         return photoPopularList;
     }
+
     public List<Integer> getPopularHeights(){
         if(popularHeights == null || popularHeights.size() ==0) {
             popularHeights = new ArrayList<>();
-            for (int i = 0; i < getPhotoPopularList().size(); i++) {
-                popularHeights.add((int) (300 + Math.random() * 300));
+            if(getPhotoPopularList() != null && getPhotoPopularList().getData()!=null && getPhotoPopularList().getData().getData()!=null) {
+                for (int i = 0; i < getPhotoPopularList().getData().getData().size(); i++) {
+                    popularHeights.add((int) (450 + Math.random() * 200));
+                }
             }
         }
         return popularHeights;

@@ -10,6 +10,8 @@ import java.io.File;
 
 public class Config {
 
+    public static final String bufFileEnd = "buf.jpg";
+
     //todo 待删除
     /** 当手机没插卡时的默认手机号   */
     public static final String defaultTelNum = "13418638286";

@@ -23,4 +23,8 @@
     <string name="cartoon_funny">Funny</string>
     <string name="cartton_horror">Horror</string>
 
+
+    <string name="lastpage">上一页</string>
+    <string name="nextpage">上一页</string>
+
 </resources>

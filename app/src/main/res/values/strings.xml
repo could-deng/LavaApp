@@ -22,4 +22,9 @@
     <string name="cartoon_funny">Funny</string>
     <string name="cartoon_horror">Horror</string>
 
+
+    <string name="lastpage">Last Page</string>
+    <string name="nextpage">Next Page</string>
+
+
 </resources>

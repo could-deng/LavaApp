@@ -4,21 +4,21 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
-import android.os.Build;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
 import java.io.File;
 import java.util.List;
-
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.FileUtils;
@@ -27,17 +27,17 @@ import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.common.ThreadManager;
 import lava.bluepay.com.lavaapp.common.fresco.FrescoHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
-import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 
 /**
  * Created by bluepay on 2017/10/14.
  */
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder> {
+public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private LayoutInflater mInflater;
-    private List<PhotoBean> mDatas;
+    private CategoryBean mDatas;
     private List<Integer> mHeights;//item的随机params
 
     private OnItemClickListener itemClickListener;
@@ -49,6 +49,62 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.itemClickListener = itemClickListener;
     }
 
+    //region===================recycler的底部view=====================
+
+    // 基本的底部类型开始位置  用于viewType
+    private static int BASE_ITEM_TYPE_FOOTER = 20000000;
+
+    private SparseArray<View> mFooterViews;
+
+    public SparseArray<View> getmFooterViews() {
+        if(mFooterViews == null){
+            mFooterViews = new SparseArray<>();
+        }
+        return mFooterViews;
+    }
+
+    /** 是不是底部类型    */
+    private boolean isFooterViewType(int viewType){
+        int position = mFooterViews.indexOfKey(viewType);
+        return position >= 0;
+    }
+
+    private RecyclerView.ViewHolder createFooterViewHolder(View view){
+        RecyclerView.ViewHolder holder = new FooterViewHolder(view);
+        return holder;
+    }
+
+    class FooterViewHolder extends RecyclerView.ViewHolder{
+        Button lastPage;
+        Button nextPage;
+        public FooterViewHolder(View itemView) {
+            super(itemView);
+            lastPage = (Button) itemView.findViewById(R.id.btn_last_page);
+            nextPage = (Button) itemView.findViewById(R.id.btn_next_page);
+        }
+
+    }
+
+    // 添加底部
+    public void addFooterView(View view) {
+        int position = mFooterViews.indexOfValue(view);
+        if (position < 0) {
+            mFooterViews.put(BASE_ITEM_TYPE_FOOTER++, view);
+        }
+//        notifyDataSetChanged();
+    }
+
+    private boolean isFooterPosition(int pos){
+        if(mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0){
+            Logger.e(Logger.DEBUG_TAG,"isFooterPosition,aaaa"+pos);
+            return true;
+        }
+        Logger.e(Logger.DEBUG_TAG,"isFooterPosition,bbb"+pos);
+        return pos >= mDatas.getData().getData().size();
+    }
+
+    //endregion===================recycler的底部view=====================
+
 
     /**
      * 默认设置为缓存中的数据
@@ -59,10 +115,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         mInflater = LayoutInflater.from(context);
         mDatas = MemExchange.getInstance().getPhotoPopularList();
         mHeights = MemExchange.getInstance().getPopularHeights();
+
+        mFooterViews = new SparseArray<>();
     }
 
-    public void setmDatas(List<PhotoBean> mDatas,List<Integer> mHeights) {
-        if(mDatas == null || mDatas.size() == 0 || mHeights == null || mHeights.size() == 0){
+    public void setmDatas(CategoryBean mDatas,List<Integer> mHeights) {
+        if(mDatas == null || mDatas.getData().getData().size() == 0 || mHeights == null || mHeights.size() == 0){
             Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,setmDatas(),error");
             return;
         }
@@ -73,35 +131,60 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        MyViewHolder myViewHolder = new MyViewHolder(mInflater.inflate(R.layout.activity_recyclerview_gridv_item,parent,false));
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if(isFooterViewType(viewType)){
+            View footer = mFooterViews.get(viewType);
+            return createFooterViewHolder(footer);
+        }
+        RecyclerView.ViewHolder myViewHolder = new MyViewHolder(mInflater.inflate(R.layout.activity_recyclerview_gridv_item,parent,false));
         return myViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, final int position) {
-            if(mDatas == null || mDatas.size() == 0){
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+
+            if(isFooterPosition(position)){
+                ((FooterViewHolder)holder).nextPage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+                ((FooterViewHolder)holder).lastPage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+                return;
+            }
+
+            if(mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0){
                 Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,onBindViewHolder(),mDatas error");
                 return;
             }
-            final PhotoBean data = mDatas.get(position);
-            if(data == null || TextUtils.isEmpty(data.getPictureImg())){
+
+            final CategoryBean.DataBeanX.DataBean data = mDatas.getData().getData().get(position);
+            if(data == null || TextUtils.isEmpty(data.getThumb())){
                 return;
             }
+            //todo 测试
+            data.setThumb("http://photocdn.sohu.com/20121119/Img358016160.jpg");
+
             //todo 图片的url一定要统一
-            if(data.getPictureImg().lastIndexOf(File.separator) == -1 || data.getPictureImg().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1){
+            if(data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1){
                 Logger.e(Logger.DEBUG_TAG,"pic url error");
                 return;
             }
 
-            ViewGroup.LayoutParams lp = holder.imageView.getLayoutParams();
+            ViewGroup.LayoutParams lp = ((MyViewHolder)holder).imageView.getLayoutParams();
             lp.height = mHeights.get(position);
 
-            int imageHeight = lp.height;
+//            int imageHeight = lp.height;
 
-            holder.imageView.setLayoutParams(lp);
-            if (TextUtils.isEmpty(data.getPictureImg())) {//默认
-                holder.imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
+            ((MyViewHolder)holder).imageView.setLayoutParams(lp);
+            if (TextUtils.isEmpty(data.getThumb())) {//默认
+                ((MyViewHolder)holder).imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
             } else {
 
                 //订阅用户、正常显示
@@ -110,27 +193,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 //非订阅用户
 
 
-                //文件名称可能出现错误的情况
-                int tempSep = data.getPictureImg().lastIndexOf(File.separator);
-                if(tempSep == -1){
-                    Logger.e(Logger.DEBUG_TAG,"RecyclerViewAdapter,error");
-                    return;
-                }
-
                 //原图路径
-                final String localFilePath = Config.PHOTO_PATH + data.getPictureImg().substring(tempSep);//绝对路径
+                final String localFilePath = Config.PHOTO_PATH + data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));//绝对路径
                 File localFile = new File(localFilePath);
                 //模糊图片路径
-                String localBufPath = localFilePath + ".buf";
+                String localBufPath = localFilePath + Config.bufFileEnd;
                 File localBufFile = new File(localBufPath);
 
-                //如果模糊图片存在
                 if(localBufFile.exists()){
                     Logger.i(Logger.DEBUG_TAG,"模糊图片存在,pos"+position);
                     //todo 将图片File转为bitmap，bitmap大小拉升至控件的大小
-                    Bitmap temp;
+                    Bitmap blur;
                     Uri uri = Uri.parse(localBufPath);
-                    temp = BitmapFactory.decodeFile(uri.toString());
+                    blur = BitmapFactory.decodeFile(uri.toString());
 //                    float scaleWidth = imageWidth * 1.0f / temp.getWidth();
 //                    float scaleWidth = 1;
 //                    float scaleHeight = imageHeight * 1.0f /temp.getHeight();
@@ -141,12 +216,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 //                    Matrix matrix = new Matrix();
 //                    matrix.postScale(scaleWidth,scaleHeight);
 //                    Bitmap blur = Bitmap.createBitmap(temp, 0, 0, temp.getWidth(), temp.getHeight(), matrix, true);
-                    Bitmap blur = Bitmap.createScaledBitmap(temp,temp.getWidth(),imageHeight,true);
-                    temp.recycle();
-                    setImageBlur(blur,holder.imageView);
 
-//                    setImageBlur(temp,holder.imageView);
-
+                    setImageBlur(blur,((MyViewHolder)holder).imageView);
                     return;
                 }
 
@@ -158,28 +229,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
 
 //                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        blur = ImageUtils.blur(context, bitmap);
+//                        blur = ImageUtils.blur(context, bitmap);
 //                    }else{
-//                        blur = ImageUtils.newBlurToViewSize(bitmap,holder.imageView);
+                        blur = ImageUtils.newBlur(bitmap,((MyViewHolder)holder).imageView);
 //                    }
-                    //拉伸至控件大小并存储和设置
 
-                    Bitmap bb = Bitmap.createScaledBitmap(blur,blur.getWidth(),imageHeight,true);
-
-                    blur.recycle();
-
-                    setImageBlur(bb,holder.imageView);
-                    ImageUtils.saveBitmap2File(bb,localBufPath);
-                    //本地加载File绝对路径
-//                    holder.imageView.setImageURI(Uri.fromFile(localFile));
+                    setImageBlur(blur,((MyViewHolder)holder).imageView);
+                    ImageUtils.saveBitmap2File(blur,localBufPath);
                 }else{
                     Logger.i(Logger.DEBUG_TAG,"两图均不存在,pos"+position);
-                    //保存缓存图片
                     ThreadManager.executeOnSubThread1(new Runnable() {
                         @Override
                         public void run() {
-                            FrescoHelper.saveImage2Local(context,data.getPictureImg(),localFilePath,new OnBitmapDownloadListener(){
-
+                            //保存原图到本地
+                            FrescoHelper.downPic(context,data.getThumb(),localFilePath,new OnBitmapDownloadListener(){
                                 @Override
                                 public void onDownloadFinish(final boolean isSuccess) {
                                     ((Activity)context).runOnUiThread(new Runnable() {
@@ -229,16 +292,28 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 //
             if(getItemClickListener()!=null){
-                holder.imageView.setOnClickListener(new View.OnClickListener() {
+                ((MyViewHolder)holder).imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        getItemClickListener().onItemClick(holder.imageView,position);
+                        Logger.e(Logger.DEBUG_TAG,"22222222222222222222222");
+                        getItemClickListener().onItemClick(((MyViewHolder)holder).imageView,position);
                     }
                 });
-                holder.imageView.setOnLongClickListener(new View.OnLongClickListener() {
+
+                ((MyViewHolder)holder).imageView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
                         return false;
+                    }
+                });
+
+
+                ((MyViewHolder)holder).cardview_item.setClickable(true);
+                ((MyViewHolder)holder).cardview_item.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Logger.e(Logger.DEBUG_TAG,"11111111111111111111111");
+                        getItemClickListener().onItemClick(((MyViewHolder)holder).imageView,position);
                     }
                 });
             }
@@ -262,20 +337,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        if(mDatas == null || mDatas.size() == 0) {
-            return 0;
+        if(mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0) {
+            return getmFooterViews().size();
         }
-        return mDatas.size();
+        return mDatas.getData().getData().size()+getmFooterViews().size();
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder{
-                SimpleDraweeView imageView;
+        SimpleDraweeView imageView;
+        CardView cardview_item;
         public MyViewHolder(View itemView) {
             super(itemView);
+            cardview_item = (CardView) itemView.findViewById(R.id.cardview_item);
             imageView = (SimpleDraweeView) itemView.findViewById(R.id.iv_item);
         }
 
     }
+
+
     /**
      * 点击事件
      */

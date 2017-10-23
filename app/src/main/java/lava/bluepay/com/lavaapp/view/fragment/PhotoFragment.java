@@ -10,12 +10,16 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
 import java.util.ArrayList;
 import java.util.List;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
+import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
 import lava.bluepay.com.lavaapp.view.adapter.ViewPagerAdapter;
@@ -34,8 +38,6 @@ public class PhotoFragment extends BaseFragment {
 
     private EmptyRecyclerView rvPopular;
     private RecyclerViewAdapter rvPopularAdapter;
-//    private List<PhotoBean> popularDatas;
-//    private List<Integer> popularHeights;
 
 
     @Nullable
@@ -50,25 +52,31 @@ public class PhotoFragment extends BaseFragment {
         super.onResume();
 
         //进行网络请求
-        ((MainActivity)getActivity()).sendPhotoPopularListRequest();
+//        ((MainActivity)getActivity()).sendPhotoPopularListRequest();
     }
 
 
     public void refreshPopular(){
-        if(getPopularList()!=null && getPopularList().size()>0){
-            List<Integer> popularHeights = new ArrayList<>();
-            for (int i = 0; i < getPopularList().size(); i++)
-            {
-                popularHeights.add( (int) (300 + Math.random() * 300));
-            }
+        if(getPopularList()!=null && getPopularList().getData()!=null && getPopularList().getData().getData()!=null
+                && getPopularList().getData().getData().size() > 0){
+//            List<CategoryBean.DataBeanX.DataBean> dateList = getPopularList().getData().getData();
+//            List<Integer> popularHeights = new ArrayList<>();
+//            for (int i = 0; i < dateList.size(); i++)
+//            {
+//                popularHeights.add( (int) (300 + Math.random() * 300));
+//            }
 
-            rvPopularAdapter.setmDatas(getPopularList(),popularHeights);
+            rvPopularAdapter.setmDatas(getPopularList(),getPopularHeight());
         }
     }
 
 
-    private List<PhotoBean> getPopularList(){
+    private CategoryBean getPopularList(){
+//        for(int i=0;i<MemExchange.getInstance().getPhotoPopularList();i++)
         return MemExchange.getInstance().getPhotoPopularList();
+    }
+    private List<Integer> getPopularHeight(){
+        return MemExchange.getInstance().getPopularHeights();
     }
 
 
@@ -76,6 +84,9 @@ public class PhotoFragment extends BaseFragment {
         View view  = inflater.inflate(R.layout.fragment_photo,container,false);
 
         List<View> views = new ArrayList<>();
+
+        //region==========类别1===========================================================================
+
         View popularView = inflater.inflate(R.layout.fragment_photo_popular,null);
         rvPopular = (EmptyRecyclerView) popularView.findViewById(R.id.rv_photo_popular);
         rvPopularAdapter = new RecyclerViewAdapter(getActivity());
@@ -95,14 +106,36 @@ public class PhotoFragment extends BaseFragment {
                 Logger.e(Logger.DEBUG_TAG,"onItemLongClick");
             }
         });
+        rvPopularAdapter.addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.view_footer,null));
+
         rvPopular.setAdapter(rvPopularAdapter);
 
 
         views.add(popularView);
+
+        //endregion==========类别1===========================================================================
+
+        //region==========类别2===========================================================================
+
         View sceneryView = inflater.inflate(R.layout.fragment_photo_scenery,null);
+        Button btn = (Button) sceneryView.findViewById(R.id.bt_to_video_activity);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent =new Intent(getActivity(), PlayVideoActivity.class);
+                startActivity(intent);
+            }
+        });
         views.add(sceneryView);
+
+        //endregion==========类别2===========================================================================
+
+        //region==========类别3===========================================================================
+
         View portrayView = inflater.inflate(R.layout.fragment_photo_portray,null);
         views.add(portrayView);
+
+        //endregion==========类别3===========================================================================
 
         vp_photo = (ViewPager) view.findViewById(R.id.vp_photo);
         if(vp_photo==null){
@@ -110,6 +143,7 @@ public class PhotoFragment extends BaseFragment {
             return view;
         }
         ViewPagerAdapter adapter = new ViewPagerAdapter(views,getContext());
+        vp_photo.setOffscreenPageLimit(views.size() - 1);
         vp_photo.setAdapter(adapter);
 
         //todo bug

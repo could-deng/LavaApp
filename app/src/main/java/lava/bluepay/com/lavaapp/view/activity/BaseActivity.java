@@ -1,9 +1,11 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
@@ -24,11 +27,16 @@ import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
 public class BaseActivity extends AppCompatActivity {
 
+    protected Context context;
     protected Toolbar toolbar;
     protected TextView tv_title;
     protected NewVPIndicator indicator;
 
-
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        context = this;
+    }
 
     public void initToolbar(){
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -95,6 +103,9 @@ public class BaseActivity extends AppCompatActivity {
                 return;
             }
             switch (msg.what){
+                case RequestManager.MSG_NETNOWR_ERROR:
+                    Toast.makeText(activity.context,"网络不可用",Toast.LENGTH_SHORT).show();
+                    break;
                 case RequestManager.MSG_REQUEST_FINISH:
                     activity.processRequest(msg);
                     break;
@@ -109,6 +120,7 @@ public class BaseActivity extends AppCompatActivity {
         Logger.e(Logger.DEBUG_TAG,"processReqError(),result = "+msg.getData().getString("resultString"));
     }
     protected void processRequest(Message msg){
+
     }
     protected String getMessgeResult(Message message){
         Bundle bundle = message.getData();

@@ -54,6 +54,11 @@ public class ApiUtils {
         }
         return instance;
     }
+
+    /**
+     * 网络是否可用
+     * @return
+     */
     public static boolean isNetWorkAvailable(){
         ConnectivityManager cm = (ConnectivityManager) MixApp.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         if(cm !=null){
@@ -89,6 +94,7 @@ public class ApiUtils {
 
     /**
      * 获取
+     * (get)
      * @param appid
      * @param encrypt
      * @return
@@ -101,6 +107,7 @@ public class ApiUtils {
 
     /**
      * 获取初始化url
+     * (post)
      * @return
      */
     public static String getInit(){
@@ -114,13 +121,27 @@ public class ApiUtils {
     public static String getCheckSub(){
         return Config.API_HOST_TEST+"/v1/checksub.api";
     }
+
     /**
-     * 获取流行图片列表url
+     * 获取请求全部类别url
+     * (post)
      * @return
      */
     public static String getCategoryList(){
         return Config.API_HOST_TEST+"/v1/category.api";
     }
-
+    /**
+     * 获取请求分页数据url
+     * (get)
+     * @return
+     */
+    public static String getQuerypage(int page,int pagesize,int cateid,String token){
+        return  jointStrings(Config.API_HOST_TEST,
+                "/v1/querypage.api?page=",String.valueOf(page),
+                "&pagesize=",String.valueOf(pagesize),
+                        "&cateid=",String.valueOf(cateid),
+                "&token=",token,
+                "&Content-Type=","application/json; charset=utf-8");
+    }
 
 }

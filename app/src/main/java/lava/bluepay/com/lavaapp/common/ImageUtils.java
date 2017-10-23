@@ -114,7 +114,7 @@ public class ImageUtils {
         try {
 //                bkg = zoomBitmap(bkg);//方法比例:屏幕／实际
             if (bkg == null) return null;
-            Bitmap overlay = Bitmap.createBitmap(
+            Bitmap overlay = Bitmap.createBitmap(                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
                     (int) (bkg.getWidth() / scaleFactor),
                     (int) (bkg.getHeight() / scaleFactor),
                     Bitmap.Config.RGB_565);
@@ -130,34 +130,34 @@ public class ImageUtils {
         }
         return bitmap;
     }
-
-    /**
-     * bitmap 模糊化处理
-     */
-    @SuppressLint("NewApi")
-    public static Bitmap newBlurToViewSize(Bitmap bkg, SimpleDraweeView view) {
-        float scaleFactor = 20;//图片缩放比例；
-        int radius = 15;//模糊程度
-        Bitmap bitmap = null;
-        try {
-//                bkg = zoomBitmap(bkg);//方法比例:屏幕／实际
-            if (bkg == null) return null;
-            Bitmap overlay = Bitmap.createBitmap(
-                    (int) (view.getWidth() / scaleFactor),
-                    (int) (view.getHeight() / scaleFactor),
-                    Bitmap.Config.RGB_565);
-            Canvas canvas = new Canvas(overlay);
-            canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
-            canvas.scale(1 / scaleFactor, 1 / scaleFactor);
-            Paint paint = new Paint();
-            paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-            canvas.drawBitmap(bkg, 0, 0, paint);
-            bitmap = ImageUtils.doBlur(overlay, radius, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return bitmap;
-    }
+//
+//    /**
+//     * bitmap 模糊化处理
+//     */
+//    @SuppressLint("NewApi")
+//    public static Bitmap newBlurToViewSize(Bitmap bkg, SimpleDraweeView view) {
+//        float scaleFactor = 20;//图片缩放比例；
+//        int radius = 15;//模糊程度
+//        Bitmap bitmap = null;
+//        try {
+////                bkg = zoomBitmap(bkg);//方法比例:屏幕／实际
+//            if (bkg == null) return null;
+//            Bitmap overlay = Bitmap.createBitmap(
+//                    (int) (view.getWidth() / scaleFactor),
+//                    (int) (view.getHeight() / scaleFactor),
+//                    Bitmap.Config.RGB_565);
+//            Canvas canvas = new Canvas(overlay);
+//            canvas.translate(-view.getLeft() / scaleFactor, -view.getTop() / scaleFactor);
+//            canvas.scale(1 / scaleFactor, 1 / scaleFactor);
+//            Paint paint = new Paint();
+//            paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+//            canvas.drawBitmap(bkg, 0, 0, paint);
+//            bitmap = ImageUtils.doBlur(overlay, radius, true);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return bitmap;
+//    }
 
 
     public static Bitmap doBlur(Bitmap sentBitmap, int radius,

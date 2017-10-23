@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -23,8 +24,11 @@ import okhttp3.RequestBody;
 
 public class RequestManager {
 
-    /**请求结果为成功*/
+    /** 网络不可用     */
+    public static final int MSG_NETNOWR_ERROR = -1;
+    /** 请求结果为成功 */
     public static final int MSG_REQUEST_FINISH = 1000;
+    /** 请求结果为失败 */
     public static final int MSG_REQUEST_ERROR = 1001;
 
 
@@ -53,6 +57,11 @@ public class RequestManager {
      * @param iRequestType
      */
     public void requestByPost(final String url, final Handler handler, final RequestBody rb,final int iRequestType){
+        if(!ApiUtils.isNetWorkAvailable()){
+            Logger.e(Logger.DEBUG_TAG,"网络不可用");
+            sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
+            return;
+        }
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -117,6 +126,13 @@ public class RequestManager {
      */
     public void request(final String url, final Handler handler,
                         final int iRequestType){
+
+        if(!ApiUtils.isNetWorkAvailable()){
+            Logger.e(Logger.DEBUG_TAG,"网络不可用");
+            sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
+            return;
+        }
+
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -139,7 +155,7 @@ public class RequestManager {
         if(isHttpResultValid(sResult)) {
             sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_FINISH);
         }else{
-            sendResultMessage(sResult,handler,iRequestType,MSG_REQUEST_ERROR);
+            sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_ERROR);
         }
     }
 

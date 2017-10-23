@@ -12,9 +12,38 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_centerInParent="true"/>
-    <include
+    <LinearLayout
         android:id="@+id/header_view"
-        layout="@layout/layout_toolbar"/>
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="visible">
+
+        <ImageView
+            android:id="@+id/iv_back"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_weight="1"
+            android:contentDescription="@null"
+            android:clickable="true"
+            android:onClick="doClick"
+            android:scaleType="center"
+            android:src="@drawable/toolbar_back" />
+
+        <TextView
+            android:id="@+id/tv_video_title"
+            android:layout_width="0dp"
+            android:layout_height="35dp"
+            android:layout_weight="10"
+            android:gravity="center"
+            android:textColor="@color/white_cloud_text"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/ll_video_bottom_layout"
         android:layout_width="match_parent"
@@ -33,13 +62,14 @@
         <SeekBar
             android:id="@+id/seekbar_video_bottom"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="10"
             android:maxHeight="3dp"
             android:minHeight="3dp"
             android:paddingLeft="12dp"
             android:paddingRight="12dp"
             android:progressDrawable="@drawable/seekbar_style"
+            android:thumb="@drawable/play_thumb_white_dot"
             />
         <TextView
             android:id="@+id/tv_video_bottom_total_size"

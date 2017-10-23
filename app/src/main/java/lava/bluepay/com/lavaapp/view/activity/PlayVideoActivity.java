@@ -5,7 +5,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.GestureDetector;
@@ -30,6 +29,12 @@ import lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView;
  */
 
 public class PlayVideoActivity extends BaseActivity {
+
+
+
+    LinearLayout header_view;
+    TextView tv_video_title;
+    ImageView iv_back;
 
     FullScreenVideoView video_view;
     ProgressBar pb_video;
@@ -77,8 +82,8 @@ public class PlayVideoActivity extends BaseActivity {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);//常量
+
         full(false);
         setContentView(R.layout.activity_play_video);
         initViews();
@@ -90,6 +95,16 @@ public class PlayVideoActivity extends BaseActivity {
      * 初始化界面
      */
     private void initViews(){
+        header_view = (LinearLayout) findViewById(R.id.header_view);
+        tv_video_title = (TextView) findViewById(R.id.tv_video_title);
+        iv_back = (ImageView) findViewById(R.id.iv_back);
+        iv_back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         video_view = (FullScreenVideoView) findViewById(R.id.video_view);
         pb_video = (ProgressBar) findViewById(R.id.pb_video);
         ll_video_bottom_layout = (LinearLayout) findViewById(R.id.ll_video_bottom_layout);
@@ -99,7 +114,25 @@ public class PlayVideoActivity extends BaseActivity {
 
         error_layout = (RelativeLayout) findViewById(R.id.error_layout);
         video_play_state = (ImageView) findViewById(R.id.video_play_state);
-
+        video_play_state.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showVideoControllerLayout();
+                if (video_view.isPlaying()) {
+                    pause();
+                    video_play_state.setImageResource(R.drawable.play);
+                } else {
+                    if (progressValue > 0) {
+                        Logger.i(Logger.DEBUG_TAG, "playVideoActivity --- > doClick : progressValue :" + progressValue);
+                        video_view.start();
+                        updateVideoProgress();
+                    } else {
+                        playVideo();
+                    }
+                    video_play_state.setImageResource(R.drawable.stop);
+                }
+            }
+        });
         //声音
         mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -232,6 +265,14 @@ public class PlayVideoActivity extends BaseActivity {
 
 
     private void stop(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tv_video_bottom_played.setText(tv_video_bottom_total_size.getText().toString());
+                seekbar_video_bottom.setProgress(100);
+            }
+        });
+
         progressValue = 0;
         video_view.pause();
         showVideoControllerLayout();
@@ -243,6 +284,7 @@ public class PlayVideoActivity extends BaseActivity {
         }
         video_view.setVideoURI(Uri.parse(video.getVideoUrl()));
         showProgressBar();
+        video_view.seekTo(0);
         video_view.start();
         video_view.requestFocus();
     }
@@ -301,21 +343,11 @@ public class PlayVideoActivity extends BaseActivity {
     //endregion============手势控制===============================
 
     private void initData(){
-        video = new VideoBean("视频Title","");
-        setToolbar(video.getVideoTitle());
+        video = new VideoBean("视频Title","http://192.168.4.210:8168/resources/video/10.mp4");
+        if(tv_video_title!=null) {
+            tv_video_title.setText(video.getVideoTitle());
+        }
         playVideo();
-    }
-    private void setToolbar(String title){
-        if(toolbar == null){
-            return;
-        }
-        toolbar.setNavigationIcon(null);
-        toolbar.setNavigationOnClickListener(null);
-        if(getSupportActionBar()!=null){
-            getSupportActionBar().setDisplayShowCustomEnabled(true);
-            getSupportActionBar().setHomeAsUpIndicator(R.drawable.toolbar_back);//返回健
-        }
-        setUITitle(title);
     }
 
 
@@ -414,7 +446,7 @@ public class PlayVideoActivity extends BaseActivity {
         full(false);
         error_layout.setVisibility(View.VISIBLE);
         ll_video_bottom_layout.setVisibility(View.VISIBLE);
-        toolbar.setVisibility(View.VISIBLE);
+        header_view.setVisibility(View.VISIBLE);
         if(video_view.isPlaying()){
             showPause();
         }else{
@@ -427,7 +459,7 @@ public class PlayVideoActivity extends BaseActivity {
         bControllerHide = true;
         full(true);
         error_layout.setVisibility(View.GONE);
-        toolbar.setVisibility(View.GONE);
+        header_view.setVisibility(View.GONE);
         ll_video_bottom_layout.setVisibility(View.GONE);
     }
 

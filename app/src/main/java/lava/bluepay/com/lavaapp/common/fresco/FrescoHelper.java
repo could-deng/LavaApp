@@ -2,21 +2,23 @@ package lava.bluepay.com.lavaapp.common.fresco;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.facebook.common.executors.CallerThreadExecutor;
+import com.facebook.common.executors.UiThreadImmediateExecutorService;
 import com.facebook.common.references.CloseableReference;
 import com.facebook.datasource.DataSource;
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.common.ImageDecodeOptions;
 import com.facebook.imagepipeline.core.ImagePipeline;
 import com.facebook.imagepipeline.datasource.BaseBitmapDataSubscriber;
 import com.facebook.imagepipeline.image.CloseableImage;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
 import lava.bluepay.com.lavaapp.common.Logger;
@@ -27,6 +29,38 @@ import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
  */
 
 public class FrescoHelper {
+
+    public static void downPic(Context context,String url, final String localPath, final RecyclerViewAdapter.OnBitmapDownloadListener listener) {
+
+        ImageDecodeOptions decodeOptions = ImageDecodeOptions.newBuilder()
+                .build();
+        ImageRequest imageRequest = ImageRequestBuilder
+                .newBuilderWithSource(Uri.parse(url))
+                .setImageDecodeOptions(decodeOptions)
+                .setAutoRotateEnabled(true)
+                .setLowestPermittedRequestLevel(ImageRequest.RequestLevel.FULL_FETCH)
+                .setProgressiveRenderingEnabled(true)//渐进渲染
+//                .setResizeOptions(new ResizeOptions(300, 300))
+                .build();
+        ImagePipeline imagePipeline = Fresco.getImagePipeline();
+        DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, context);
+
+        dataSource.subscribe(new BaseBitmapDataSubscriber() {
+            @Override
+            protected void onNewResultImpl(Bitmap bitmap) {
+                //获取图片的bitmap
+                Logger.i(Logger.DEBUG_TAG,"FrescoHelper,subscriber,onNewResultImpl");
+                saveBitmap2File(bitmap,localPath,listener);
+            }
+
+            @Override
+            protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
+                Logger.e(Logger.DEBUG_TAG,"FrescoHelper,onFailureImpl");
+
+            }
+        }, UiThreadImmediateExecutorService.getInstance());
+
+    }
 
     /**
      * Fresco加载图片的同时保存图片到本地
@@ -49,12 +83,12 @@ public class FrescoHelper {
 
             @Override
             protected void onFailureImpl(DataSource<CloseableReference<CloseableImage>> dataSource) {
-
+                Logger.i(Logger.DEBUG_TAG,"FrescoHelper,subscriber,onFailureImpl");
             }
             @Override
             protected void onNewResultImpl(Bitmap bitmap) {
-                saveBitmap2File(bitmap,localPath,listener);
                 Logger.i(Logger.DEBUG_TAG,"FrescoHelper,subscriber,onNewResultImpl");
+                saveBitmap2File(bitmap,localPath,listener);
             }
         };
 

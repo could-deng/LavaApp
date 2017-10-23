@@ -13,6 +13,9 @@ import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
@@ -21,6 +24,7 @@ import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
@@ -305,13 +309,23 @@ public class MainActivity extends BaseActivity {
     /**
      * 请求图片流行类数据
      */
-    public void sendPhotoPopularListRequest(){
+    public void sendPhotoPopularListRequest(int nowPage,int cateId){
+        if(MemExchange.getInstance().getTokenData() == null){
+            return;
+        }
+        String sRequest = ApiUtils.getQuerypage(nowPage,10,cateId,MemExchange.getInstance().getTokenData().getToken());
+        RequestManager.getInstance().request(sRequest,getMyHandler(),ApiUtils.requestPhotoPopular);
+    }
+
+    public void sendAllCategoryListRequest(){
 //        if(MemExchange.getInstance().getTokenData() == null){
 //            return;
 //        }
 //        String sRequest = ApiUtils.getCategoryList();
 //        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCategoryRequestBody(),ApiUtils.requestAllCategory);
     }
+
+
 
     @Override
     protected void processReqError(Message msg) {
@@ -334,7 +348,8 @@ public class MainActivity extends BaseActivity {
                 Logger.e(Logger.DEBUG_TAG,"获取token成功");
 //                sendInitRequest(1,1);
 //                sendCheckSubRequest(TextUtils.isEmpty(Utils.getIMSI(MainActivity.this))?Config.defaultTelNum:Utils.getIMSI(MainActivity.this));
-                sendPhotoPopularListRequest();
+
+                sendPhotoPopularListRequest(MemExchange.getInstance().getPhotoPopularPageIndex(),0);
                 break;
             case ApiUtils.requestInit:
                 InitData initData = JsonHelper.getObject(result,InitData.class);
@@ -355,9 +370,9 @@ public class MainActivity extends BaseActivity {
             case ApiUtils.requestPhotoPopular:
                 //通过gson转换为bean类
                 //todo 刷新数据
-//                List<PhotoBean> beanList = new ArrayList<>();
-//                MemExchange.getInstance().setPhotoPopularList(beanList);
-//                getPhotoFragment().refreshPopular();
+                CategoryBean beanList = JsonHelper.getObject(result,CategoryBean.class);
+                MemExchange.getInstance().setPhotoPopularList(beanList);
+                getPhotoFragment().refreshPopular();
                 break;
         }
     }
