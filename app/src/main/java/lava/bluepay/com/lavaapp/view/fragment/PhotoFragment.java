@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,6 @@ import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
 import lava.bluepay.com.lavaapp.view.adapter.ViewPagerAdapter;
-import lava.bluepay.com.lavaapp.view.bean.PhotoBean;
 import lava.bluepay.com.lavaapp.view.widget.EmptyRecyclerView;
 
 /**
@@ -98,6 +98,8 @@ public class PhotoFragment extends BaseFragment {
             public void onItemClick(View view, int position) {
                 Intent intent = new Intent();
                 intent.setClass(getContext(), ViewPagerActivity.class);
+                intent.putExtra("categoryId",1);//大类id
+                intent.putExtra("index",position);//为大类中的index
                 startActivity(intent);
             }
 
@@ -105,11 +107,12 @@ public class PhotoFragment extends BaseFragment {
             public void onItemLongClick(View view, int position) {
                 Logger.e(Logger.DEBUG_TAG,"onItemLongClick");
             }
+
         });
-        rvPopularAdapter.addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.view_footer,null));
-
+//        rvPopularAdapter.addFooterView(LayoutInflater.from(getContext()).inflate(R.layout.view_footer,null));
+        rvPopular.addFootView(LayoutInflater.from(getActivity()).inflate(R.layout.view_footer,null));
+//        rvPopular.setLayoutManager(new LinearLayoutManager(getActivity()));
         rvPopular.setAdapter(rvPopularAdapter);
-
 
         views.add(popularView);
 

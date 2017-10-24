@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import java.util.ArrayList;
 import java.util.List;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.view.adapter.DraweePagerAdapter;
 import lava.bluepay.com.lavaapp.view.widget.MultiTouchViewPager;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
@@ -52,7 +53,7 @@ public class ViewPagerActivity extends BaseActivity {
         viewPager.addOnPageChangeListener(getPageChangeListener());
 
 
-        pagerAdapter.setPicUrlList(setVPData());
+        pagerAdapter.setPicUrlList(getVPData());
 
         if (pagerAdapter.getPicUrlList().size() > 1) {//当有两个banner 才可以来回滚动
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -110,16 +111,27 @@ public class ViewPagerActivity extends BaseActivity {
     }
 
 
-    private List<String> setVPData(){
-       if(picData == null){
-           picData = new ArrayList<>();
-           picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
-           picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
-           picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
-       }
-       return picData;
-    }
+//    private List<String> setVPData(Bundle bundle){
+//        if(picData == null){
+//            picData = new ArrayList<>();
+//        }
+//       int categoryId = bundle.getInt("categoryId",-1);
+//        switch (categoryId){
+//            case 0:
+//                picData = MemExchange.getInstance().getPhotoPopularList().getData().;
+//                break;
+//        }
+//    }
 
+    private List<String> getVPData(){
+        if(picData == null){
+            picData = new ArrayList<>();
+            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
+            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
+            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
+        }
+        return picData;
+    }
 
     @Override
     protected void onDestroy() {

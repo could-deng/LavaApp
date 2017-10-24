@@ -10,8 +10,7 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="5dp"
     android:layout_marginLeft="5dp"
-    android:layout_marginRight="5dp"
-    android:clickable="true">
+    android:layout_marginRight="5dp">
 
 
     <com.facebook.drawee.view.SimpleDraweeView
@@ -23,7 +22,6 @@
         fresco:fadeDuration="300"
         fresco:placeholderImageScaleType="fitXY"
         fresco:placeholderImage="@mipmap/ic_launcher"
-        android:clickable="true"
         />
 
 

@@ -5,6 +5,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import java.util.ArrayList;
+import java.util.List;
+
+import lava.bluepay.com.lavaapp.view.adapter.FooterViewRecyclerAdapter;
 
 /**
  * Created by yuanqiang on 2017/5/10.
@@ -12,7 +16,10 @@ import android.view.View;
 
 public class EmptyRecyclerView extends RecyclerView {
 
+    private List<View> mFootViewInfos = new ArrayList<>();
+
     private View emptyView;
+    private Adapter mAdapter;
 
     public EmptyRecyclerView(Context context) {
         super(context);
@@ -76,15 +83,35 @@ public class EmptyRecyclerView extends RecyclerView {
         checkIfEmpty();
     }
 
+    public void addFootView(View v){
+        mFootViewInfos.add(v);
+        if(mAdapter!=null){
+            if(!(mAdapter instanceof FooterViewRecyclerAdapter)){
+                mAdapter = new FooterViewRecyclerAdapter(mAdapter,mFootViewInfos);
+            }
+        }
+    }
+
+
     @Override
     public void setAdapter(Adapter adapter) {
-        final Adapter oldAdapter = getAdapter();
-        if(oldAdapter!=null){
-            oldAdapter.unregisterAdapterDataObserver(observer);
+
+        if(mFootViewInfos.size()>0){
+            mAdapter = new FooterViewRecyclerAdapter(adapter,mFootViewInfos);
+            super.setAdapter(mAdapter);
         }
-        super.setAdapter(adapter);
-        if(adapter!=null){
-            adapter.registerAdapterDataObserver(observer);
+        else {
+            mAdapter = adapter ;
+            super.setAdapter(mAdapter);
+
+            final Adapter oldAdapter = getAdapter();
+            if (oldAdapter != null) {
+                oldAdapter.unregisterAdapterDataObserver(observer);
+            }
+            super.setAdapter(mAdapter);
+            if (mAdapter != null) {
+                mAdapter.registerAdapterDataObserver(observer);
+            }
         }
     }
 }
