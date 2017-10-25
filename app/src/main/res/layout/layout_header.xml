@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fitmix.sdk.view.widget.swiperefresh.RefreshHeaderView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:paddingBottom="8dp"
+    android:paddingTop="8dp">
+
+    <ImageView
+        android:id="@+id/iv_pull"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="visible"
+        android:contentDescription="@null"
+        android:background="@drawable/animation_refresh_header_pull" />
+
+    <ImageView
+        android:id="@+id/iv_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:contentDescription="@null"
+        android:background="@drawable/animation_refresh_header_loading" />
+
+</com.fitmix.sdk.view.widget.swiperefresh.RefreshHeaderView>

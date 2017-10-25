@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="fragment_photo_portray"/>
-</LinearLayout>
+    <lava.bluepay.com.lavaapp.view.widget.swiperefresh.SwipeLoadLayout
+        android:id="@+id/swipe_container_photo_portray"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:swipe_style="scale">
+        <lava.bluepay.com.lavaapp.view.widget.EmptyRecyclerView
+            android:id="@id/swipe_target"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <include
+            android:id="@id/swipe_load_more_footer"
+            layout="@layout/layout_footer"/>
+    </lava.bluepay.com.lavaapp.view.widget.swiperefresh.SwipeLoadLayout>
+</RelativeLayout>

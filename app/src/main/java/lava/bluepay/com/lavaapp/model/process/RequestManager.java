@@ -126,7 +126,7 @@ public class RequestManager {
      */
     public void request(final String url, final Handler handler,
                         final int iRequestType){
-
+        Logger.e(Logger.DEBUG_TAG,"请求:"+url);
         if(!ApiUtils.isNetWorkAvailable()){
             Logger.e(Logger.DEBUG_TAG,"网络不可用");
             sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);

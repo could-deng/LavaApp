@@ -8,11 +8,9 @@ import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import java.io.File;
@@ -35,7 +33,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private Context context;
     private LayoutInflater mInflater;
-    private CategoryBean mDatas;
+    private List<CategoryBean.DataBeanX.DataBean> mDatas;
     private List<Integer> mHeights;//item的随机params
 
     private OnItemClickListener itemClickListener;
@@ -48,83 +46,67 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.itemClickListener = itemClickListener;
     }
 
-    //region===================recycler的底部view=====================
-//
-//    // 基本的底部类型开始位置  用于viewType
-//    private static int BASE_ITEM_TYPE_FOOTER = 20000000;
-//
-//    private SparseArray<View> mFooterViews;
-//
-//    public SparseArray<View> getmFooterViews() {
-//        if (mFooterViews == null) {
-//            mFooterViews = new SparseArray<>();
-//        }
-//        return mFooterViews;
-//    }
-//
-//    /**
-//     * 是不是底部类型
-//     */
-//    private boolean isFooterViewType(int viewType) {
-//        int position = mFooterViews.indexOfKey(viewType);
-//        return position >= 0;
-//    }
-//
-//    private RecyclerView.ViewHolder createFooterViewHolder(View view) {
-//        RecyclerView.ViewHolder holder = new FooterViewHolder(view);
-//        return holder;
-//    }
-//
-//
-//    class FooterViewHolder extends RecyclerView.ViewHolder {
-//        Button lastPage;
-//        Button nextPage;
-//
-//        public FooterViewHolder(View itemView) {
-//            super(itemView);
-//            lastPage = (Button) itemView.findViewById(R.id.btn_last_page);
-//            nextPage = (Button) itemView.findViewById(R.id.btn_next_page);
-//        }
-//
-//    }
-//
-//    // 添加底部
-//    public void addFooterView(View view) {
-//        int position = mFooterViews.indexOfValue(view);
-//        if (position < 0) {
-//            mFooterViews.put(BASE_ITEM_TYPE_FOOTER++, view);
-//        }
-////        notifyDataSetChanged();
-//    }
-//
-//    private boolean isFooterPosition(int pos) {
-//        if (mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0) {
-//            Logger.e(Logger.DEBUG_TAG, "isFooterPosition,aaaa" + pos);
-//            return true;
-//        }
-//        Logger.e(Logger.DEBUG_TAG, "isFooterPosition,bbb" + pos);
-//        return pos >= mDatas.getData().getData().size();
-//    }
-
-    //endregion===================recycler的底部view=====================
-
 
     /**
      * 默认设置为缓存中的数据
      *
      * @param context
+     * @param categoryId 对应类别id（） 枚举例如:Config.CategoryPhotoPopular
      */
-    public RecyclerViewAdapter(Context context) {
+    public RecyclerViewAdapter(Context context,int categoryId) {
         this.context = context;
         mInflater = LayoutInflater.from(context);
-        mDatas = MemExchange.getInstance().getPhotoPopularList();
-        mHeights = MemExchange.getInstance().getPopularHeights();
+        switch (categoryId) {
+            //图片
+            case Config.CategoryPhotoPopular:
+                mDatas = MemExchange.getInstance().getPhotoPopularList();
+                mHeights = MemExchange.getInstance().getPopularHeights();
+                break;
+            case Config.CategoryPhotoPortray:
+                mDatas = MemExchange.getInstance().getPhotoPortrayList();
+                mHeights = MemExchange.getInstance().getPhotoPortrayHeights();
+                break;
+            case Config.CategoryPhotoScenery:
+                mDatas = MemExchange.getInstance().getPhotoSceneryList();
+                mHeights = MemExchange.getInstance().getPhotoSceneryHeights();
+                break;
 
-//        mFooterViews = new SparseArray<>();
+            //视屏
+            case Config.CategoryVideoPopular:
+                mDatas = MemExchange.getInstance().getVideoPopularList();
+                mHeights = MemExchange.getInstance().getVideoPopularHeights();
+                break;
+            case Config.CategoryVideoFunny:
+                mDatas = MemExchange.getInstance().getVideoFunnyList();
+                mHeights = MemExchange.getInstance().getVideoFunnyHeights();
+                break;
+            case Config.CategoryVideoSport:
+                mDatas = MemExchange.getInstance().getVideoSportList();
+                mHeights = MemExchange.getInstance().getVideoSportHeights();
+                break;
+
+
+            //卡通
+            case Config.CategoryCartoonPopular:
+
+                mDatas = MemExchange.getInstance().getCartoonPopularList();
+                mHeights = MemExchange.getInstance().getCartoonPopularHeights();
+
+                break;
+            case Config.CategoryCartoonFunny:
+                mDatas = MemExchange.getInstance().getCartoonFunnyList();
+                mHeights = MemExchange.getInstance().getCartoonFunnyHeights();
+                break;
+            case Config.CategoryCartoonhorror:
+                mDatas = MemExchange.getInstance().getCartoonHorrorList();
+                mHeights = MemExchange.getInstance().getCartoonHorrorHeights();
+                break;
+
+        }
     }
 
-    public void setmDatas(CategoryBean mDatas, List<Integer> mHeights) {
-        if (mDatas == null || mDatas.getData().getData().size() == 0 || mHeights == null || mHeights.size() == 0) {
+    public void setmDatas(List<CategoryBean.DataBeanX.DataBean> mDatas, List<Integer> mHeights) {
+        if (mDatas == null || mDatas.size() == 0 || mHeights == null || mHeights.size() == 0) {
             Logger.e(Logger.DEBUG_TAG, "RecyclerViewAdapter,setmDatas(),error");
             return;
         }
@@ -136,10 +118,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//        if (isFooterViewType(viewType)) {
-//            View footer = mFooterViews.get(viewType);
-//            return createFooterViewHolder(footer);
-//        }
+
         View view = mInflater.inflate(R.layout.activity_recyclerview_gridv_item, parent, false);
         view.setOnClickListener(this);
         MyViewHolder myViewHolder = new MyViewHolder(view);
@@ -162,30 +141,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+
         holder.itemView.setTag(position);
 
-//        if (isFooterPosition(position)) {
-//            ((FooterViewHolder) holder).nextPage.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//
-//                }
-//            });
-//            ((FooterViewHolder) holder).lastPage.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//
-//                }
-//            });
-//            return;
-//        }
-
-        if (mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0) {
+        if (mDatas == null ||  mDatas.size() == 0) {
             Logger.e(Logger.DEBUG_TAG, "RecyclerViewAdapter,onBindViewHolder(),mDatas error");
             return;
         }
 
-        final CategoryBean.DataBeanX.DataBean data = mDatas.getData().getData().get(position);
+        final CategoryBean.DataBeanX.DataBean data = mDatas.get(position);
         if (data == null || TextUtils.isEmpty(data.getThumb())) {
             return;
         }
@@ -323,11 +287,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public int getItemCount() {
-        if (mDatas == null || mDatas.getData() == null || mDatas.getData().getData() == null || mDatas.getData().getData().size() == 0) {
+        if (mDatas == null || mDatas.size() == 0) {
 //            return getmFooterViews().size();
             return 0;
         }
-        return mDatas.getData().getData().size() ;//+ getmFooterViews().size();
+        return mDatas.size() ;//+ getmFooterViews().size();
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

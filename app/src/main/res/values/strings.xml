@@ -27,4 +27,13 @@
     <string name="nextpage">Next Page</string>
 
 
+
+    <!-- swipeLoadLayout-->
+    <string name="swipelayout_to_load_more">Slide up load more</string>
+    <string name="swipelayout_release">Loading</string>
+    <string name="swipelayout_loading">Loading</string>
+    <string name="swipelayout_load_complete">Done</string>
+    <string name="swipelayout_load_nothing">No more</string>
+    <string name="swipelayout_load_failure">Load fail</string>
+
 </resources>

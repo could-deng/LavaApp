@@ -18,8 +18,18 @@ public class ApiUtils {
     public static final int requestInit = 501;
     public static final int requestCheckSub = 502;
     public static final int requestAllCategory = 10000;
-    public static final int requestPhotoPopular = 10001;
-    public static final int requestPhotoScenery = 10002;
+
+    public static final int requestPhotoPopular = 10001;//图片-流行
+    public static final int requestPhotoPortray = 10002;
+    public static final int requestPhotoScenery = 10003;
+
+    public static final int requestVideoPopular = 20001;//视频-流行
+    public static final int requestVideoFunny = 20002;
+    public static final int requestVideoSport = 20003;
+
+    public static final int requestCartoonPopular = 30001;//卡通-流行
+    public static final int requestCartoonFunny = 30002;
+    public static final int requestCartoonHorror = 30003;
 
     //endregion=========不同数据请求的标示=====================
 

@@ -27,4 +27,15 @@
     <string name="lastpage">上一页</string>
     <string name="nextpage">上一页</string>
 
+
+
+    <!-- swipeLoadLayout-->
+    <string name="swipelayout_to_load_more">上拉加载更多</string>
+    <string name="swipelayout_release">释放加载</string>
+    <string name="swipelayout_loading">加载中</string>
+    <string name="swipelayout_load_complete">加载完成</string>
+    <string name="swipelayout_load_nothing">没有更多</string>
+    <string name="swipelayout_load_failure">加载失败</string>
+
+
 </resources>

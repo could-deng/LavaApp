@@ -115,6 +115,7 @@ public class ViewPagerActivity extends BaseActivity {
 //        if(picData == null){
 //            picData = new ArrayList<>();
 //        }
+//       //todo 如果某一类的条目很多需要只显示一部分
 //       int categoryId = bundle.getInt("categoryId",-1);
 //        switch (categoryId){
 //            case 0:
