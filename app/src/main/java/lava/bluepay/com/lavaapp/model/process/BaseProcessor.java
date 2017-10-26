@@ -1,6 +1,8 @@
 package lava.bluepay.com.lavaapp.model.process;
 
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Net;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.OKHttpUtil;
 import okhttp3.Request;
@@ -34,7 +36,7 @@ public class BaseProcessor {
         Request request = new Request.Builder().url(url)
                 .addHeader("Content-Type","application/json; charset=utf-8").build();
         String ret;
-        if(ApiUtils.isNetWorkAvailable()){
+        if(Net.isAvailable(MixApp.getContext())){
             try {
                 Response response = OKHttpUtil.getInstance().execute(request);
                 if(response !=null){
@@ -71,16 +73,18 @@ public class BaseProcessor {
      * @return
      */
     public String postRequestBodyToApi(String url, RequestBody body){
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("Content-Type","application/json; charset=utf-8")
-                .post(body)
-                .build();
-        try {
-            Response response = OKHttpUtil.getInstance().execute(request);
-            return response.body().string();
-        }catch (Exception e){
-            e.printStackTrace();
+        if(Net.isAvailable(MixApp.getContext())) {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Content-Type", "application/json; charset=utf-8")
+                    .post(body)
+                    .build();
+            try {
+                Response response = OKHttpUtil.getInstance().execute(request);
+                return response.body().string();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

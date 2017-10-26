@@ -33,7 +33,50 @@ public class ApiUtils {
 
     //endregion=========不同数据请求的标示=====================
 
+    //region=========http请求返回错误码=====================
 
+    public static final int reqResSuccess = 200;
+    public static final int reqResError = 400;
+    public static final int reqResErrorException = 500;
+    public static final int reqResErrorAuthFail = 1001;
+    public static final int reqResErrorAuth = 1002;
+    public static final int reqResErrorInBlack = 1005;
+    public static final int reqResErrorHaveSub = 1006;
+    public static final int reqResErrorHaveNotSub = 1007;
+    public static final int reqResErrorHaveQue = 1008;
+    public static final int reqResErrorIsNew = 1009;
+    public static final int reqResErrorDevNotExist = 1010;
+    public static final int reqResErrorCategeryNotExist = 1011;
+
+//    200
+//        完成请求
+//    400
+//        参数错误
+//    500
+//        系统出现异常,请联系开发人员
+//    1001
+//        鉴权失败
+//    1002
+//        鉴权失效
+//    1004
+//        必要参数错误
+//    1005
+//        用户在黑名单中
+//    1006
+//        用户已订阅
+//    1007
+//        用户未订阅
+//    1008
+//        用户已退订
+//    1009
+//        用户属于新用户，可以订阅
+//    1010
+//        设备号不存在
+//    1011
+//        分类ID不存在
+
+
+    //endregion=========http请求返回错误码=====================
 
 
     /**
@@ -131,6 +174,7 @@ public class ApiUtils {
     public static String getCheckSub(){
         return Config.API_HOST_TEST+"/v1/checksub.api";
     }
+
 
     /**
      * 获取请求全部类别url

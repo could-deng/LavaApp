@@ -24,6 +24,7 @@ import lava.bluepay.com.lavaapp.common.ThreadManager;
 import lava.bluepay.com.lavaapp.common.fresco.FrescoHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 
 /**
  * Created by bluepay on 2017/10/14.
@@ -46,6 +47,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.itemClickListener = itemClickListener;
     }
 
+    public List<CategoryBean.DataBeanX.DataBean> getmDatas() {
+        return mDatas;
+    }
 
     /**
      * 默认设置为缓存中的数据
@@ -154,7 +158,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             return;
         }
         //todo 测试
-        data.setThumb("http://photocdn.sohu.com/20121119/Img358016160.jpg");
+//        data.setThumb("http://photocdn.sohu.com/20121119/Img358016160.jpg");
 
         //todo 图片的url一定要统一
         if (data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
@@ -170,25 +174,26 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((MyViewHolder) holder).imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
         } else {
 
-            //订阅用户、正常显示
-//                holder.imageView.setImageURI(Uri.parse(data.getPictureImg()));
+            if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                //订阅用户、正常显示
+                ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
+            }else {
+                //非订阅用户
 
-            //非订阅用户
 
+                //原图路径
+                final String localFilePath = Config.PHOTO_PATH + data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));//绝对路径
+                File localFile = new File(localFilePath);
+                //模糊图片路径
+                String localBufPath = localFilePath + Config.bufFileEnd;
+                File localBufFile = new File(localBufPath);
 
-            //原图路径
-            final String localFilePath = Config.PHOTO_PATH + data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));//绝对路径
-            File localFile = new File(localFilePath);
-            //模糊图片路径
-            String localBufPath = localFilePath + Config.bufFileEnd;
-            File localBufFile = new File(localBufPath);
-
-            if (localBufFile.exists()) {
-                Logger.i(Logger.DEBUG_TAG, "模糊图片存在,pos" + position);
-                //todo 将图片File转为bitmap，bitmap大小拉升至控件的大小
-                Bitmap blur;
-                Uri uri = Uri.parse(localBufPath);
-                blur = BitmapFactory.decodeFile(uri.toString());
+                if (localBufFile.exists()) {
+                    Logger.i(Logger.DEBUG_TAG, "模糊图片存在,pos" + position);
+                    //todo 将图片File转为bitmap，bitmap大小拉升至控件的大小
+                    Bitmap blur;
+                    Uri uri = Uri.parse(localBufPath);
+                    blur = BitmapFactory.decodeFile(uri.toString());
 //                    float scaleWidth = imageWidth * 1.0f / temp.getWidth();
 //                    float scaleWidth = 1;
 //                    float scaleHeight = imageHeight * 1.0f /temp.getHeight();
@@ -200,49 +205,50 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 //                    matrix.postScale(scaleWidth,scaleHeight);
 //                    Bitmap blur = Bitmap.createBitmap(temp, 0, 0, temp.getWidth(), temp.getHeight(), matrix, true);
 
-                setImageBlur(blur, ((MyViewHolder) holder).imageView);
-                return;
-            }
+                    setImageBlur(blur, ((MyViewHolder) holder).imageView);
+                    return;
+                }
 
-            if (localFile.exists()) {
-                Logger.i(Logger.DEBUG_TAG, "原图片存在,模糊图片不存在,pos" + position);
-                //模糊处理得到相同大小的bitmap
-                final Bitmap blur;
-                Uri uri = Uri.parse(localFilePath);
-                Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
+                if (localFile.exists()) {
+                    Logger.i(Logger.DEBUG_TAG, "原图片存在,模糊图片不存在,pos" + position);
+                    //模糊处理得到相同大小的bitmap
+                    final Bitmap blur;
+                    Uri uri = Uri.parse(localFilePath);
+                    Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
 
 //                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-//                        blur = ImageUtils.blur(context, bitmap);
+                        blur = ImageUtils.blur(context, bitmap);
 //                    }else{
-                blur = ImageUtils.newBlur(bitmap, ((MyViewHolder) holder).imageView);
+//                    blur = ImageUtils.newBlur(bitmap, ((MyViewHolder) holder).imageView);
 //                    }
 
-                setImageBlur(blur, ((MyViewHolder) holder).imageView);
-                ImageUtils.saveBitmap2File(blur, localBufPath);
-            } else {
-                Logger.i(Logger.DEBUG_TAG, "两图均不存在,pos" + position);
-                ThreadManager.executeOnSubThread1(new Runnable() {
-                    @Override
-                    public void run() {
-                        //保存原图到本地
-                        FrescoHelper.downPic(context, data.getThumb(), localFilePath, new OnBitmapDownloadListener() {
-                            @Override
-                            public void onDownloadFinish(final boolean isSuccess) {
-                                ((Activity) context).runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (isSuccess) {
-                                            notifyItemChanged(position);
+                    setImageBlur(blur, ((MyViewHolder) holder).imageView);
+                    ImageUtils.saveBitmap2File(blur, localBufPath);
+                } else {
+                    Logger.i(Logger.DEBUG_TAG, "两图均不存在,pos" + position);
+                    ThreadManager.executeOnSubThread1(new Runnable() {
+                        @Override
+                        public void run() {
+                            //保存原图到本地
+                            FrescoHelper.downPic(context, data.getThumb(), localFilePath, new OnBitmapDownloadListener() {
+                                @Override
+                                public void onDownloadFinish(final boolean isSuccess) {
+                                    ((Activity) context).runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (isSuccess) {
+                                                notifyItemChanged(position);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
 
-                            }
+                                }
 
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
 
+                }
             }
             //模糊处理
 //                ThreadManager.executeOnSubThread1(new Runnable() {

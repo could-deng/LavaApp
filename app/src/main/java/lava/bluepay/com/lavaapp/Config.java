@@ -11,7 +11,7 @@ import java.io.File;
 public class Config {
 
     public static final String bufFileEnd = "buf.jpg";
-
+    public static final int PerPageSize = 10;//每页的数量
     //todo 待删除
     /** 当手机没插卡时的默认手机号   */
     public static final String defaultTelNum = "13418638286";
@@ -35,7 +35,10 @@ public class Config {
     public static final String PHOTO_PATH = PATH_APP_STORRAGE + File.separator + "Pic"+ File.separator;
 
 
-
+//    客户端设备id 1安卓pad 2安卓手机 3ios手机 4iospad
+//     * versionid 设备的版本
+    public static final int DeviceIdAndroidPhone = 2;
+    public static final int AppVersionId =1;
 
     /**
      * 请求各类数据接口（cateid参数）的类别枚举
@@ -59,4 +62,30 @@ public class Config {
     public static final int CategoryCartoonhorror = 12;
 
 
+
+
+
+    //region==========手机相关资源====================
+    public static final String ERROR_C_BluePay_IMSI = "0000000000";
+
+
+
+    public static int PhoneType;
+    public static final int PhoneType_MTK = 0;	// MTK 5.0 以下
+    public static final int PhoneType_SP1 = 1;		// 展讯1 5.0以下
+    public static final int PhoneType_SPEXLA = 2; // 展讯2、猎户座、Lava 5.0以上
+    public static final int PhoneType_QUALCOMM = 3; // 高通骁龙
+    /**
+     * 单卡手机
+     */
+    public static final byte MOBILE_PHONE_CARD = 5;
+    /**
+     * 未知手机
+     */
+    public static final byte MOBILE_PHONE_KNOWN = 6;
+
+    public static byte MOBILE_PHONE_TYPE = MOBILE_PHONE_CARD;
+
+
+    //endregion==========手机相关资源====================
 }

@@ -369,6 +369,20 @@ public class CartoonFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         Logger.e(Logger.DEBUG_TAG,TAG+"onDestroy()");
+
+        if(MemExchange.getInstance().getCartoonPopularList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setCartoonPopularList(MemExchange.getInstance().getCartoonPopularList().subList(0,10));
+            MemExchange.getInstance().setCartoonPopularPageIndex(1);
+        }
+        if(MemExchange.getInstance().getCartoonFunnyList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setCartoonFunnyList(MemExchange.getInstance().getCartoonFunnyList().subList(0,10));
+            MemExchange.getInstance().setCartoonFunnyPageIndex(1);
+        }
+        if(MemExchange.getInstance().getCartoonHorrorList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setCartoonHorrorList(MemExchange.getInstance().getCartoonHorrorList().subList(0,10));
+            MemExchange.getInstance().setCartoonHorrorPageIndex(1);
+        }
+
         super.onDestroy();
     }
 

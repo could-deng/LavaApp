@@ -1,7 +1,9 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,7 +19,9 @@ import android.widget.Toast;
 
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
+import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
@@ -116,9 +120,26 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 请求失败
+     * @param msg
+     */
     protected  void processReqError(Message msg){
         Logger.e(Logger.DEBUG_TAG,"processReqError(),result = "+msg.getData().getString("resultString"));
+        String mResult = msg.getData().getString("resultString");
+        BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
+        switch (bean.getCode()){
+            case 1001:
+                Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+        }
     }
+
+    /**
+     * 请求成功
+     * @param msg
+     */
     protected void processRequest(Message msg){
 
     }
@@ -134,4 +155,25 @@ public class BaseActivity extends AppCompatActivity {
         return sResult;
     }
 
+
+
+
+
+    public void showExitDialog() {
+        // 弹框确认是否退出
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(R.string.request_out_of_date);
+        builder.setTitle("tips");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                ((BaseActivity)context).finish();
+                dialog.dismiss();
+                System.exit(0);
+            }
+        });
+
+        builder.setCancelable(false);//不可取消
+        builder.create().show();
+    }
 }

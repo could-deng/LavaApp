@@ -1,5 +1,7 @@
 package lava.bluepay.com.lavaapp.model.api.bean;
 
+import android.text.TextUtils;
+
 /**
  * Created by bluepay on 2017/10/20.
  */
@@ -68,5 +70,12 @@ public class CheckSubBean extends BaseBean {
         public void setMsisdn(String msisdn) {
             this.msisdn = msisdn;
         }
+    }
+
+    public static boolean ifHaveSubscribe(DataBean data){
+        if(data !=null && !TextUtils.isEmpty(data.getStatus())){
+            return (data.getStatus() == "A/T")?true:false;
+        }
+        return false;
     }
 }

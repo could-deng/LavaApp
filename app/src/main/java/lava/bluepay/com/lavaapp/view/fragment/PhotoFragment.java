@@ -17,9 +17,13 @@ import java.util.List;
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
+import lava.bluepay.com.lavaapp.common.pay.IExecutorCallback;
+import lava.bluepay.com.lavaapp.common.pay.PayHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
 import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
@@ -109,11 +113,17 @@ public class PhotoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), ViewPagerActivity.class);
-                intent.putExtra("categoryId",Config.CategoryPhotoPopular);//大类id
-                intent.putExtra("index",position);//为大类中的index
-                startActivity(intent);
+
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    intent.putExtra("categoryId", Config.CategoryPhotoPopular);//大类id
+                    intent.putExtra("index", position);//为大类中的index
+                    startActivity(intent);
+                }else{
+                    //为订阅的则提示是否订阅
+                }
             }
 
             @Override
@@ -191,6 +201,27 @@ public class PhotoFragment extends BaseFragment {
                 startActivity(intent);
             }
         });
+
+        Button btn_subscript = (Button) sceneryView.findViewById(R.id.btn_subscript);
+        btn_subscript.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                PayHelper.doPay(new IExecutorCallback() {
+//                    @Override
+//                    public void onExecuted(int result, String msg) {
+//
+//                    }
+//                });
+
+//                String telNum = Utils.getIMSI(getActivity());
+//                MemExchange.m_iIMSI1 = telNum;
+//                MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
+
+                //
+                ((MainActivity)getActivity()).getmProgressDialog().show();
+            }
+        });
+
 
         //下拉控件
         swipe_container_photo_scenery = (SwipeLoadLayout) sceneryView.findViewById(R.id.swipe_container_photo_portray);
@@ -433,6 +464,18 @@ public class PhotoFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         Logger.e(Logger.DEBUG_TAG,TAG+"onDestroy()");
+        if(MemExchange.getInstance().getPhotoPopularList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setPhotoPopularList(MemExchange.getInstance().getPhotoPopularList().subList(0,10));
+            MemExchange.getInstance().setPhotoPopularPageIndex(1);
+        }
+        if(MemExchange.getInstance().getPhotoPortrayList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setPhotoPortrayList(MemExchange.getInstance().getPhotoPortrayList().subList(0,10));
+            MemExchange.getInstance().setPhotoPortrayPageIndex(1);
+        }
+        if(MemExchange.getInstance().getPhotoSceneryList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setPhotoSceneryList(MemExchange.getInstance().getPhotoSceneryList().subList(0,10));
+            MemExchange.getInstance().setPhotoSceneryPageIndex(1);
+        }
         super.onDestroy();
     }
 

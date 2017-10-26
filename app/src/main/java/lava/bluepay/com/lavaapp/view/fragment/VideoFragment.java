@@ -75,7 +75,7 @@ public class VideoFragment extends BaseFragment {
     }
 
 
-    private View initView(LayoutInflater inflater,ViewGroup container){
+    private View initView(final LayoutInflater inflater, ViewGroup container){
         View view  = inflater.inflate(R.layout.fragment_video,container,false);
 
         List<View> views = new ArrayList<>();
@@ -105,10 +105,22 @@ public class VideoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), PlayVideoActivity.class);
-                //todo 设置视屏源
-                startActivity(intent);
+                if(rvPopularAdapter.getmDatas()!=null){
+                    CategoryBean.DataBeanX.DataBean bean = rvPopularAdapter.getmDatas().get(position);
+                    if(bean == null){
+                        return;
+                    }
+                    Intent intent = new Intent();
+
+
+                    Bundle data = new Bundle();
+                    data.putString("title",bean.getTitle());
+                    data.putString("urlPath", bean.getSeeds());
+                    intent.putExtras(data);
+                    intent.setClass(getContext(), PlayVideoActivity.class);
+
+                    startActivity(intent);
+                }
             }
 
             @Override
@@ -386,6 +398,19 @@ public class VideoFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         Logger.e(Logger.DEBUG_TAG,TAG+"onDestroy()");
+        if(MemExchange.getInstance().getVideoPopularList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setVideoPopularList(MemExchange.getInstance().getVideoPopularList().subList(0,10));
+            MemExchange.getInstance().setVideoPopularPageIndex(1);
+        }
+        if(MemExchange.getInstance().getVideoFunnyList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setVideoFunnyList(MemExchange.getInstance().getVideoFunnyList().subList(0,10));
+            MemExchange.getInstance().setVideoFunnyPageIndex(1);
+        }
+        if(MemExchange.getInstance().getVideoSportList().size()> Config.PerPageSize){
+            MemExchange.getInstance().setVideoSportList(MemExchange.getInstance().getVideoSportList().subList(0,10));
+            MemExchange.getInstance().setVideoSportPageIndex(1);
+        }
+
         super.onDestroy();
     }
     @Override

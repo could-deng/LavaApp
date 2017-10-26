@@ -1,6 +1,7 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,7 +9,9 @@ import android.os.Message;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
@@ -16,6 +19,7 @@ import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
@@ -49,6 +53,71 @@ public class MainActivity extends BaseActivity {
     private CartoonFragment cartoonFragment;
     private VideoFragment videoFragment;
 
+
+    //region==============初始化业务===================
+
+    private ProgressDialog mProgressDialog;
+
+    //初始化的三个阶段
+    private static final int NOWInitState0 = 0;
+    private static final int NOWInitState1 = 1;
+    private static final int NOWInitState2 = 2;
+    private static final int NOWInitState3 = 3;
+
+    private int nowInitState = 0;//当前阶段（//todo activity回收的情况）
+
+    public ProgressDialog getmProgressDialog(){
+        return mProgressDialog;
+    }
+
+    /**
+     * 初始化app（请求token、请求初始化字段、请求订阅状态）
+     * 分三个阶段
+     */
+    private void initApp(int nowState){
+        if(!mProgressDialog.isShowing()){
+            mProgressDialog.show();
+        }
+        switch (nowState){
+            case MainActivity.NOWInitState0://去请求token
+                nowInitState = MainActivity.NOWInitState0;
+
+                sendGetTokenRequest();
+                break;
+            case MainActivity.NOWInitState1://去请求初始化信息
+                sendInitRequest(Config.DeviceIdAndroidPhone,Config.AppVersionId);
+
+                break;
+            case MainActivity.NOWInitState2://去请求订阅信息
+
+                String telNum = Utils.getIMSI(context);
+                MemExchange.m_iIMSI1 = telNum;
+                MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
+
+                Logger.e(Logger.DEBUG_TAG,"imsi1="+MemExchange.m_iIMSI1+",imsi2="+MemExchange.m_iIMSI2+",imsi="+MemExchange.m_iIMSI
+                +",imei="+MemExchange.m_iIMEI+",pho="+MemExchange.m_sPhoneNumber);
+
+                if(!TextUtils.isEmpty(telNum)){
+                    sendCheckSubRequest(telNum);
+                }else{
+                    MemExchange.getInstance().setHaveNoSim();
+                    nowInitState = MainActivity.NOWInitState3;
+                    initApp(nowInitState);
+                }
+                break;
+            case MainActivity.NOWInitState3:
+                if(mProgressDialog!=null && mProgressDialog.isShowing()){
+                    mProgressDialog.dismiss();
+                }
+                //请求第一页数据
+                sendCategoryDataListRequest(1,Config.CategoryPhotoPopular,ApiUtils.requestPhotoPopular);
+                break;
+        }
+
+    }
+
+    //region==============初始化业务===================
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,16 +125,13 @@ public class MainActivity extends BaseActivity {
 
         //1. Android 6.0申请权限
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-//            getPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-//                    Manifest.permission.BODY_SENSORS,
-//                    Manifest.permission.ACCESS_FINE_LOCATION});
+//            getPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE});
         }
 
         initToolbar();
         initViews();
-        sendGetTokenRequest();
+        initApp(MainActivity.NOWInitState0);
 
-//
 //        switchToFragment(FRAGMENT_PHOTO);
 //        loadDataForPhotoFragment();
     }
@@ -124,6 +190,15 @@ public class MainActivity extends BaseActivity {
 
 
     private void initViews(){
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setTitle("");
+        mProgressDialog.setMessage(getResources().getString(R.string.app_initial));
+        mProgressDialog.setCanceledOnTouchOutside(false);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setIndeterminate(true);
+
+
         rg_select_fragment = (RadioGroup) findViewById(R.id.rg_select_fragment);
         rb_fragment_photo = (RadioButton) findViewById(R.id.tv_fragment_photo);
         rb_fragment_video = (RadioButton) findViewById(R.id.tv_fragment_video);
@@ -218,12 +293,13 @@ public class MainActivity extends BaseActivity {
         if(photoFragment == null){
             photoFragment = new PhotoFragment();
 
-            if(ApiUtils.isNetWorkAvailable()) {
-                //发送请求
-            }else{
-                Logger.e(Logger.DEBUG_TAG,"MainActivity,switchToFragment,photoFragment,net work not work");
-                //todo 提示网络不可用
-            }
+//            if(ApiUtils.isNetWorkAvailable()) {
+//                发送请求
+//            }else{
+//                Logger.e(Logger.DEBUG_TAG,"MainActivity,switchToFragment,photoFragment,net work not work");
+//                todo 提示网络不可用
+//            }
+
         }
         return photoFragment;
     }
@@ -272,21 +348,33 @@ public class MainActivity extends BaseActivity {
      * 请求token
      */
     public void sendGetTokenRequest(){
-        String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid="+Config.APPID+Config.APPSALT));
-        RequestManager.getInstance().request(sRequest,getMyHandler(),ApiUtils.requestToken);
+        try {
+            String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
+            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken);
+        }catch (Exception e){
+            e.printStackTrace();
+            //todo 上传错误日志
+        }
     }
 
     /**
      * 请求初始化数据
-     * 客户端设备id 1安卓pad 2安卓手机 3ios手机 4iospad
-     * versionid 设备的版本
+     * @param dev 客户端设备id 1安卓pad 2安卓手机 3ios手机 4iospad
+     * @param versionid 设备的版本
      */
     public void sendInitRequest(int dev, int versionid){
-        if(MemExchange.getInstance().getTokenData() == null){
-            return;
+        try {
+            TokenData.DataBean bean = MemExchange.getInstance().getTokenData();
+            if (bean == null || TextUtils.isEmpty(bean.getToken())) {
+                Logger.e(Logger.DEBUG_TAG,"请求无效");
+                return;
+            }
+            String sRequest = ApiUtils.getInit();
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getInitRequestBody(dev, versionid,bean.getToken()), ApiUtils.requestInit);
+        }catch(Exception e){
+            e.printStackTrace();
+            //todo 上传错误日志
         }
-        String sRequest = ApiUtils.getInit();
-        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getInitRequestBody(dev,versionid),ApiUtils.requestInit);
     }
 
     /**
@@ -294,11 +382,18 @@ public class MainActivity extends BaseActivity {
      * @param telNum
      */
     public void sendCheckSubRequest(String telNum){
-        if(MemExchange.getInstance().getTokenData() == null){
-            return;
+        try {
+            TokenData.DataBean bean = MemExchange.getInstance().getTokenData();
+            if (bean == null || TextUtils.isEmpty(bean.getToken())) {
+                Logger.e(Logger.DEBUG_TAG,"请求无效");
+                return;
+            }
+            String sRequest = ApiUtils.getCheckSub();
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()), ApiUtils.requestCheckSub);
+        }catch (Exception e){
+            e.printStackTrace();
+            //todo 上传错误日志
         }
-        String sRequest = ApiUtils.getCheckSub();
-        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCheckSubRequestBody(telNum),ApiUtils.requestCheckSub);
     }
 
     /**
@@ -306,9 +401,10 @@ public class MainActivity extends BaseActivity {
      */
     public void sendCategoryDataListRequest(int nowPage, int cateId, int requestType){
         if(MemExchange.getInstance().getTokenData() == null){
+            Logger.e(Logger.DEBUG_TAG,"请求无效");
             return;
         }
-        String sRequest = ApiUtils.getQuerypage(nowPage,10,cateId,MemExchange.getInstance().getTokenData().getToken());
+        String sRequest = ApiUtils.getQuerypage(nowPage,Config.PerPageSize,cateId,MemExchange.getInstance().getTokenData().getToken());
         RequestManager.getInstance().request(sRequest,getMyHandler(),requestType);
     }
 
@@ -341,22 +437,27 @@ public class MainActivity extends BaseActivity {
                 }
                 MemExchange.getInstance().setTokenData(tokenData.getData());
                 Logger.e(Logger.DEBUG_TAG,"获取token成功");
-//                sendInitRequest(1,1);
-//                sendCheckSubRequest(TextUtils.isEmpty(Utils.getIMSI(MainActivity.this))?Config.defaultTelNum:Utils.getIMSI(MainActivity.this));
+                if(++nowInitState <= MainActivity.NOWInitState3){
+                    initApp(nowInitState);
+                }
 
-                //请求第一页数据
-                sendCategoryDataListRequest(1,Config.CategoryPhotoPopular,ApiUtils.requestPhotoPopular);
                 break;
             case ApiUtils.requestInit:
                 InitData initData = JsonHelper.getObject(result,InitData.class);
                 MemExchange.getInstance().setInitData(initData.getData());
                 Logger.e(Logger.DEBUG_TAG,"初始化成功");
+                if(++nowInitState <= MainActivity.NOWInitState3){
+                    initApp(nowInitState);
+                }
                 break;
 
             case ApiUtils.requestCheckSub:
                 CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
                 MemExchange.getInstance().setCheckSubData(subBean.getData());
                 Logger.e(Logger.DEBUG_TAG,"查询订阅状态成功");
+                if(++ nowInitState <= MainActivity.NOWInitState3){
+                    initApp(nowInitState);
+                }
                 break;
             case ApiUtils.requestAllCategory:
                 CategoryListBean categoryListBean = JsonHelper.getObject(result, CategoryListBean.class);

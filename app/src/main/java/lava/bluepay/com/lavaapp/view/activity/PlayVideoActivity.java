@@ -18,6 +18,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.FormatUtils;
 import lava.bluepay.com.lavaapp.common.Logger;
@@ -343,7 +345,15 @@ public class PlayVideoActivity extends BaseActivity {
     //endregion============手势控制===============================
 
     private void initData(){
-        video = new VideoBean("视频Title","http://192.168.4.210:8168/resources/video/10.mp4");
+
+        Bundle bundle = getIntent().getExtras();
+        String title = bundle.getString("title");
+        String urlPath = bundle.getString("urlPath");
+        if(TextUtils.isEmpty(title) || TextUtils.isEmpty(urlPath)){
+            Toast.makeText(context,getString(R.string.video_path_error),Toast.LENGTH_SHORT).show();
+            return;
+        }
+        video = new VideoBean(title,urlPath);
         if(tv_video_title!=null) {
             tv_video_title.setText(video.getVideoTitle());
         }

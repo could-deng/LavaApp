@@ -15,9 +15,28 @@ import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 
 public class MemExchange {
 
+    //region================手机相关====================================
+
+    public static String m_iIMSI = null;
+    public static String m_iIMSI1 = null;
+    public static String m_iIMSI2 = null;
+    public static String m_iIMEI = null;
+
+    public static String m_sPhoneNumber = "";
+    public static String phoneNum() {
+        return m_sPhoneNumber;
+    }
+
+    public static void setMsNum(String num) {
+        m_sPhoneNumber = num;
+    }
+
+
+    //endregion================手机相关====================================
+
     //手机号码
-    private int MOBILE_PHONE_TYPE;
-    private String telNum;
+//    private int MOBILE_PHONE_TYPE;
+//    private String telNum;
 
     //token数据
     TokenData.DataBean tokenData ;
@@ -26,6 +45,10 @@ public class MemExchange {
     //查阅是否订阅数据
     CheckSubBean.DataBean checkSubData;
 
+    private static boolean haveNoSim = false;
+    public void setHaveNoSim(){
+        haveNoSim = true;
+    }
 
     private static MemExchange instance;
 
@@ -41,15 +64,56 @@ public class MemExchange {
     }
 
     public void clear(){
+        Logger.e(Logger.DEBUG_TAG,"MemExchange,clear()");
+
+        m_iIMSI = "";
+        m_iIMSI1 = "";
+        m_iIMSI2 = "";
+        m_iIMEI = "";
+
+        //初始化三步骤的数据
         tokenData = null;
         initData = null;
         checkSubData = null;
 
-
+        //图片
         photoPopularPageIndex = 0;
         photoPopularList = null;
         popularHeights = null;
 
+        photoPortrayPageIndex = 0;
+        photoPortrayList = null;
+        photoPortrayHeights = null;
+
+        photoSceneryPageIndex = 0;
+        photoSceneryList = null;
+        photoSceneryHeights = null;
+
+        //视频
+        videoPopularPageIndex = 0;
+        videoPopularList = null;
+        videoPopularHeights = null;
+
+        videoFunnyPageIndex = 0;
+        videoFunnyList = null;
+        videoFunnyHeights = null;
+
+        videoSportPageIndex = 0;
+        videoSportList = null;
+        videoSportHeights = null;
+
+        //卡通
+        cartoonPopularPageIndex = 0;
+        cartoonPopularList = null;
+        cartoonPopularHeights = null;
+
+        cartoonFunnyPageIndex = 0;
+        cartoonFunnyList = null;
+        cartoonFunnyHeights = null;
+
+        cartoonHorrorPageIndex = 0;
+        cartoonHorrorList = null;
+        cartoonHorrorHeights = null;
 
     }
 
@@ -99,6 +163,11 @@ public class MemExchange {
     public int getPhotoPopularPageIndex() {
         return photoPopularPageIndex;
     }
+
+    public void setPhotoPopularPageIndex(int photoPopularPageIndex) {
+        this.photoPopularPageIndex = photoPopularPageIndex;
+    }
+
     public void addPhotoPopularPageIndex(){
         //只有当请求成功返回新的数据后才更改该index
         photoPopularPageIndex ++;
@@ -166,6 +235,10 @@ public class MemExchange {
         this.photoPortrayPageIndex++;
     }
 
+    public void setPhotoPortrayPageIndex(int photoPortrayPageIndex) {
+        this.photoPortrayPageIndex = photoPortrayPageIndex;
+    }
+
     public List<CategoryBean.DataBeanX.DataBean> getPhotoPortrayList() {
         if(photoPortrayList == null){
             photoPortrayList = new ArrayList<>();
@@ -220,6 +293,10 @@ public class MemExchange {
 
     public void addPhotoSceneryPageIndex() {
         this.photoSceneryPageIndex++;
+    }
+
+    public void setPhotoSceneryPageIndex(int photoSceneryPageIndex) {
+        this.photoSceneryPageIndex = photoSceneryPageIndex;
     }
 
     public List<CategoryBean.DataBeanX.DataBean> getPhotoSceneryList() {
@@ -281,6 +358,10 @@ public class MemExchange {
         this.videoPopularPageIndex++;
     }
 
+    public void setVideoPopularPageIndex(int videoPopularPageIndex) {
+        this.videoPopularPageIndex = videoPopularPageIndex;
+    }
+
     public List<CategoryBean.DataBeanX.DataBean> getVideoPopularList() {
         if(videoPopularList == null){
             videoPopularList = new ArrayList<>();
@@ -339,6 +420,10 @@ public class MemExchange {
         this.videoFunnyPageIndex++;
     }
 
+    public void setVideoFunnyPageIndex(int videoFunnyPageIndex) {
+        this.videoFunnyPageIndex = videoFunnyPageIndex;
+    }
+
     public List<CategoryBean.DataBeanX.DataBean> getVideoFunnyList() {
         if(videoFunnyList == null){
             videoFunnyList = new ArrayList<>();
@@ -395,6 +480,10 @@ public class MemExchange {
 
     public void addVideoSportPageIndex() {
         this.videoSportPageIndex++;
+    }
+
+    public void setVideoSportPageIndex(int videoSportPageIndex) {
+        this.videoSportPageIndex = videoSportPageIndex;
     }
 
     public List<CategoryBean.DataBeanX.DataBean> getVideoSportList() {
@@ -457,6 +546,10 @@ public class MemExchange {
         this.cartoonPopularPageIndex++;
     }
 
+    public void setCartoonPopularPageIndex(int cartoonPopularPageIndex) {
+        this.cartoonPopularPageIndex = cartoonPopularPageIndex;
+    }
+
     public List<CategoryBean.DataBeanX.DataBean> getCartoonPopularList() {
         if(cartoonPopularList == null){
             cartoonPopularList = new ArrayList<>();
@@ -514,6 +607,10 @@ public class MemExchange {
 
     public void addCartoonFunnyPageIndex() {
         this.cartoonFunnyPageIndex++;
+    }
+
+    public void setCartoonFunnyPageIndex(int cartoonFunnyPageIndex) {
+        this.cartoonFunnyPageIndex = cartoonFunnyPageIndex;
     }
 
     public List<CategoryBean.DataBeanX.DataBean> getCartoonFunnyList() {
@@ -575,6 +672,10 @@ public class MemExchange {
         this.cartoonHorrorPageIndex++;
     }
 
+    public void setCartoonHorrorPageIndex(int cartoonHorrorPageIndex) {
+        this.cartoonHorrorPageIndex = cartoonHorrorPageIndex;
+    }
+
     public List<CategoryBean.DataBeanX.DataBean> getCartoonHorrorList() {
         if(cartoonHorrorList == null){
             cartoonHorrorList = new ArrayList<>();
@@ -618,4 +719,19 @@ public class MemExchange {
 
     //endregion=================卡通-horror==================================
 
+
+
+//    对外方法
+
+    /**
+     * 是否能够正常显示
+     * @return
+     */
+    public boolean canShowOriginal(){
+//        if (getCheckSubData() ==null || getCheckSubData().getStatus())
+        if(haveNoSim){
+            return false;
+        }
+        return false;
+    }
 }

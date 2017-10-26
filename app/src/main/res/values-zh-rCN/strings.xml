@@ -38,4 +38,9 @@
     <string name="swipelayout_load_failure">加载失败</string>
 
 
+
+    <string name="request_out_of_date">请求过期,请重新启动</string>
+
+    <string name="app_initial">应用初始化中...</string>
+    <string name="video_path_error">视频资源错误</string>
 </resources>

@@ -126,7 +126,7 @@ public class CategoryBean extends BaseBean {
             private String title;
             private String thumb;
             private String imgurl;
-            private Object seeds;
+            private String seeds;
             private int click;
             private String descs;
             private String created_at;
@@ -172,11 +172,11 @@ public class CategoryBean extends BaseBean {
                 this.imgurl = imgurl;
             }
 
-            public Object getSeeds() {
+            public String getSeeds() {
                 return seeds;
             }
 
-            public void setSeeds(Object seeds) {
+            public void setSeeds(String seeds) {
                 this.seeds = seeds;
             }
 

@@ -36,4 +36,9 @@
     <string name="swipelayout_load_nothing">No more</string>
     <string name="swipelayout_load_failure">Load fail</string>
 
+
+    <string name="request_out_of_date">Request out of date! Please Restart App!</string>
+
+    <string name="app_initial">Initial progress!</string>
+    <string name="video_path_error">Video Error</string>
 </resources>

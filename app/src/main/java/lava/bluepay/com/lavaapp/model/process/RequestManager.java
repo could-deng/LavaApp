@@ -57,22 +57,20 @@ public class RequestManager {
      * @param iRequestType
      */
     public void requestByPost(final String url, final Handler handler, final RequestBody rb,final int iRequestType){
-        if(!ApiUtils.isNetWorkAvailable()){
-            Logger.e(Logger.DEBUG_TAG,"网络不可用");
-            sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
-            return;
-        }
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 String sResult = BaseProcessor.getInstance().postRequestBodyToApi(url,rb);
                 if(TextUtils.isEmpty(sResult)){
-                    Logger.e(Logger.DEBUG_TAG,"post,RequestManager,result null error");
+                    Logger.e(Logger.DEBUG_TAG,"网络不可用");
+                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
                     return;
                 }
                 if(handler!=null){
                     Logger.i(Logger.DEBUG_TAG,""+sResult.toString());
                     sendRequestResultMessage(sResult,handler,iRequestType);
+                }else{
+                    Logger.e(Logger.DEBUG_TAG,"handler miss error");
                 }
             }
         });
@@ -84,11 +82,11 @@ public class RequestManager {
      * @param versionid
      * @return
      */
-    public RequestBody getInitRequestBody(int dev,int versionid){
+    public RequestBody getInitRequestBody(int dev,int versionid,String tokenString){
         FormBody.Builder builder = new FormBody.Builder();
         builder.add("appdev",String.valueOf(dev))
                 .add("versionid",String.valueOf(versionid))
-                .add("token","eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJMYXZhIiwiaWF0IjoxNTA4NDc5OTE3LCJleHAiOjE1MDg0ODcxMTcsImFwcGlkIjoid3NnWWF0RXgifQ.N2VS7ctSGiAROU_EmfhZFkW_ueuc8QSLDMBSJAVX7M0")
+                .add("token",tokenString)
                 .add("Content-Type","application/json; charset=utf-8");
         return builder.build();
     }
@@ -98,10 +96,10 @@ public class RequestManager {
      * @param telNum
      * @return
      */
-    public RequestBody getCheckSubRequestBody(String telNum){
+    public RequestBody getCheckSubRequestBody(String telNum,String tokenString){
         FormBody.Builder builder = new FormBody.Builder();
         builder.add("msisdn",telNum)
-                .add("token", MemExchange.getInstance().getTokenData().getToken())
+                .add("token", tokenString)
                 .add("Content-Type","application/json; charset=utf-8");
         return builder.build();
     }
@@ -127,18 +125,13 @@ public class RequestManager {
     public void request(final String url, final Handler handler,
                         final int iRequestType){
         Logger.e(Logger.DEBUG_TAG,"请求:"+url);
-        if(!ApiUtils.isNetWorkAvailable()){
-            Logger.e(Logger.DEBUG_TAG,"网络不可用");
-            sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
-            return;
-        }
-
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 String sResult = BaseProcessor.getInstance().getDataFromApi(url);
                 if(TextUtils.isEmpty(sResult)){
-                    Logger.e(Logger.DEBUG_TAG,"get,RequestManager,result null error");
+                    Logger.e(Logger.DEBUG_TAG,"网络不可用");
+                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
                     return;
                 }
                 if(handler!=null){
@@ -159,9 +152,14 @@ public class RequestManager {
         }
     }
 
+    /**
+     *
+     * @param result
+     * @return
+     */
     private boolean isHttpResultValid(String result){
         BaseBean bean = JsonHelper.getObject(result, BaseBean.class);
-        if(bean.getCode() == 200){
+        if(bean!=null && bean.getCode() == ApiUtils.reqResSuccess){
             return true;
         }
         return false;
