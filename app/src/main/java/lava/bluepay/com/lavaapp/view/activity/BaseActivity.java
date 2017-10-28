@@ -16,11 +16,14 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
+import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
@@ -136,8 +139,18 @@ public class BaseActivity extends AppCompatActivity {
         switch (bean.getCode()){
             case ApiUtils.reqResErrorAuthFail:
             case ApiUtils.reqResErrorAuthError:
+                //todo re request
+                //todo 次数需要限制
+                MemExchange.getInstance().setIsTokenInvalid(true);
+                RequestBean lastBean = MemExchange.getInstance().getLastestReqBean();
+                if(lastBean != null){
+                    if(lastBean.getRequestType()>ApiUtils.requestAllCategory){
+                        RequestManager.getInstance().request(lastBean.getUrl(),getMyHandler(),lastBean.getRequestType());
+                    }
+                }
+
                 Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
-                finish();
+
                 break;
         }
     }
@@ -147,7 +160,21 @@ public class BaseActivity extends AppCompatActivity {
      * @param msg
      */
     protected void processRequest(Message msg){
-
+        String result = getMessgeResult(msg);
+        switch (msg.arg1) {
+            case ApiUtils.requestToken:
+                TokenData tokenData = JsonHelper.getObject(result, TokenData.class);
+                if (tokenData == null) {
+                    Logger.e(Logger.DEBUG_TAG, "TokenData null error");
+                    return;
+                }
+                MemExchange.getInstance().setTokenData(tokenData.getData());
+                Logger.e(Logger.DEBUG_TAG, "获取token成功");
+                if(MemExchange.getInstance().getIsTokenInvalid()){
+                    MemExchange.getInstance().setIsTokenInvalid(false);
+                }
+                break;
+        }
     }
     protected String getMessgeResult(Message message){
         Bundle bundle = message.getData();

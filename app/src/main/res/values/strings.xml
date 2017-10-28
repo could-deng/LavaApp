@@ -45,4 +45,9 @@
     <string name="sms_send_error">Sms Send Failure! Subscribe Failue!</string>
     <string name="sms_subscribe_success">Subscribe Done!</string>
     <string name="sms_miss_can_not_see">无Sim卡,无法观看</string>
+
+    <string name="initial_error">初始化错误,请重新启动</string>
+
+
+    <string name="try_later">Please Try Later</string>
 </resources>

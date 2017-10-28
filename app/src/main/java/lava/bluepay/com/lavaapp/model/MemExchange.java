@@ -16,8 +16,22 @@ import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 
 public class MemExchange {
 
+    private Boolean isTokenInvalid;//token是否失效
+    public void setIsTokenInvalid(boolean invalid){
+        isTokenInvalid = invalid;
+    }
+    public Boolean getIsTokenInvalid(){
+        return isTokenInvalid;
+    }
 
-    //reio public ArrayList<RequestBean> requestBeanList;
+    private RequestBean requestBean;
+    public void saveLastestReqBean(RequestBean bean){
+        requestBean = bean;
+    }
+    public RequestBean getLastestReqBean(){
+        return requestBean;
+    }
+
     //region================手机相关====================================
 
     public static String m_iIMSI = null;

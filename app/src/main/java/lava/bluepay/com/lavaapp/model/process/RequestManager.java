@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
@@ -57,6 +58,8 @@ public class RequestManager {
      * @param iRequestType
      */
     public void requestByPost(final String url, final Handler handler, final RequestBody rb,final int iRequestType){
+
+        MemExchange.getInstance().saveLastestReqBean(new RequestBean(iRequestType,url));
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -124,6 +127,9 @@ public class RequestManager {
      */
     public void request(final String url, final Handler handler,
                         final int iRequestType){
+
+        MemExchange.getInstance().saveLastestReqBean(new RequestBean(iRequestType,url));
+
         Logger.e(Logger.DEBUG_TAG,"请求:"+url);
         getRequestExecutor().execute(new Runnable() {
             @Override

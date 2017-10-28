@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -30,7 +31,7 @@ import lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView;
  * Created by bluepay on 2017/10/16.
  */
 
-public class PlayVideoActivity extends BaseActivity {
+public class PlayVideoActivity extends AppCompatActivity {
 
 
 
@@ -361,7 +362,7 @@ public class PlayVideoActivity extends BaseActivity {
         String title = bundle.getString("title");
         String urlPath = bundle.getString("urlPath");
         if(TextUtils.isEmpty(title) || TextUtils.isEmpty(urlPath)){
-            Toast.makeText(context,getString(R.string.video_path_error),Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,getString(R.string.video_path_error),Toast.LENGTH_SHORT).show();
             return;
         }
         video = new VideoBean(title,urlPath);

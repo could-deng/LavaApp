@@ -500,6 +500,12 @@ public class MainActivity extends BaseActivity {
      * 请求某一类数据请求
      */
     public void sendCategoryDataListRequest(int nowPage, int cateId, int requestType){
+        if(MemExchange.getInstance().getIsTokenInvalid()){
+            loadError(requestType);
+            Toast.makeText(context,context.getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+            return;
+        }
+        //todo 没有任务堆积才可以进行下一步
         if(MemExchange.getInstance().getTokenData() == null){
             Logger.e(Logger.DEBUG_TAG,"请求无效");
             return;
@@ -521,7 +527,16 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processReqError(Message msg) {
         super.processReqError(msg);
-
+        switch (msg.arg1){
+            case ApiUtils.requestToken:
+            case ApiUtils.requestInit:
+                Toast.makeText(context,context.getString(R.string.initial_error),Toast.LENGTH_SHORT).show();
+                break;
+            case ApiUtils.requestCheckSub:
+                //todo
+                break;
+        }
+        loadError(msg.arg1);
     }
 
     @Override
@@ -530,17 +545,9 @@ public class MainActivity extends BaseActivity {
         String result = getMessgeResult(msg);
         switch (msg.arg1){
             case ApiUtils.requestToken:
-                TokenData tokenData = JsonHelper.getObject(result, TokenData.class);
-                if(tokenData == null){
-                    Logger.e(Logger.DEBUG_TAG,"TokenData null error");
-                    return;
-                }
-                MemExchange.getInstance().setTokenData(tokenData.getData());
-                Logger.e(Logger.DEBUG_TAG,"获取token成功");
                 if(++nowInitState <= MainActivity.NOWInitState3){
                     initApp(nowInitState);
                 }
-
                 break;
             case ApiUtils.requestInit:
                 InitData initData = JsonHelper.getObject(result,InitData.class);
@@ -654,6 +661,69 @@ public class MainActivity extends BaseActivity {
 
     //endregion=======网络请求=================
 
+    private void loadError(int requestType){
+        switch(requestType) {
+            //图片
+            case ApiUtils.requestPhotoPopular:
+                PhotoFragment tempPhotoFragment1 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+                if (tempPhotoFragment1 != null) {
+                    tempPhotoFragment1.stopLoadError();
+                }
+                break;
+            case ApiUtils.requestPhotoPortray:
+                PhotoFragment tempPhotoFragment2 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+                if (tempPhotoFragment2 != null) {
+                    tempPhotoFragment2.portrayListStopLoadError();
+                }
+                break;
+            case ApiUtils.requestPhotoScenery:
+                PhotoFragment tempPhotoFragment3 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+                if (tempPhotoFragment3 != null) {
+                    tempPhotoFragment3.sceneryListStopLoadError();
+                }
+                break;
+
+            //视屏
+            case ApiUtils.requestVideoPopular:
+                VideoFragment tempVideoFragment1 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
+                if (tempVideoFragment1 != null) {
+                    tempVideoFragment1.stopLoadError();
+                }
+                break;
+            case ApiUtils.requestVideoFunny:
+                VideoFragment tempVideoFragment2 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
+                if (tempVideoFragment2 != null) {
+                    tempVideoFragment2.funnyListStopLoadError();
+                }
+                break;
+            case ApiUtils.requestVideoSport:
+                VideoFragment tempVideoFragment3 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
+                if (tempVideoFragment3 != null) {
+                    tempVideoFragment3.sportListStopLoadError();
+                }
+                break;
+
+            //卡通
+            case ApiUtils.requestCartoonPopular:
+                CartoonFragment tempCartoonFragment1 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
+                if (tempCartoonFragment1 != null) {
+                    tempCartoonFragment1.stopLoadError();
+                }
+                break;
+            case ApiUtils.requestCartoonFunny:
+                CartoonFragment tempCartoonFragment2 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
+                if (tempCartoonFragment2 != null) {
+                    tempCartoonFragment2.funnyListStopLoadError();
+                }
+                break;
+            case ApiUtils.requestCartoonHorror:
+                CartoonFragment tempCartoonFragment3 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
+                if (tempCartoonFragment3 != null) {
+                    tempCartoonFragment3.horrorListStopLoadError();
+                }
+                break;
+        }
+    }
 
     //region=======fragment1(更新数据源、界面更新)=================
 

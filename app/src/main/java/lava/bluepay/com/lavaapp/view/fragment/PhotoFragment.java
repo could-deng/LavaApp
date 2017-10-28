@@ -214,8 +214,6 @@ public class PhotoFragment extends BaseFragment {
 
         //region==========类别2===========================================================================
 
-
-
         View portrayView = inflater.inflate(R.layout.fragment_photo_portray,null);
 
         //下拉控件
@@ -297,37 +295,6 @@ public class PhotoFragment extends BaseFragment {
         //region==========类别3===========================================================================
 
         View sceneryView = inflater.inflate(R.layout.fragment_photo_scenery,null);
-
-
-        Button btn = (Button) sceneryView.findViewById(R.id.bt_to_video_activity);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent =new Intent(getActivity(), PlayVideoActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        Button btn_subscript = (Button) sceneryView.findViewById(R.id.btn_subscript);
-        btn_subscript.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                PayHelper.doPay(new IExecutorCallback() {
-//                    @Override
-//                    public void onExecuted(int result, String msg) {
-//
-//                    }
-//                });
-
-//                String telNum = Utils.getIMSI(getActivity());
-//                MemExchange.m_iIMSI1 = telNum;
-//                MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
-
-                //
-                ((MainActivity)getActivity()).getmProgressDialog().show();
-            }
-        });
-
 
         //下拉控件
         swipe_container_photo_scenery = (SwipeLoadLayout) sceneryView.findViewById(R.id.swipe_container_photo_portray);
