@@ -11,6 +11,7 @@ import android.graphics.drawable.Animatable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.List;
 
 import lava.bluepay.com.lavaapp.common.ImageUtils;
 import lava.bluepay.com.lavaapp.common.ThreadManager;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
 import lava.bluepay.com.lavaapp.view.widget.photodraweeview.PhotoDraweeView;
 
@@ -39,7 +41,7 @@ public class DraweePagerAdapter extends PagerAdapter {
         void onSingleTap();
     }
     private OnCustomClickListener clickListener;
-    private List<String> picUrlList;
+    private List<CategoryBean.DataBeanX.DataBean> picUrlList;
     private Context context;
 
 
@@ -51,11 +53,11 @@ public class DraweePagerAdapter extends PagerAdapter {
         this.context = context;
     }
 
-    public void setPicUrlList(List<String> picUrlList){
+    public void setPicUrlList(List<CategoryBean.DataBeanX.DataBean> picUrlList){
         this.picUrlList = picUrlList;
         notifyDataSetChanged();
     }
-    public List<String> getPicUrlList(){
+    public List<CategoryBean.DataBeanX.DataBean> getPicUrlList(){
         return picUrlList;
     }
     @Override
@@ -84,8 +86,12 @@ public class DraweePagerAdapter extends PagerAdapter {
         final PhotoDraweeView photoDraweeView = new PhotoDraweeView(viewGroup.getContext());
         PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
 
+        CategoryBean.DataBeanX.DataBean bean = picUrlList.get(position);
+        if(bean == null || TextUtils.isEmpty(bean.getImgurl())){
+            return null;
+        }
         //订阅用户
-        controller.setUri(Uri.parse(picUrlList.get(position)));
+        controller.setUri(Uri.parse(bean.getImgurl()));
 
         controller.setOldController(photoDraweeView.getController());
         controller.setControllerListener(new BaseControllerListener<ImageInfo>() {

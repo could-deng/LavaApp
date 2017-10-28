@@ -6,11 +6,14 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,12 +45,50 @@ public class PhotoFragment extends BaseFragment {
 
     private ViewPager vp_photo;
 
+    //region=========页面刷新相关==============
+    public int getVPNowIndex(){
+        int nowIndex = -1;
+        if(vp_photo!=null){
+            nowIndex = vp_photo.getCurrentItem();
+        }
+        return nowIndex;
+    }
+    public void notifyIndexAdapter(int index){
+
+        switch (index){
+            case 0:
+                rvPopular.smoothScrollToPosition(0);
+                break;
+            case 1:
+                rv_photo_portray.smoothScrollToPosition(0);
+                break;
+            case 2:
+                rv_photo_scenery.smoothScrollToPosition(0);
+                break;
+        }
+        if(rvPopularAdapter!=null) {
+            rvPopularAdapter.notifyItemRangeChanged(0, (getPopularList().size() < 4) ? getPopularList().size() : 4);
+        }
+        if(rvPortrayAdapter!=null) {
+            rvPortrayAdapter.notifyItemRangeChanged(0, (getPortrayList().size() < 4) ? getPortrayList().size() : 4);
+        }
+        if(rvSceneryAdapter!=null) {
+            rvSceneryAdapter.notifyItemRangeChanged(0, (getSceneryList().size() < 4) ? getSceneryList().size() : 4);
+        }
+    }
+
+    //endregion=========页面刷新相关==============
+
     //region=========类别1==============
 
     private SwipeLoadLayout swipe_container_photo_popular;
     private EmptyRecyclerView rvPopular;
     private RecyclerViewAdapter rvPopularAdapter;
     private SwipeLoadLayout.OnLoadMoreListener rvPopularLoadMoreListener;
+
+//    private int firstVisiblePopularIndex = -1;
+//    private int lastVisiblePopularIndex = -1;
+//    private RecyclerView.OnScrollListener popularScrollListener;
 
     //endregion=========类别1==============
 
@@ -57,6 +98,9 @@ public class PhotoFragment extends BaseFragment {
     private RecyclerViewAdapter rvPortrayAdapter;
     private SwipeLoadLayout.OnLoadMoreListener rvPortrayLoadMoreListener;
 
+//    private int firstVisiblePortrayIndex = -1;
+//    private int lastVisiblePortrayIndex = -1;
+//    private RecyclerView.OnScrollListener portrayScrollListener;
     //endregion=========类别2==============
 
     //region=========类别3==============
@@ -65,6 +109,9 @@ public class PhotoFragment extends BaseFragment {
     private RecyclerViewAdapter rvSceneryAdapter;
     private SwipeLoadLayout.OnLoadMoreListener rvSceneryLoadMoreListener;
 
+//    private int firstVisibleSceneryIndex = -1;
+//    private int lastVisibleSceneryIndex = -1;
+//    private RecyclerView.OnScrollListener sceneryScrollListener;
 
     //endregion=========类别3==============
 
@@ -109,20 +156,47 @@ public class PhotoFragment extends BaseFragment {
         rvPopular.setItemAnimator(new DefaultItemAnimator());//动画
         rvPopular.setEmptyView(inflater.inflate(R.layout.view_empty,null));
 
+//        popularScrollListener = new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if(newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+//                    //因为StaggeredGridLayoutManager的特殊性可能导致最后显示的item存在多个，所以这里取到的是一个数组
+//                    //得到这个数组后再取到数组中position值最大的那个就是最后显示的position值了
+//                    int[] lastPositions = new int[2];
+//                    int[] firstPositions = new int[2];
+//                    ((StaggeredGridLayoutManager) layoutManager).findLastVisibleItemPositions(lastPositions);
+//                    lastVisiblePopularIndex = Utils.findMax(lastPositions);
+//                    ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(firstPositions);
+//                    firstVisiblePopularIndex = Utils.findMin(firstPositions);
+//
+//                }
+//            }
+//        };
+//        rvPopular.addOnScrollListener(popularScrollListener);
+
+
 //        rvPopular.addItemDecoration(new DividerGridItemDecoration(getActivity()));
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
-                    intent.putExtra("categoryId", Config.CategoryPhotoPopular);//大类id
-                    intent.putExtra("index", position);//为大类中的index
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryPhotoPopular);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    //为订阅的则提示是否订阅
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
                 }
             }
 
@@ -160,11 +234,23 @@ public class PhotoFragment extends BaseFragment {
         rvPortrayAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), ViewPagerActivity.class);
-                intent.putExtra("categoryId",Config.CategoryPhotoPortray);//大类id
-                intent.putExtra("index",position);//为大类中的index
-                startActivity(intent);
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryPhotoPortray);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -179,6 +265,26 @@ public class PhotoFragment extends BaseFragment {
         rv_photo_portray.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
         rv_photo_portray.setItemAnimator(new DefaultItemAnimator());//动画
         rv_photo_portray.setEmptyView(inflater.inflate(R.layout.view_empty,null));
+
+//        portrayScrollListener = new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if(newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+//                    //因为StaggeredGridLayoutManager的特殊性可能导致最后显示的item存在多个，所以这里取到的是一个数组
+//                    //得到这个数组后再取到数组中position值最大的那个就是最后显示的position值了
+//                    int[] lastPositions = new int[2];
+//                    int[] firstPositions = new int[2];
+//                    ((StaggeredGridLayoutManager) layoutManager).findLastVisibleItemPositions(lastPositions);
+//                    lastVisiblePortrayIndex = Utils.findMax(lastPositions);
+//                    ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(firstPositions);
+//                    firstVisiblePortrayIndex = Utils.findMin(firstPositions);
+//
+//                }
+//            }
+//        };
+//        rv_photo_portray.addOnScrollListener(portrayScrollListener);
         rv_photo_portray.setAdapter(rvPortrayAdapter);
 
 
@@ -240,11 +346,23 @@ public class PhotoFragment extends BaseFragment {
         rvSceneryAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), ViewPagerActivity.class);
-                intent.putExtra("categoryId",Config.CategoryPhotoScenery);//大类id
-                intent.putExtra("index",position);//为大类中的index
-                startActivity(intent);
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryPhotoScenery);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -259,10 +377,29 @@ public class PhotoFragment extends BaseFragment {
         rv_photo_scenery.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
         rv_photo_scenery.setItemAnimator(new DefaultItemAnimator());//动画
         rv_photo_scenery.setEmptyView(inflater.inflate(R.layout.view_empty,null));
+
+
+//        sceneryScrollListener = new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                super.onScrollStateChanged(recyclerView, newState);
+//                if(newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+//                    //因为StaggeredGridLayoutManager的特殊性可能导致最后显示的item存在多个，所以这里取到的是一个数组
+//                    //得到这个数组后再取到数组中position值最大的那个就是最后显示的position值了
+//                    int[] lastPositions = new int[2];
+//                    int[] firstPositions = new int[2];
+//                    ((StaggeredGridLayoutManager) layoutManager).findLastVisibleItemPositions(lastPositions);
+//                    lastVisibleSceneryIndex = Utils.findMax(lastPositions);
+//                    ((StaggeredGridLayoutManager) layoutManager).findFirstVisibleItemPositions(firstPositions);
+//                    firstVisibleSceneryIndex = Utils.findMin(firstPositions);
+//
+//                }
+//            }
+//        };
+//        rv_photo_scenery.addOnScrollListener(sceneryScrollListener);
+
         rv_photo_scenery.setAdapter(rvSceneryAdapter);
-
-
-
 
 
         views.add(sceneryView);
@@ -288,6 +425,7 @@ public class PhotoFragment extends BaseFragment {
 
             @Override
             public void onPageSelected(int position) {//0,1,2
+                Logger.i(Logger.DEBUG_TAG,"onPageSelected(),pos="+position);
                 //默认选中第一页时不加载数据,第二第三页才加载数据
                 switch(position){
                     case 1:
@@ -308,6 +446,7 @@ public class PhotoFragment extends BaseFragment {
 
             }
         });
+        vp_photo.setCurrentItem(0);
 
         //todo bug
         Activity activity = getActivity();
@@ -333,7 +472,11 @@ public class PhotoFragment extends BaseFragment {
 
     public void refreshPopular(){
         if(getPopularList()!=null && getPopularList().size() > 0){
-            rvPopularAdapter.setmDatas(getPopularList(),getPopularHeight());
+            if(rvPopularAdapter!=null) {
+                rvPopularAdapter.setmDatas(getPopularList(), getPopularHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getPopularList(){
@@ -377,7 +520,11 @@ public class PhotoFragment extends BaseFragment {
 
     public void refreshPortray(){
         if(getPortrayList()!=null && getPortrayList().size() > 0){
-            rvPortrayAdapter.setmDatas(getPortrayList(),getPortrayHeight());
+            if(rvPortrayAdapter!=null) {
+                rvPortrayAdapter.setmDatas(getPortrayList(), getPortrayHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getPortrayList(){
@@ -420,7 +567,11 @@ public class PhotoFragment extends BaseFragment {
 
     public void refreshScenery(){
         if(getSceneryList()!=null && getSceneryList().size() > 0){
-            rvSceneryAdapter.setmDatas(getSceneryList(),getSceneryHeight());
+            if(rvSceneryAdapter!=null) {
+                rvSceneryAdapter.setmDatas(getSceneryList(), getSceneryHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getSceneryList(){
@@ -464,6 +615,7 @@ public class PhotoFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         Logger.e(Logger.DEBUG_TAG,TAG+"onDestroy()");
+//        clearData();
         if(MemExchange.getInstance().getPhotoPopularList().size()> Config.PerPageSize){
             MemExchange.getInstance().setPhotoPopularList(MemExchange.getInstance().getPhotoPopularList().subList(0,10));
             MemExchange.getInstance().setPhotoPopularPageIndex(1);
@@ -478,6 +630,15 @@ public class PhotoFragment extends BaseFragment {
         }
         super.onDestroy();
     }
+
+//    private void clearData(){
+//        firstVisiblePopularIndex = -1;
+//        lastVisiblePopularIndex = -1;
+//        firstVisiblePortrayIndex = -1;
+//        lastVisiblePortrayIndex = -1;
+//        firstVisibleSceneryIndex = -1;
+//        lastVisibleSceneryIndex = -1;
+//    }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {

@@ -2,6 +2,8 @@ package lava.bluepay.com.lavaapp.model.api.bean;
 
 import android.text.TextUtils;
 
+import lava.bluepay.com.lavaapp.model.MemExchange;
+
 /**
  * Created by bluepay on 2017/10/20.
  */
@@ -73,6 +75,9 @@ public class CheckSubBean extends BaseBean {
     }
 
     public static boolean ifHaveSubscribe(DataBean data){
+        if(MemExchange.getInstance().getCanSee()){
+            return true;
+        }
         if(data !=null && !TextUtils.isEmpty(data.getStatus())){
             return (data.getStatus() == "A/T")?true:false;
         }

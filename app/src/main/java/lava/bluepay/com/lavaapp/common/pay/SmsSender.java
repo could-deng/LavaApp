@@ -19,8 +19,8 @@ import lava.bluepay.com.lavaapp.model.MemExchange;
 
 public class SmsSender  {
 
-    private static final String SENT_SMS_ACTION = "SENT_SMS_ACTION";
-    private static String SMS_DELIVERED_ACTION = "SMS_DELIVERED_ACTION";
+    public static final String SENT_SMS_ACTION = "SENT_SMS_ACTION";
+    public static final String SMS_DELIVERED_ACTION = "SMS_DELIVERED_ACTION";
 
 
     //短代V2接口直接走这个方法

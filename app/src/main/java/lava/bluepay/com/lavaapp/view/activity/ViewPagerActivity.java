@@ -8,10 +8,17 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import com.squareup.leakcanary.RefWatcher;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import lava.bluepay.com.lavaapp.Config;
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.view.adapter.DraweePagerAdapter;
 import lava.bluepay.com.lavaapp.view.widget.MultiTouchViewPager;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
@@ -26,7 +33,7 @@ public class ViewPagerActivity extends BaseActivity {
 
     private DraweePagerAdapter pagerAdapter;
 
-    private List<String> picData;
+    private List<CategoryBean.DataBeanX.DataBean> picData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +41,7 @@ public class ViewPagerActivity extends BaseActivity {
         setContentView(R.layout.activity_viewpager);
         initToolbar();
         setToolbar();
+        initData();
 
         dotContainer = (LinearLayout) findViewById(R.id.dot_container);
         viewPager = (MultiTouchViewPager) findViewById(R.id.view_pager);
@@ -78,6 +86,18 @@ public class ViewPagerActivity extends BaseActivity {
 
     }
 
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        outState.put
+//    }
+//
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//
+//    }
+
 
     private ViewPager.OnPageChangeListener getPageChangeListener() {
         if (listener == null) {
@@ -111,31 +131,61 @@ public class ViewPagerActivity extends BaseActivity {
     }
 
 
-//    private List<String> setVPData(Bundle bundle){
-//        if(picData == null){
-//            picData = new ArrayList<>();
-//        }
-//       //todo 如果某一类的条目很多需要只显示一部分
-//       int categoryId = bundle.getInt("categoryId",-1);
-//        switch (categoryId){
-//            case 0:
-//                picData = MemExchange.getInstance().getPhotoPopularList().getData().;
-//                break;
-//        }
-//    }
-
-    private List<String> getVPData(){
+    private void initData(){
+        Bundle bundle = getIntent().getExtras();
+        if(bundle==null){
+            return;
+        }
+        int categoryId = bundle.getInt("categoryId",-1);
+        int index = bundle.getInt("index",-1);
+        if(categoryId == -1 || index == -1){
+            return;
+        }
+        int startIndex = (index -Config.ViewPagerMaxSize/2)<0?0:index-(Config.ViewPagerMaxSize/2);
+        int endIndex = (index+ Config.ViewPagerMaxSize/2)>getCategoryList(categoryId).size()?getCategoryList(categoryId).size():(index+ Config.ViewPagerMaxSize/2);
         if(picData == null){
             picData = new ArrayList<>();
-            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
-            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
-            picData.add("https://timgsa.baidu.com/timg?image&quality=80&size=b10000_10000&sec=1507971152&di=60abb664a9da6550d3a887afc8bfcdfc&src=http://attach.bbs.miui.com/forum/201501/25/203109lxh7tun7gy15l5x2.jpg");
+        }
+        picData = getCategoryList(categoryId).subList(startIndex,endIndex);
+
+    }
+
+    private List<CategoryBean.DataBeanX.DataBean> getCategoryList(int categoryId){
+        if(categoryId == Config.CategoryPhotoPopular){
+            return MemExchange.getInstance().getPhotoPopularList();
+        }else if(categoryId == Config.CategoryPhotoPortray){
+            return MemExchange.getInstance().getPhotoPortrayList();
+        }else if(categoryId == Config.CategoryPhotoScenery){
+            return MemExchange.getInstance().getPhotoSceneryList();
+        }
+        else if(categoryId == Config.CategoryVideoPopular){
+            return MemExchange.getInstance().getVideoPopularList();
+        }else if(categoryId == Config.CategoryVideoFunny){
+            return MemExchange.getInstance().getVideoFunnyList();
+        }else if(categoryId == Config.CategoryVideoSport){
+            return MemExchange.getInstance().getVideoSportList();
+        }
+        else if (categoryId == Config.CategoryCartoonPopular) {
+            return MemExchange.getInstance().getCartoonPopularList();
+        } else if (categoryId == Config.CategoryCartoonFunny) {
+            return MemExchange.getInstance().getCartoonFunnyList();
+        }
+//        else if (categoryId == Config.CategoryCartoonhorror) {
+            return MemExchange.getInstance().getCartoonHorrorList();
+//        }
+    }
+
+    private List<CategoryBean.DataBeanX.DataBean> getVPData(){
+        if(picData == null){
+            picData = new ArrayList<>();
         }
         return picData;
     }
 
     @Override
     protected void onDestroy() {
+        RefWatcher refWatcher = MixApp.getRefWatcher(this);
+        refWatcher.watch(this);
         super.onDestroy();
 
     }

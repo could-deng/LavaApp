@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
@@ -16,14 +15,15 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
+
 
 /**
  * Created by bluepay on 2017/10/9.
@@ -120,6 +120,11 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     /**
      * 请求失败
      * @param msg
@@ -129,7 +134,8 @@ public class BaseActivity extends AppCompatActivity {
         String mResult = msg.getData().getString("resultString");
         BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
         switch (bean.getCode()){
-            case 1001:
+            case ApiUtils.reqResErrorAuthFail:
+            case ApiUtils.reqResErrorAuthError:
                 Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
                 finish();
                 break;

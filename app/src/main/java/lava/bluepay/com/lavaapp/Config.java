@@ -11,7 +11,13 @@ import java.io.File;
 public class Config {
 
     public static final String bufFileEnd = "buf.jpg";
+    public static final int reCheckSubTimeSeparator = 2000;//发送短信成功后的查询订阅时间间隔
+    public static final int maxCheckSubTimes = 4;//查询最大次数
+
     public static final int PerPageSize = 10;//每页的数量
+    public static final int ViewPagerMaxSize = 9;//viewpager最多显示的张数
+
+
     //todo 待删除
     /** 当手机没插卡时的默认手机号   */
     public static final String defaultTelNum = "13418638286";

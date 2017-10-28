@@ -3,6 +3,7 @@ package lava.bluepay.com.lavaapp.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
@@ -15,6 +16,8 @@ import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 
 public class MemExchange {
 
+
+    //reio public ArrayList<RequestBean> requestBeanList;
     //region================手机相关====================================
 
     public static String m_iIMSI = null;
@@ -32,6 +35,13 @@ public class MemExchange {
     }
 
 
+    private boolean canSee = false;//其他运营商可直接观看。发送了短信但是轮循查询失败的也可直接观看
+    public void setCanSee(){
+        canSee = true;
+    }
+    public boolean getCanSee(){
+        return canSee;
+    }
     //endregion================手机相关====================================
 
     //手机号码
@@ -49,6 +59,10 @@ public class MemExchange {
     public void setHaveNoSim(){
         haveNoSim = true;
     }
+    public boolean ifHaveSim(){
+        return !haveNoSim;
+    }
+
 
     private static MemExchange instance;
 

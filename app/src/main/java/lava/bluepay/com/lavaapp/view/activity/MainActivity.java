@@ -1,5 +1,7 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -11,15 +13,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.common.Utils;
+import lava.bluepay.com.lavaapp.common.pay.PayHelper;
+import lava.bluepay.com.lavaapp.common.pay.SmsReceiver;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
@@ -53,6 +58,98 @@ public class MainActivity extends BaseActivity {
     private CartoonFragment cartoonFragment;
     private VideoFragment videoFragment;
 
+    //region==============订阅业务===================
+
+    SmsReceiver mReceiver;
+
+
+    private CheckHandler myHandler;
+    /**轮循查询订阅状态 */
+    public static final int MSG_RECHECK_SUB_SITUATION = 100;
+
+    private int nowCheckTime;
+    private boolean isInCheck = false;
+
+    public void setCheckStop(){
+        nowCheckTime = 0;
+        isInCheck = false;
+    }
+    public CheckHandler getCheckHandler(){
+        if(myHandler == null){
+            myHandler = new CheckHandler(this);
+        }
+        return myHandler;
+    }
+
+    /**
+     * 用来轮循查询订阅状态的Handler
+     */
+    private static class CheckHandler extends WeakHandler{
+
+        public CheckHandler(Activity instance) {
+            super(instance);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            BaseActivity activity = (BaseActivity) getRefercence();
+            if(activity == null){
+                return;
+            }
+            switch (msg.what){
+                case MainActivity.MSG_RECHECK_SUB_SITUATION:
+                    if(!TextUtils.isEmpty(MemExchange.m_iIMSI)){
+                        ((MainActivity) activity).sendCheckSubRequest(MemExchange.m_iIMSI);
+                    }else{
+                        //每秒查询过程中发现Sim卡丢失
+                        ((MainActivity) activity).getCheckHandler().removeCallbacksAndMessages(null);
+                        ((MainActivity) activity).setCheckStop();
+                        MemExchange.getInstance().setCanSee();
+                        //todo 刷新界面
+                        ((MainActivity) activity).SubSuccess();
+                    }
+                    break;
+            }
+
+        }
+    }
+    /**
+     * 短信发送成功后查询订阅结果
+     */
+    public void continueCheckSubSituation(){
+        isInCheck = true;
+        getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION,Config.reCheckSubTimeSeparator);
+
+    }
+    public void showSmsSendError(){
+        Toast.makeText(context, getResources().getString(R.string.sms_send_error), Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * 订阅成功后刷新界面
+     */
+    public void SubSuccess(){
+        Toast.makeText(MainActivity.this,getResources().getString(R.string.sms_subscribe_success),Toast.LENGTH_SHORT).show();
+        int nowPage = -1;
+        if(getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG)!=null){
+            nowPage = getPhotoFragment().getVPNowIndex();
+            if(nowPage != -1){
+                getPhotoFragment().notifyIndexAdapter(nowPage);
+            }
+        }else if(getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG)!=null){
+            nowPage = getVideoFragment().getVPNowIndex();
+            if(nowPage != -1){
+                getVideoFragment().notifyIndexAdapter(nowPage);
+            }
+        }else if(getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG)!=null){
+            nowPage = getCartoonFragment().getVPNowIndex();
+            if(nowPage != -1){
+                getCartoonFragment().notifyIndexAdapter(nowPage);
+            }
+        }
+    }
+    //endregion==============订阅业务===================
+
 
     //region==============初始化业务===================
 
@@ -65,7 +162,7 @@ public class MainActivity extends BaseActivity {
     private static final int NOWInitState3 = 3;
 
     private int nowInitState = 0;//当前阶段（//todo activity回收的情况）
-
+    private boolean isInInitState = false;
     public ProgressDialog getmProgressDialog(){
         return mProgressDialog;
     }
@@ -109,6 +206,7 @@ public class MainActivity extends BaseActivity {
                 if(mProgressDialog!=null && mProgressDialog.isShowing()){
                     mProgressDialog.dismiss();
                 }
+                isInInitState =false;
                 //请求第一页数据
                 sendCategoryDataListRequest(1,Config.CategoryPhotoPopular,ApiUtils.requestPhotoPopular);
                 break;
@@ -130,6 +228,7 @@ public class MainActivity extends BaseActivity {
 
         initToolbar();
         initViews();
+        isInInitState = true;
         initApp(MainActivity.NOWInitState0);
 
 //        switchToFragment(FRAGMENT_PHOTO);
@@ -206,6 +305,7 @@ public class MainActivity extends BaseActivity {
         rg_select_fragment.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                getSupportFragmentManager().popBackStackImmediate();//弹出栈中全部对象
                 if(checkedId == R.id.tv_fragment_photo){
                     switchToFragment(FRAGMENT_PHOTO);
                 }else if(checkedId == R.id.tv_fragment_video){
@@ -455,8 +555,32 @@ public class MainActivity extends BaseActivity {
                 CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
                 MemExchange.getInstance().setCheckSubData(subBean.getData());
                 Logger.e(Logger.DEBUG_TAG,"查询订阅状态成功");
-                if(++ nowInitState <= MainActivity.NOWInitState3){
-                    initApp(nowInitState);
+
+                if(isInInitState) {
+                    if (++nowInitState <= MainActivity.NOWInitState3) {
+                        initApp(nowInitState);
+                    }
+                }
+                if(isInCheck){
+                    if(!CheckSubBean.ifHaveSubscribe(subBean.getData())){
+                        if(nowCheckTime<Config.maxCheckSubTimes){
+                            nowCheckTime++;
+                            getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION,Config.reCheckSubTimeSeparator);
+                        }else{
+                            isInCheck = false;
+                            nowCheckTime = 0;
+                            getCheckHandler().removeCallbacksAndMessages(null);
+                            MemExchange.getInstance().setCanSee();
+                            //todo 刷新界面
+                            SubSuccess();
+                        }
+                    }else{
+                        isInCheck = false;
+                        nowCheckTime = 0;
+                        getCheckHandler().removeCallbacksAndMessages(null);
+                        //todo 刷新界面
+                        SubSuccess();
+                    }
                 }
                 break;
             case ApiUtils.requestAllCategory:
@@ -469,44 +593,58 @@ public class MainActivity extends BaseActivity {
 
             //图片
             case ApiUtils.requestPhotoPopular:
+                PhotoFragment tempPhotoFragment1 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+
                 CategoryBean beanList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshPhotoPopularList(beanList);
+                refreshPhotoPopularList(beanList,tempPhotoFragment1!=null);
                 break;
             case ApiUtils.requestPhotoPortray:
+                PhotoFragment tempPhotoFragment2 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+
                 CategoryBean photoPortrayList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshPhotoPortray(photoPortrayList);
+                refreshPhotoPortray(photoPortrayList,tempPhotoFragment2!=null);
                 break;
             case ApiUtils.requestPhotoScenery:
+                PhotoFragment tempPhotoFragment3 = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+
                 CategoryBean photoSceneryList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshPhotoScenery(photoSceneryList);
+                refreshPhotoScenery(photoSceneryList,tempPhotoFragment3!=null);
                 break;
 
             //视屏
             case ApiUtils.requestVideoPopular:
+                VideoFragment tempVideoFragment1 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
+
                 CategoryBean videoPopularList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshVideoPopular(videoPopularList);
+                refreshVideoPopular(videoPopularList,tempVideoFragment1!=null);
                 break;
             case ApiUtils.requestVideoFunny:
+                VideoFragment tempVideoFragment2 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
+
                 CategoryBean videoFunnyList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshVideoFunny(videoFunnyList);
+                refreshVideoFunny(videoFunnyList,tempVideoFragment2!=null);
                 break;
             case ApiUtils.requestVideoSport:
+                VideoFragment tempVideoFragment3 = (VideoFragment) getSupportFragmentManager().findFragmentByTag(VideoFragment.TAG);
                 CategoryBean videoSportList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshVideoSport(videoSportList);
+                refreshVideoSport(videoSportList,tempVideoFragment3!=null);
                 break;
 
             //卡通
             case ApiUtils.requestCartoonPopular:
+                CartoonFragment tempCartoonFragment1 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
                 CategoryBean cartoonPopularList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshCartoonPopular(cartoonPopularList);
+                refreshCartoonPopular(cartoonPopularList,tempCartoonFragment1!=null);
                 break;
             case ApiUtils.requestCartoonFunny:
+                CartoonFragment tempCartoonFragment2 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
                 CategoryBean cartoonFunnyList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshCartoonFunny(cartoonFunnyList);
+                refreshCartoonFunny(cartoonFunnyList,tempCartoonFragment2!=null);
                 break;
             case ApiUtils.requestCartoonHorror:
+                CartoonFragment tempCartoonFragment3 = (CartoonFragment) getSupportFragmentManager().findFragmentByTag(CartoonFragment.TAG);
                 CategoryBean cartoonHorrorList = JsonHelper.getObject(result,CategoryBean.class);
-                refreshCartoonHorror(cartoonHorrorList);
+                refreshCartoonHorror(cartoonHorrorList,tempCartoonFragment3!=null);
                 break;
         }
     }
@@ -517,29 +655,36 @@ public class MainActivity extends BaseActivity {
     //endregion=======网络请求=================
 
 
-    //region=======fragment1相关=================
+    //region=======fragment1(更新数据源、界面更新)=================
 
     /**
      * 刷新流行类图片数据
      * @param beanList
+     * @param ifShow 当前界面是否显示
      */
-    private void refreshPhotoPopularList(CategoryBean beanList){
+    private void refreshPhotoPopularList(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getPhotoFragment().stopLoadNothing();
-                return;
-            }else{
-                getPhotoFragment().stopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getPhotoFragment().stopLoadNothing();
+                    return;
+                } else {
+                    getPhotoFragment().stopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getPhotoPopularPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setPhotoPopularList(beanList.getData().getData());
-                getPhotoFragment().refreshPopular();
+                if(ifShow) {
+                    getPhotoFragment().refreshPopular();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getPhotoPopularList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setPopularHeights(false,beanList.getData().getData().size());
-                getPhotoFragment().refreshPopular();
+                if(ifShow) {
+                    getPhotoFragment().refreshPopular();
+                }
             }
             MemExchange.getInstance().addPhotoPopularPageIndex();
         }else{
@@ -547,23 +692,29 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void refreshPhotoPortray(CategoryBean beanList){
+    private void refreshPhotoPortray(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getPhotoFragment().portrayListStopLoadNothing();
-                return;
-            }else{
-                getPhotoFragment().portrayListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getPhotoFragment().portrayListStopLoadNothing();
+                    return;
+                } else {
+                    getPhotoFragment().portrayListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getPhotoPortrayPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setPhotoPortrayList(beanList.getData().getData());
-                getPhotoFragment().refreshPortray();
+                if(ifShow) {
+                    getPhotoFragment().refreshPortray();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getPhotoPortrayList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setPopularPortrayHeights(false,beanList.getData().getData().size());
-                getPhotoFragment().refreshPortray();
+                if(ifShow) {
+                    getPhotoFragment().refreshPortray();
+                }
             }
             MemExchange.getInstance().addPhotoPortrayPageIndex();
         }else{
@@ -571,23 +722,29 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void refreshPhotoScenery(CategoryBean beanList){
+    private void refreshPhotoScenery(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getPhotoFragment().sceneryListStopLoadNothing();
-                return;
-            }else{
-                getPhotoFragment().sceneryListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getPhotoFragment().sceneryListStopLoadNothing();
+                    return;
+                } else {
+                    getPhotoFragment().sceneryListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getPhotoSceneryPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setPhotoSceneryList(beanList.getData().getData());
-                getPhotoFragment().refreshScenery();
+                if(ifShow) {
+                    getPhotoFragment().refreshScenery();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getPhotoSceneryList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setPopularSceneryHeights(false,beanList.getData().getData().size());
-                getPhotoFragment().refreshScenery();
+                if(ifShow) {
+                    getPhotoFragment().refreshScenery();
+                }
             }
             MemExchange.getInstance().addPhotoSceneryPageIndex();
         }else{
@@ -597,28 +754,34 @@ public class MainActivity extends BaseActivity {
 
 
 
-    //endregion=======fragment1相关=================
+    //endregion=======fragment1(更新数据源、界面更新)=================
 
 
-    //region=======fragment2相关=================
+    //region=======fragment2(更新数据源、界面更新)=================
 
-    private void refreshVideoPopular(CategoryBean beanList){
+    private void refreshVideoPopular(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getVideoFragment().stopLoadNothing();
-                return;
-            }else{
-                getVideoFragment().stopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getVideoFragment().stopLoadNothing();
+                    return;
+                } else {
+                    getVideoFragment().stopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getVideoPopularPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setVideoPopularList(beanList.getData().getData());
-                getVideoFragment().refreshPopular();
+                if(ifShow) {
+                    getVideoFragment().refreshPopular();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getVideoPopularList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setVideoPopularHeights(false,beanList.getData().getData().size());
-                getVideoFragment().refreshPopular();
+                if(ifShow) {
+                    getVideoFragment().refreshPopular();
+                }
             }
             MemExchange.getInstance().addVideoPopularPageIndex();
         }else{
@@ -629,23 +792,29 @@ public class MainActivity extends BaseActivity {
 
 
 
-    private void refreshVideoFunny(CategoryBean beanList){
+    private void refreshVideoFunny(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getVideoFragment().funnyListStopLoadNothing();
-                return;
-            }else{
-                getVideoFragment().funnyListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getVideoFragment().funnyListStopLoadNothing();
+                    return;
+                } else {
+                    getVideoFragment().funnyListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getVideoFunnyPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setVideoFunnyList(beanList.getData().getData());
-                getVideoFragment().refreshFunny();
+                if(ifShow) {
+                    getVideoFragment().refreshFunny();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getVideoFunnyList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setVideoFunnyHeights(false,beanList.getData().getData().size());
-                getVideoFragment().refreshFunny();
+                if(ifShow) {
+                    getVideoFragment().refreshFunny();
+                }
             }
             MemExchange.getInstance().addVideoFunnyPageIndex();
         }else{
@@ -653,23 +822,29 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void refreshVideoSport(CategoryBean beanList){
+    private void refreshVideoSport(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getVideoFragment().sportListStopLoadNothing();
-                return;
-            }else{
-                getVideoFragment().sportListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getVideoFragment().sportListStopLoadNothing();
+                    return;
+                } else {
+                    getVideoFragment().sportListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getVideoSportPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setVideoSportList(beanList.getData().getData());
-                getVideoFragment().refreshSport();
+                if(ifShow) {
+                    getVideoFragment().refreshSport();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getVideoSportList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setVideoSportHeights(false,beanList.getData().getData().size());
-                getVideoFragment().refreshSport();
+                if(ifShow) {
+                    getVideoFragment().refreshSport();
+                }
             }
             MemExchange.getInstance().addVideoSportPageIndex();
         }else{
@@ -677,28 +852,39 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    //endregion=======fragment2相关=================
+    //endregion=======fragment2相关(更新数据源、界面更新)=================
 
 
-    //region=======fragment3相关=================
+    //region=======fragment3(更新数据源、界面更新)=================
 
-    private void refreshCartoonPopular(CategoryBean beanList){
+    /**
+     * 更新数据源、界面更新
+     * @param beanList
+     * @param ifShow 界面是否更新
+     */
+    private void refreshCartoonPopular(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getCartoonFragment().stopLoadNothing();
-                return;
-            }else{
-                getCartoonFragment().stopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getCartoonFragment().stopLoadNothing();
+                    return;
+                } else {
+                    getCartoonFragment().stopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getCartoonPopularPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setCartoonPopularList(beanList.getData().getData());
-                getCartoonFragment().refreshPopular();
+                if(ifShow) {
+                    getCartoonFragment().refreshPopular();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getCartoonPopularList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setCartoonPopularHeights(false,beanList.getData().getData().size());
-                getCartoonFragment().refreshPopular();
+                if(ifShow) {
+                    getCartoonFragment().refreshPopular();
+                }
             }
             MemExchange.getInstance().addCartoonPopularPageIndex();
         }else{
@@ -709,23 +895,29 @@ public class MainActivity extends BaseActivity {
 
 
 
-    private void refreshCartoonFunny(CategoryBean beanList){
+    private void refreshCartoonFunny(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getCartoonFragment().funnyListStopLoadNothing();
-                return;
-            }else{
-                getCartoonFragment().funnyListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getCartoonFragment().funnyListStopLoadNothing();
+                    return;
+                } else {
+                    getCartoonFragment().funnyListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getCartoonFunnyPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setCartoonFunnyList(beanList.getData().getData());
-                getCartoonFragment().refreshFunny();
+                if(ifShow) {
+                    getCartoonFragment().refreshFunny();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getVideoFunnyList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setVideoFunnyHeights(false,beanList.getData().getData().size());
-                getCartoonFragment().refreshFunny();
+                if(ifShow) {
+                    getCartoonFragment().refreshFunny();
+                }
             }
             MemExchange.getInstance().addCartoonFunnyPageIndex();
         }else{
@@ -733,23 +925,29 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void refreshCartoonHorror(CategoryBean beanList){
+    private void refreshCartoonHorror(CategoryBean beanList,boolean ifShow){
         if(beanList!=null && beanList.getData()!=null) {
             //无数据
-            if(beanList.getData().getData() == null ||beanList.getData().getData().size() <= 0){
-                getCartoonFragment().horrorListStopLoadNothing();
-                return;
-            }else{
-                getCartoonFragment().horrorListStopLoading();
+            if(ifShow) {
+                if (beanList.getData().getData() == null || beanList.getData().getData().size() <= 0) {
+                    getCartoonFragment().horrorListStopLoadNothing();
+                    return;
+                } else {
+                    getCartoonFragment().horrorListStopLoading();
+                }
             }
             //有数据
             if (MemExchange.getInstance().getCartoonHorrorPageIndex() == 0) {//请求第一页的数据
                 MemExchange.getInstance().setCartoonHorrorList(beanList.getData().getData());
-                getCartoonFragment().refreshHorror();
+                if(ifShow) {
+                    getCartoonFragment().refreshHorror();
+                }
             }else{//请求其他页的数据
                 MemExchange.getInstance().getCartoonHorrorList().addAll(beanList.getData().getData());
                 MemExchange.getInstance().setCartoonHorrorHeights(false,beanList.getData().getData().size());
-                getCartoonFragment().refreshHorror();
+                if(ifShow) {
+                    getCartoonFragment().refreshHorror();
+                }
             }
             MemExchange.getInstance().addCartoonHorrorPageIndex();
         }else{
@@ -757,18 +955,9 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    //endregion=======fragment3相关=================
+    //endregion=======fragment3相关(更新数据源、界面更新)=================
 
 
-
-
-
-
-
-//    private boolean ifFragmentCanBeSeen(Fragment fragment){
-//        if(fragment.is)
-//            re
-//    }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -809,9 +998,48 @@ public class MainActivity extends BaseActivity {
         builder.create().show();
     }
 
+    /**
+     * 订阅dialog
+     */
+    public void showSubscripDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Are you sure to subscribe?");
+        builder.setTitle("tips");
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                if (Utils.checkPermission(context, Manifest.permission.READ_SMS)){
+                    try {
+                        mReceiver = new SmsReceiver(context);
+                        mReceiver.register();
+                        PayHelper.doPay();
+                    }catch (Exception e){
+                        if(mReceiver!=null){
+                            mReceiver.unregister();
+                        }
+                        e.printStackTrace();
+                    }
+
+                }else{
+                    Toast.makeText(context,"没有短信权限",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        getCheckHandler().removeCallbacksAndMessages(null);
+        getMyHandler().removeCallbacksAndMessages(null);//推出时清空全部消息
     }
 
     @Override
@@ -819,9 +1047,6 @@ public class MainActivity extends BaseActivity {
         super.finish();
         MemExchange.getInstance().clear();
     }
-
-
-    //todo 初始化脚本
 
 
 }

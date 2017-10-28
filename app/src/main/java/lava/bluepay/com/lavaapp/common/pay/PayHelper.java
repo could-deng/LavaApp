@@ -1,5 +1,7 @@
 package lava.bluepay.com.lavaapp.common.pay;
 
+import android.content.Context;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 
 import lava.bluepay.com.lavaapp.MixApp;
@@ -11,18 +13,19 @@ import lava.bluepay.com.lavaapp.common.Logger;
 
 public class PayHelper {
 
-    public static void doPay(IExecutorCallback callback){
+
+    public static void doPay(){
         //todo 暂时还没写
-        SmsSendBean bb = new SmsSendBean(MixApp.getContext(),"123","345");
-        AsyncTask<?,?,?> task = PayTask.createAndStart(bb,callback);
+        SmsSendBean bb = new SmsSendBean(MixApp.getContext(),"111111111","内容");
+        AsyncTask<?,?,?> task = PayTask.createAndStart(bb);
     }
 
     private static class PayTask extends AsyncTask<Object,String,String>{
 
-        protected static AsyncTask<?,?,?> createAndStart(SmsSendBean bean,IExecutorCallback callback){
+        protected static AsyncTask<?,?,?> createAndStart(SmsSendBean bean){
             PayTask task = new PayTask();
             try {
-                task.execute(bean,callback);
+                task.execute(bean);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -34,13 +37,8 @@ public class PayHelper {
         protected String doInBackground(Object... params) {
             try {
                 SmsSendBean bean = (SmsSendBean) params[0];
-                IExecutorCallback p1 = (IExecutorCallback)(params[1]);
                 boolean isSendOK = SmsSender.finalsendSms(bean.getContext(), bean.getToNum(), bean.getContent());
                 Logger.i(Logger.DEBUG_TAG, "isSendOk:" + isSendOK);
-                if (p1 != null) {
-                    p1.onExecuted(isSendOK?1:0, "");
-
-                }
             }catch (Exception e){
                 e.printStackTrace();
             }

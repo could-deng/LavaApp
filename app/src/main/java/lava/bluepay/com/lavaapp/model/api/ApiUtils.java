@@ -39,7 +39,7 @@ public class ApiUtils {
     public static final int reqResError = 400;
     public static final int reqResErrorException = 500;
     public static final int reqResErrorAuthFail = 1001;
-    public static final int reqResErrorAuth = 1002;
+    public static final int reqResErrorAuthError = 1002;
     public static final int reqResErrorInBlack = 1005;
     public static final int reqResErrorHaveSub = 1006;
     public static final int reqResErrorHaveNotSub = 1007;

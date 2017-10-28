@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,10 @@ import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
 import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
+import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
 import lava.bluepay.com.lavaapp.view.adapter.ViewPagerAdapter;
 import lava.bluepay.com.lavaapp.view.widget.EmptyRecyclerView;
@@ -37,6 +40,41 @@ public class CartoonFragment extends BaseFragment {
     public static final String TAG = "cartoonFragment";
 
     private ViewPager vp_cartoon;
+
+    //region=========页面刷新相关==============
+
+    public int getVPNowIndex(){
+        int nowIndex = -1;
+        if(vp_cartoon!=null){
+            nowIndex = vp_cartoon.getCurrentItem();
+        }
+        return nowIndex;
+    }
+    public void notifyIndexAdapter(int index){
+
+        switch (index){
+            case 0:
+                rv_cartoon_popular.smoothScrollToPosition(0);
+                break;
+            case 1:
+                rv_cartoon_funny.smoothScrollToPosition(0);
+                break;
+            case 2:
+                rv_cartoon_horror.smoothScrollToPosition(0);
+                break;
+        }
+        if(rvPopularAdapter!=null) {
+            rvPopularAdapter.notifyItemRangeChanged(0, (getPopularList().size() < 4) ? getPopularList().size() : 4);
+        }
+        if(rvFunnyAdapter!=null) {
+            rvFunnyAdapter.notifyItemRangeChanged(0, (getFunnyList().size() < 4) ? getFunnyList().size() : 4);
+        }
+        if(rvHorrorAdapter!=null) {
+            rvHorrorAdapter.notifyItemRangeChanged(0, (getHorrorList().size() < 4) ? getHorrorList().size() : 4);
+        }
+    }
+
+    //endregion=========页面刷新相关==============
 
     //region=========类别1==============
 
@@ -101,7 +139,23 @@ public class CartoonFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryCartoonPopular);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -145,7 +199,23 @@ public class CartoonFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryCartoonFunny);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -187,7 +257,23 @@ public class CartoonFragment extends BaseFragment {
         rvHorrorAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                    Intent intent = new Intent();
+                    intent.setClass(getContext(), ViewPagerActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("categoryId", Config.CategoryCartoonhorror);//大类id
+                    bundle.putInt("index", position);//为大类中的index
+                    intent.putExtras(bundle);
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -220,6 +306,40 @@ public class CartoonFragment extends BaseFragment {
         vp_cartoon.setOffscreenPageLimit(views.size()-1);
         vp_cartoon.setAdapter(adapter);
 
+        ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch(position){
+                    case 0:
+                        if(MemExchange.getInstance().getCartoonPopularList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryCartoonPopular, ApiUtils.requestCartoonPopular);
+                        }
+                        break;
+                    case 1:
+                        if(MemExchange.getInstance().getCartoonFunnyList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryCartoonFunny, ApiUtils.requestCartoonFunny);
+                        }
+                        break;
+                    case 2:
+                        if(MemExchange.getInstance().getCartoonHorrorList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryCartoonhorror, ApiUtils.requestCartoonHorror);
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        };
+        vp_cartoon.addOnPageChangeListener(onPageChangeListener);
+        onPageChangeListener.onPageSelected(0);
+
+
         Activity activity = getActivity();
         String[] titles;
         if(getActivity()!=null){
@@ -238,7 +358,11 @@ public class CartoonFragment extends BaseFragment {
 
     public void refreshPopular(){
         if(getPopularList()!=null && getPopularList().size() > 0){
-            rvPopularAdapter.setmDatas(getPopularList(),getPopularHeight());
+            if(rvPopularAdapter!=null) {
+                rvPopularAdapter.setmDatas(getPopularList(), getPopularHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getPopularList(){
@@ -283,7 +407,11 @@ public class CartoonFragment extends BaseFragment {
 
     public void refreshFunny(){
         if(getFunnyList()!=null && getFunnyList().size() > 0){
-            rvFunnyAdapter.setmDatas(getFunnyList(),getFunnyHeight());
+            if(rvFunnyAdapter!=null) {
+                rvFunnyAdapter.setmDatas(getFunnyList(), getFunnyHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getFunnyList(){
@@ -327,7 +455,11 @@ public class CartoonFragment extends BaseFragment {
 
     public void refreshHorror(){
         if(getHorrorList()!=null && getHorrorList().size() > 0){
-            rvHorrorAdapter.setmDatas(getHorrorList(),getHorrorHeight());
+            if(rvHorrorAdapter!=null) {
+                rvHorrorAdapter.setmDatas(getHorrorList(), getHorrorHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getHorrorList(){

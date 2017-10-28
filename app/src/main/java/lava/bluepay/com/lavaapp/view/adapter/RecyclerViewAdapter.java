@@ -134,7 +134,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public void onClick(View v) {
-        Logger.e(Logger.DEBUG_TAG, "!!!!!!!" + v.toString());
         if (getItemClickListener() != null) {
             if (v.getTag() != null) {
                 getItemClickListener().onItemClick(v, (int) v.getTag());
@@ -157,8 +156,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (data == null || TextUtils.isEmpty(data.getThumb())) {
             return;
         }
-        //todo 测试
-//        data.setThumb("http://photocdn.sohu.com/20121119/Img358016160.jpg");
 
         //todo 图片的url一定要统一
         if (data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
@@ -294,10 +291,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public int getItemCount() {
         if (mDatas == null || mDatas.size() == 0) {
-//            return getmFooterViews().size();
             return 0;
         }
-        return mDatas.size() ;//+ getmFooterViews().size();
+        return mDatas.size() ;
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

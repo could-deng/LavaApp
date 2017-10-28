@@ -1,27 +1,18 @@
 package lava.bluepay.com.lavaapp.view.widget;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
-
 import java.lang.ref.WeakReference;
-import java.util.logging.Logger;
-
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.common.Logger;
 
 /**
  * viewPager的指示器
@@ -283,7 +274,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     @Override
     public void onPageSelected(int position) {
         mCurrentPosition = position;
-        Log.i("TT","onPageSelected(),pos="+position);
+        Logger.i(Logger.DEBUG_TAG,"NewVPIndicator,onPageSelected(),pos="+position);
     }
 
     @Override

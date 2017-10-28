@@ -1,7 +1,9 @@
 package lava.bluepay.com.lavaapp.common;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -30,6 +32,32 @@ public class Utils {
     // 是否双卡双待手机
     public static boolean CheckSignalSim() {
         return Config.MOBILE_PHONE_TYPE == Config.MOBILE_PHONE_CARD;
+    }
+
+
+
+    @SuppressLint("NewApi")
+    public static boolean checkPermission(Context context, String permission) {
+        int granted = -2;
+        try {
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                granted = context.checkSelfPermission(permission);
+            } else {
+                // granted = context.checkCallingPermission(permission);
+                PackageManager pm = context.getPackageManager();
+                granted = pm.checkPermission(permission, context.getPackageName());
+
+            }
+            if (granted == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -395,6 +423,25 @@ public class Utils {
         }
         // Log.i("BluePay","---单卡手机-----");
         return imsi;
+    }
+
+    public static int findMax(int[] array) {
+        int max = array[0];
+        for (int value : array) {
+            if (value > max) {
+                max = value;
+            }
+        }
+        return max;
+    }
+    public static int findMin(int[] array){
+        int min = array[0];
+        for(int value:array){
+            if(value<min){
+                min = value;
+            }
+        }
+        return min;
     }
 
 }

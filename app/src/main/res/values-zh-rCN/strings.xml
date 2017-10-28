@@ -14,14 +14,14 @@
     <string name="photo_portray">画像</string>
 
     <!--视屏-->
-    <string name="video_popular">Popular</string>
-    <string name="video_funny">Funny</string>
-    <string name="video_sports">Sports</string>
+    <string name="video_popular">流行</string>
+    <string name="video_funny">趣味</string>
+    <string name="video_sports">运动</string>
 
     <!--卡通-->
-    <string name="cartoon_popular">Popular</string>
-    <string name="cartoon_funny">Funny</string>
-    <string name="cartton_horror">Horror</string>
+    <string name="cartoon_popular">流行</string>
+    <string name="cartoon_funny">趣味</string>
+    <string name="cartoon_horror">恐怖</string>
 
 
     <string name="lastpage">上一页</string>
@@ -43,4 +43,8 @@
 
     <string name="app_initial">应用初始化中...</string>
     <string name="video_path_error">视频资源错误</string>
+
+    <string name="sms_send_error">短信发送失败,订阅失败!</string>
+    <string name="sms_subscribe_success">订阅成功!</string>
+    <string name="sms_miss_can_not_see">无Sim卡,无法观看</string>
 </resources>

@@ -7,10 +7,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,7 @@ import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
+import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
 import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
@@ -37,6 +40,40 @@ public class VideoFragment extends BaseFragment {
     public static final String TAG = "videoFragment";
 
     private ViewPager vp_video;
+
+    //region=========页面刷新相关==============
+    public int getVPNowIndex(){
+        int nowIndex = -1;
+        if(vp_video!=null){
+            nowIndex = vp_video.getCurrentItem();
+        }
+        return nowIndex;
+    }
+    public void notifyIndexAdapter(int index){
+
+        switch (index){
+            case 0:
+                rv_video_popular.smoothScrollToPosition(0);
+                break;
+            case 1:
+                rv_video_funny.smoothScrollToPosition(0);
+                break;
+            case 2:
+                rv_video_sport.smoothScrollToPosition(0);
+                break;
+        }
+        if(rvPopularAdapter!=null) {
+            rvPopularAdapter.notifyItemRangeChanged(0, (getPopularList().size() < 4) ? getPopularList().size() : 4);
+        }
+        if(rvFunnyAdapter!=null) {
+            rvFunnyAdapter.notifyItemRangeChanged(0, (getFunnyList().size() < 4) ? getFunnyList().size() : 4);
+        }
+        if(rvSportAdapter!=null) {
+            rvSportAdapter.notifyItemRangeChanged(0, (getSportList().size() < 4) ? getSportList().size() : 4);
+        }
+    }
+
+    //endregion=========页面刷新相关==============
 
 
     //region=========类别1==============
@@ -105,21 +142,29 @@ public class VideoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(rvPopularAdapter.getmDatas()!=null){
-                    CategoryBean.DataBeanX.DataBean bean = rvPopularAdapter.getmDatas().get(position);
-                    if(bean == null){
-                        return;
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                    if (rvPopularAdapter.getmDatas() != null) {
+                        CategoryBean.DataBeanX.DataBean bean = rvPopularAdapter.getmDatas().get(position);
+                        if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
+                            return;
+                        }
+                        Intent intent = new Intent();
+                        Bundle data = new Bundle();
+                        data.putString("title", bean.getTitle());
+                        data.putString("urlPath", bean.getSeeds());
+                        intent.putExtras(data);
+                        intent.setClass(getContext(), PlayVideoActivity.class);
+
+                        startActivity(intent);
                     }
-                    Intent intent = new Intent();
-
-
-                    Bundle data = new Bundle();
-                    data.putString("title",bean.getTitle());
-                    data.putString("urlPath", bean.getSeeds());
-                    intent.putExtras(data);
-                    intent.setClass(getContext(), PlayVideoActivity.class);
-
-                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
                 }
             }
 
@@ -164,10 +209,28 @@ public class VideoFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), PlayVideoActivity.class);
-                //todo 设置视屏源
-                startActivity(intent);
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                    CategoryBean.DataBeanX.DataBean bean = rvFunnyAdapter.getmDatas().get(position);
+                    if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
+                        return;
+                    }
+                    Intent intent = new Intent();
+                    Bundle data = new Bundle();
+                    data.putString("title", bean.getTitle());
+                    data.putString("urlPath", bean.getSeeds());
+                    intent.putExtras(data);
+                    intent.setClass(getContext(), PlayVideoActivity.class);
+
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -209,10 +272,28 @@ public class VideoFragment extends BaseFragment {
         rvSportAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                Intent intent = new Intent();
-                intent.setClass(getContext(), PlayVideoActivity.class);
-                //todo 设置视屏源
-                startActivity(intent);
+                if(MemExchange.getInstance().ifHaveSim()){
+                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                //订阅了的则进入
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                    CategoryBean.DataBeanX.DataBean bean = rvSportAdapter.getmDatas().get(position);
+                    if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
+                        return;
+                    }
+                    Intent intent = new Intent();
+                    Bundle data = new Bundle();
+                    data.putString("title", bean.getTitle());
+                    data.putString("urlPath", bean.getSeeds());
+                    intent.putExtras(data);
+                    intent.setClass(getContext(), PlayVideoActivity.class);
+
+                    startActivity(intent);
+                }else{
+                    //未订阅的则提示是否订阅
+                    ((MainActivity)getActivity()).showSubscripDialog();
+                }
             }
 
             @Override
@@ -235,7 +316,7 @@ public class VideoFragment extends BaseFragment {
         views.add(sportsView);
 
 
-        //region==========类别3===========================================================================
+        //endregion==========类别3===========================================================================
 
 
         vp_video = (ViewPager) view.findViewById(R.id.vp_video);
@@ -246,6 +327,38 @@ public class VideoFragment extends BaseFragment {
         ViewPagerAdapter adapter = new ViewPagerAdapter(views,getContext());
         vp_video.setOffscreenPageLimit(views.size() - 1);
         vp_video.setAdapter(adapter);
+        ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                switch(position){
+                    case 0:
+                        if(MemExchange.getInstance().getVideoPopularList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryVideoPopular, ApiUtils.requestVideoPopular);
+                        }
+                        break;
+                    case 1:
+                        if(MemExchange.getInstance().getVideoFunnyList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryVideoFunny, ApiUtils.requestVideoFunny);
+                        }
+                        break;
+                    case 2:
+                        if(MemExchange.getInstance().getVideoSportList().size() == 0){
+                            ((MainActivity)getActivity()).sendCategoryDataListRequest(1, Config.CategoryVideoSport, ApiUtils.requestVideoSport);
+                        }
+                        break;
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        };
+        vp_video.addOnPageChangeListener(pageChangeListener);
+        pageChangeListener.onPageSelected(0);
 
         Activity activity = getActivity();
         String[] titles;
@@ -264,7 +377,11 @@ public class VideoFragment extends BaseFragment {
 
     public void refreshPopular(){
         if(getPopularList()!=null && getPopularList().size() > 0){
-            rvPopularAdapter.setmDatas(getPopularList(),getPopularHeight());
+            if(rvPopularAdapter!=null) {
+                rvPopularAdapter.setmDatas(getPopularList(), getPopularHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getPopularList(){
@@ -310,7 +427,11 @@ public class VideoFragment extends BaseFragment {
 
     public void refreshFunny(){
         if(getFunnyList()!=null && getFunnyList().size() > 0){
-            rvFunnyAdapter.setmDatas(getFunnyList(),getFunnyHeight());
+            if(rvFunnyAdapter!=null) {
+                rvFunnyAdapter.setmDatas(getFunnyList(), getFunnyHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getFunnyList(){
@@ -355,7 +476,11 @@ public class VideoFragment extends BaseFragment {
 
     public void refreshSport(){
         if(getSportList()!=null && getSportList().size() > 0){
-            rvSportAdapter.setmDatas(getSportList(),getSportHeight());
+            if(rvSportAdapter!=null) {
+                rvSportAdapter.setmDatas(getSportList(), getSportHeight());
+            }else{
+                Logger.e(Logger.DEBUG_TAG,"refresh error");
+            }
         }
     }
     private List<CategoryBean.DataBeanX.DataBean> getSportList(){

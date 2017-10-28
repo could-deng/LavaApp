@@ -5,5 +5,5 @@ package lava.bluepay.com.lavaapp.common.pay;
  */
 
 public interface IExecutorCallback {
-    void onExecuted(int result,String msg);
+    void onExecuted(boolean ifSuccess,String msg);
 }

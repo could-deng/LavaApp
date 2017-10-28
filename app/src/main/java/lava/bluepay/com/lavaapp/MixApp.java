@@ -5,8 +5,12 @@ import android.content.Context;
 import android.os.Build;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.github.moduth.blockcanary.BlockCanary;
+import com.squareup.leakcanary.LeakCanary;
+import com.squareup.leakcanary.RefWatcher;
 
 import lava.bluepay.com.lavaapp.common.FileUtils;
+import lava.bluepay.com.lavaapp.test.AppBlockCanaryContext;
 
 /**
  * Created by bluepay on 2017/10/14.
@@ -14,6 +18,13 @@ import lava.bluepay.com.lavaapp.common.FileUtils;
 
 public class MixApp extends Application {
     private static Context context;
+        private RefWatcher refWatcher;
+
+    public static RefWatcher getRefWatcher(Context context) {
+        MixApp application = (MixApp) context.getApplicationContext();
+        return application.refWatcher;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -24,6 +35,9 @@ public class MixApp extends Application {
             Fresco.initialize(this);//facebook fresco框架
         }
         FileUtils.makeFolders(Config.PHOTO_PATH);
+
+        BlockCanary.install(this, new AppBlockCanaryContext()).start();
+        refWatcher = LeakCanary.install(this);//LeakCanary
     }
 
 

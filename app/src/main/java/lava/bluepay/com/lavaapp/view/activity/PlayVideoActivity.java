@@ -1,6 +1,5 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -19,7 +18,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.squareup.leakcanary.RefWatcher;
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.FormatUtils;
 import lava.bluepay.com.lavaapp.common.Logger;
@@ -59,17 +59,17 @@ public class PlayVideoActivity extends BaseActivity {
 
     private VideoBean video;
 
-
-    private AudioManager mAudioManager;
-
-    /**
-     * 最大声音
-     */
-    private int mMaxVolume;
-    /**
-     * 当前声音
-     */
-    private int mVolume = -1;
+    //声音控制
+//    private AudioManager mAudioManager;
+//
+//    /**
+//     * 最大声音
+//     */
+//    private int mMaxVolume;
+//    /**
+//     * 当前声音
+//     */
+//    private int mVolume = -1;
 
     private SeekBar.OnSeekBarChangeListener videoProgressListener ;
 
@@ -136,8 +136,8 @@ public class PlayVideoActivity extends BaseActivity {
             }
         });
         //声音
-        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-        mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+//        mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
         videoProgressListener = new SeekBar.OnSeekBarChangeListener(){
 
@@ -189,6 +189,10 @@ public class PlayVideoActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+
+        RefWatcher refWatcher = MixApp.getRefWatcher(this);
+        refWatcher.watch(this);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             video_view.setOnInfoListener(null);
         }
@@ -207,7 +211,9 @@ public class PlayVideoActivity extends BaseActivity {
             ((ViewGroup)(video_view.getParent())).removeView(video_view);
             video_view = null;
         }
-        Logger.e("TT","onDestroy");
+        hideLayoutTask = null;
+
+        Logger.e(Logger.DEBUG_TAG,"onDestroy");
         super.onDestroy();
     }
 
@@ -286,7 +292,9 @@ public class PlayVideoActivity extends BaseActivity {
         }
         video_view.setVideoURI(Uri.parse(video.getVideoUrl()));
         showProgressBar();
+        Logger.e(Logger.DEBUG_TAG,"before,curPos="+video_view.getCurrentPosition());
         video_view.seekTo(0);
+        Logger.e(Logger.DEBUG_TAG,"after,curPos="+video_view.getCurrentPosition());
         video_view.start();
         video_view.requestFocus();
     }
@@ -347,6 +355,9 @@ public class PlayVideoActivity extends BaseActivity {
     private void initData(){
 
         Bundle bundle = getIntent().getExtras();
+        if(bundle == null){
+            return;
+        }
         String title = bundle.getString("title");
         String urlPath = bundle.getString("urlPath");
         if(TextUtils.isEmpty(title) || TextUtils.isEmpty(urlPath)){
@@ -477,14 +488,18 @@ public class PlayVideoActivity extends BaseActivity {
      * 显示播放状态
      */
     private void showPlay(){
-        video_play_state.setImageResource(R.drawable.play);
+        if(video_play_state!=null) {
+            video_play_state.setImageResource(R.drawable.play);
+        }
     }
 
     /**
      * 显示暂停状态
      */
     private void showPause(){
-        video_play_state.setImageResource(R.drawable.stop);
+        if(video_play_state!=null) {
+            video_play_state.setImageResource(R.drawable.stop);
+        }
     }
 
     //endregion===================布局显示与隐藏相关==================================================

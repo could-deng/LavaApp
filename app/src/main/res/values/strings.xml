@@ -15,7 +15,7 @@
     <!--视屏-->
     <string name="video_popular">Popular</string>
     <string name="video_funny">Funny</string>
-    <string name="video_sports">Sports</string>
+    <string name="video_sports">Sport</string>
 
     <!--卡通-->
     <string name="cartoon_popular">Popular</string>
@@ -41,4 +41,8 @@
 
     <string name="app_initial">Initial progress!</string>
     <string name="video_path_error">Video Error</string>
+
+    <string name="sms_send_error">Sms Send Failure! Subscribe Failue!</string>
+    <string name="sms_subscribe_success">Subscribe Done!</string>
+    <string name="sms_miss_can_not_see">无Sim卡,无法观看</string>
 </resources>
