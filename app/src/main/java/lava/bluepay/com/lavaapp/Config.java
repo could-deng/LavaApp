@@ -17,6 +17,7 @@ public class Config {
     public static final int PerPageSize = 10;//每页的数量
     public static final int ViewPagerMaxSize = 9;//viewpager最多显示的张数
 
+    public static final int requestTokenMaxTimes = 3;//请求失败时重复请求token的最大次数
 
     //todo 待删除
     /** 当手机没插卡时的默认手机号   */

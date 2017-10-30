@@ -50,4 +50,11 @@
 
 
     <string name="try_later">Please Try Later</string>
+    <string name="have_no_network">Have no network,please try later</string>
+
+
+    <string name="if_sure_to_play_without_wifi">当前网络并非WIFI环境,是否继续播放</string>
+    <string name="sure_to_play_without_wifi">继续播放</string>
+    <string name="exit_without_wifi">取消播放</string>
+
 </resources>

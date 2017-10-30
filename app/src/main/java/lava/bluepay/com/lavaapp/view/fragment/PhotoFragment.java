@@ -6,12 +6,10 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -20,15 +18,11 @@ import java.util.List;
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
-import lava.bluepay.com.lavaapp.common.Utils;
-import lava.bluepay.com.lavaapp.common.pay.IExecutorCallback;
-import lava.bluepay.com.lavaapp.common.pay.PayHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
-import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
 import lava.bluepay.com.lavaapp.view.adapter.ViewPagerAdapter;
@@ -181,7 +175,7 @@ public class PhotoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -232,7 +226,7 @@ public class PhotoFragment extends BaseFragment {
         rvPortrayAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -313,7 +307,7 @@ public class PhotoFragment extends BaseFragment {
         rvSceneryAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }

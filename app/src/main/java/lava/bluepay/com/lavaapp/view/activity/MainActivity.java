@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
+import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
@@ -28,6 +29,7 @@ import lava.bluepay.com.lavaapp.common.pay.SmsReceiver;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
+import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
@@ -155,6 +157,18 @@ public class MainActivity extends BaseActivity {
 
     private ProgressDialog mProgressDialog;
 
+    private ProgressDialog getProgressDialog(){
+        if(mProgressDialog == null){
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setTitle("");
+            mProgressDialog.setMessage(getResources().getString(R.string.app_initial));
+            mProgressDialog.setCanceledOnTouchOutside(false);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setIndeterminate(true);
+        }
+        return mProgressDialog;
+    }
+
     //初始化的三个阶段
     private static final int NOWInitState0 = 0;
     private static final int NOWInitState1 = 1;
@@ -163,17 +177,14 @@ public class MainActivity extends BaseActivity {
 
     private int nowInitState = 0;//当前阶段（//todo activity回收的情况）
     private boolean isInInitState = false;
-    public ProgressDialog getmProgressDialog(){
-        return mProgressDialog;
-    }
 
     /**
      * 初始化app（请求token、请求初始化字段、请求订阅状态）
      * 分三个阶段
      */
     private void initApp(int nowState){
-        if(!mProgressDialog.isShowing()){
-            mProgressDialog.show();
+        if(!getProgressDialog().isShowing()){
+            getProgressDialog().show();
         }
         switch (nowState){
             case MainActivity.NOWInitState0://去请求token
@@ -197,14 +208,13 @@ public class MainActivity extends BaseActivity {
                 if(!TextUtils.isEmpty(telNum)){
                     sendCheckSubRequest(telNum);
                 }else{
-                    MemExchange.getInstance().setHaveNoSim();
                     nowInitState = MainActivity.NOWInitState3;
                     initApp(nowInitState);
                 }
                 break;
             case MainActivity.NOWInitState3:
-                if(mProgressDialog!=null && mProgressDialog.isShowing()){
-                    mProgressDialog.dismiss();
+                if(getProgressDialog().isShowing()){
+                    getProgressDialog().dismiss();
                 }
                 isInInitState =false;
                 //请求第一页数据
@@ -228,11 +238,30 @@ public class MainActivity extends BaseActivity {
 
         initToolbar();
         initViews();
-        isInInitState = true;
-        initApp(MainActivity.NOWInitState0);
 
+        if(ApiUtils.isNetWorkAvailable()) {
+            isInInitState = true;
+            initApp(MainActivity.NOWInitState0);
+        }else{
+            Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+        }
 //        switchToFragment(FRAGMENT_PHOTO);
 //        loadDataForPhotoFragment();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if(!isInInitState && nowInitState<NOWInitState3 && MemExchange.getInstance().getInitData() == null){
+            if(ApiUtils.isNetWorkAvailable()) {
+                nowInitState = 0;
+                isInInitState = true;
+                initApp(MainActivity.NOWInitState0);
+            }else{
+                Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -290,14 +319,6 @@ public class MainActivity extends BaseActivity {
 
     private void initViews(){
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setTitle("");
-        mProgressDialog.setMessage(getResources().getString(R.string.app_initial));
-        mProgressDialog.setCanceledOnTouchOutside(false);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setIndeterminate(true);
-
-
         rg_select_fragment = (RadioGroup) findViewById(R.id.rg_select_fragment);
         rb_fragment_photo = (RadioButton) findViewById(R.id.tv_fragment_photo);
         rb_fragment_video = (RadioButton) findViewById(R.id.tv_fragment_video);
@@ -316,7 +337,6 @@ public class MainActivity extends BaseActivity {
             }
         });
     }
-
 
     /**
      * 切换fragment
@@ -450,7 +470,7 @@ public class MainActivity extends BaseActivity {
     public void sendGetTokenRequest(){
         try {
             String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
-            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken);
+            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,new RequestBean());
         }catch (Exception e){
             e.printStackTrace();
             //todo 上传错误日志
@@ -470,7 +490,7 @@ public class MainActivity extends BaseActivity {
                 return;
             }
             String sRequest = ApiUtils.getInit();
-            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getInitRequestBody(dev, versionid,bean.getToken()), ApiUtils.requestInit);
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getInitRequestBody(dev, versionid,bean.getToken()), new RequestBean(ApiUtils.requestInit,-1,-1));
         }catch(Exception e){
             e.printStackTrace();
             //todo 上传错误日志
@@ -483,13 +503,16 @@ public class MainActivity extends BaseActivity {
      */
     public void sendCheckSubRequest(String telNum){
         try {
+            if(TextUtils.isEmpty(telNum)){
+                return;
+            }
             TokenData.DataBean bean = MemExchange.getInstance().getTokenData();
             if (bean == null || TextUtils.isEmpty(bean.getToken())) {
                 Logger.e(Logger.DEBUG_TAG,"请求无效");
                 return;
             }
             String sRequest = ApiUtils.getCheckSub();
-            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()), ApiUtils.requestCheckSub);
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()), new RequestBean(ApiUtils.requestCheckSub,-1,-1));
         }catch (Exception e){
             e.printStackTrace();
             //todo 上传错误日志
@@ -511,7 +534,7 @@ public class MainActivity extends BaseActivity {
             return;
         }
         String sRequest = ApiUtils.getQuerypage(nowPage,Config.PerPageSize,cateId,MemExchange.getInstance().getTokenData().getToken());
-        RequestManager.getInstance().request(sRequest,getMyHandler(),requestType);
+        RequestManager.getInstance().request(sRequest,getMyHandler(),requestType,new RequestBean(requestType,nowPage,cateId));
     }
 
     public void sendAllCategoryListRequest(){
@@ -527,15 +550,51 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processReqError(Message msg) {
         super.processReqError(msg);
-        switch (msg.arg1){
-            case ApiUtils.requestToken:
-            case ApiUtils.requestInit:
-                Toast.makeText(context,context.getString(R.string.initial_error),Toast.LENGTH_SHORT).show();
-                break;
-            case ApiUtils.requestCheckSub:
-                //todo
-                break;
+
+        String mResult = getMessgeResult(msg);
+        BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
+        if(bean.getCode() == ApiUtils.HTTP_NETWORK_FAIL || bean.getCode() == ApiUtils.HTTP_REQUEST_EXCEPTION) {
+            switch (msg.arg1) {
+                case ApiUtils.requestToken:
+                    //初始化
+                    if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
+                        Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }else if(MemExchange.getInstance().getIsTokenInvalid()) {
+                        //过期查询
+                        MemExchange.getInstance().returnTokenToNormal();
+                    }
+                    break;
+                case ApiUtils.requestInit:
+                    Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
+                    finish();
+                    break;
+                case ApiUtils.requestCheckSub:
+                    if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
+                        //初始化
+                        Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }else{
+                        //轮循订阅查询
+                        isInCheck = false;
+                        nowCheckTime = 0;
+                        getCheckHandler().removeCallbacksAndMessages(null);
+                        MemExchange.getInstance().setCanSee();
+                        //todo 刷新界面
+                        SubSuccess();
+                    }
+                    break;
+
+            }
+
         }
+
+        if(bean.getCode() == ApiUtils.reqResErrorAuthFail|| bean.getCode() == ApiUtils.reqResErrorAuthError){
+            return;
+        }
+
         loadError(msg.arg1);
     }
 

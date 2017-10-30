@@ -6,11 +6,17 @@ package lava.bluepay.com.lavaapp.base;
 
 public class RequestBean {
     private int requestType = -1;
-    private String url ;
+//    private String url ;
+    private int nowPage = -1;
+    private int cateId = -1;
 
-    public RequestBean(int requestType, String url) {
+    public RequestBean() {
+    }
+
+    public RequestBean(int requestType, int nowPage, int cateId) {
         this.requestType = requestType;
-        this.url = url;
+        this.nowPage = nowPage;
+        this.cateId = cateId;
     }
 
     public int getRequestType() {
@@ -21,11 +27,19 @@ public class RequestBean {
         this.requestType = requestType;
     }
 
-    public String getUrl() {
-        return url;
+    public int getNowPage() {
+        return nowPage;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setNowPage(int nowPage) {
+        this.nowPage = nowPage;
+    }
+
+    public int getCateId() {
+        return cateId;
+    }
+
+    public void setCateId(int cateId) {
+        this.cateId = cateId;
     }
 }

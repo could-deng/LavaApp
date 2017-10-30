@@ -25,8 +25,8 @@ import okhttp3.RequestBody;
 
 public class RequestManager {
 
-    /** 网络不可用     */
-    public static final int MSG_NETNOWR_ERROR = -1;
+//    /** 网络不可用     */
+//    public static final int MSG_NETNOWR_ERROR = -1;
     /** 请求结果为成功 */
     public static final int MSG_REQUEST_FINISH = 1000;
     /** 请求结果为失败 */
@@ -55,23 +55,26 @@ public class RequestManager {
      * @param url
      * @param handler
      * @param rb
-     * @param iRequestType
+     * @param bean
      */
-    public void requestByPost(final String url, final Handler handler, final RequestBody rb,final int iRequestType){
+    public void requestByPost(final String url, final Handler handler, final RequestBody rb,final RequestBean bean){
 
-        MemExchange.getInstance().saveLastestReqBean(new RequestBean(iRequestType,url));
+
+
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                MemExchange.getInstance().saveLastestReqBean(bean);
+
                 String sResult = BaseProcessor.getInstance().postRequestBodyToApi(url,rb);
                 if(TextUtils.isEmpty(sResult)){
-                    Logger.e(Logger.DEBUG_TAG,"网络不可用");
-                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
+                    Logger.e(Logger.DEBUG_TAG,"exception");
+//                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
                     return;
                 }
                 if(handler!=null){
                     Logger.i(Logger.DEBUG_TAG,""+sResult.toString());
-                    sendRequestResultMessage(sResult,handler,iRequestType);
+                    sendRequestResultMessage(sResult,handler,bean.getRequestType());
                 }else{
                     Logger.e(Logger.DEBUG_TAG,"handler miss error");
                 }
@@ -126,18 +129,25 @@ public class RequestManager {
      * @param iRequestType
      */
     public void request(final String url, final Handler handler,
-                        final int iRequestType){
+                        final int iRequestType, final RequestBean reqBean){
 
-        MemExchange.getInstance().saveLastestReqBean(new RequestBean(iRequestType,url));
+
 
         Logger.e(Logger.DEBUG_TAG,"请求:"+url);
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
+//                if(iRequestType!=ApiUtils.requestToken) {
+                    if(reqBean!=null) {
+                        MemExchange.getInstance().saveLastestReqBean(reqBean);
+                    }
+//                }
+
                 String sResult = BaseProcessor.getInstance().getDataFromApi(url);
                 if(TextUtils.isEmpty(sResult)){
-                    Logger.e(Logger.DEBUG_TAG,"网络不可用");
-                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
+                    Logger.e(Logger.DEBUG_TAG,"exception");
+//                    Logger.e(Logger.DEBUG_TAG,"网络不可用");
+//                    sendResultMessage("",handler,iRequestType,MSG_NETNOWR_ERROR);
                     return;
                 }
                 if(handler!=null){

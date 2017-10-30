@@ -1,5 +1,7 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -24,6 +26,8 @@ import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.FormatUtils;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Net;
+import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.view.bean.VideoBean;
 import lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView;
 
@@ -291,6 +295,7 @@ public class PlayVideoActivity extends AppCompatActivity {
         if(TextUtils.isEmpty(video.getVideoUrl())){
             return;
         }
+
         video_view.setVideoURI(Uri.parse(video.getVideoUrl()));
         showProgressBar();
         Logger.e(Logger.DEBUG_TAG,"before,curPos="+video_view.getCurrentPosition());
@@ -299,6 +304,33 @@ public class PlayVideoActivity extends AppCompatActivity {
         video_view.start();
         video_view.requestFocus();
     }
+
+    /**
+     * 弹框确认是否继续播放
+     */
+
+    public void showSureToPlayDialog() {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(PlayVideoActivity.this);
+        builder.setMessage(getResources().getString(R.string.if_sure_to_play_without_wifi));
+        builder.setTitle("Tips");
+        builder.setPositiveButton(getResources().getString(R.string.sure_to_play_without_wifi), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                playVideo();
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton(getResources().getString(R.string.exit_without_wifi), new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                PlayVideoActivity.this.finish();
+                dialog.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
 
     private void pause(){
         progressValue = video_view.getCurrentPosition();
@@ -369,7 +401,16 @@ public class PlayVideoActivity extends AppCompatActivity {
         if(tv_video_title!=null) {
             tv_video_title.setText(video.getVideoTitle());
         }
-        playVideo();
+        if(!Net.isAvailable(PlayVideoActivity.this)){
+            Toast.makeText(PlayVideoActivity.this,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        if(Net.isWifiActive(PlayVideoActivity.this)) {
+            playVideo();
+        }else{
+            showSureToPlayDialog();
+        }
     }
 
 
@@ -428,7 +469,7 @@ public class PlayVideoActivity extends AppCompatActivity {
      * @param enable 1、true 显示  2、false 不显示
      */
     private void full(boolean enable) {
-        if (!enable) {
+        if (enable) {
             WindowManager.LayoutParams lp = getWindow().getAttributes();
             lp.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
             getWindow().setAttributes(lp);

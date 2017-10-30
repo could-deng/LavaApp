@@ -54,7 +54,7 @@ public class BaseProcessor {
                 Logger.e(Logger.DEBUG_TAG,"BaseProcessor,getDataFromApi(),execption");
             }
         }else{
-            ret = getHttpExceptionString(ApiUtils.HTTP_REQUEST_INPUT_INVALID);
+            ret = getHttpExceptionString(ApiUtils.HTTP_NETWORK_FAIL);
             Logger.e(Logger.DEBUG_TAG,"BaseProcessor,netWork not available");
         }
         return ret;
@@ -73,6 +73,7 @@ public class BaseProcessor {
      * @return
      */
     public String postRequestBodyToApi(String url, RequestBody body){
+        String ret = "";
         if(Net.isAvailable(MixApp.getContext())) {
             Request request = new Request.Builder()
                     .url(url)
@@ -81,12 +82,16 @@ public class BaseProcessor {
                     .build();
             try {
                 Response response = OKHttpUtil.getInstance().execute(request);
-                return response.body().string();
+                ret = response.body().string();
+                return ret;
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }else{
+            ret = getHttpExceptionString(ApiUtils.HTTP_NETWORK_FAIL);
+            Logger.e(Logger.DEBUG_TAG,"BaseProcessor,netWork not available");
         }
-        return null;
+        return ret;
     }
 
 

@@ -24,7 +24,6 @@ import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
-import lava.bluepay.com.lavaapp.view.activity.PlayVideoActivity;
 import lava.bluepay.com.lavaapp.view.activity.ViewPagerActivity;
 import lava.bluepay.com.lavaapp.view.adapter.RecyclerViewAdapter;
 import lava.bluepay.com.lavaapp.view.adapter.ViewPagerAdapter;
@@ -139,7 +138,7 @@ public class CartoonFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -199,7 +198,7 @@ public class CartoonFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -257,7 +256,7 @@ public class CartoonFragment extends BaseFragment {
         rvHorrorAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }

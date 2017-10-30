@@ -15,6 +15,8 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
@@ -22,6 +24,7 @@ import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
+import lava.bluepay.com.lavaapp.model.api.MD5Util;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
@@ -110,9 +113,9 @@ public class BaseActivity extends AppCompatActivity {
                 return;
             }
             switch (msg.what){
-                case RequestManager.MSG_NETNOWR_ERROR:
-                    Toast.makeText(activity.context,"网络不可用",Toast.LENGTH_SHORT).show();
-                    break;
+//                case RequestManager.MSG_NETNOWR_ERROR:
+//                    Toast.makeText(activity.context,"网络不可用",Toast.LENGTH_SHORT).show();
+//                    break;
                 case RequestManager.MSG_REQUEST_FINISH:
                     activity.processRequest(msg);
                     break;
@@ -137,19 +140,40 @@ public class BaseActivity extends AppCompatActivity {
         String mResult = msg.getData().getString("resultString");
         BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
         switch (bean.getCode()){
+            case ApiUtils.HTTP_NETWORK_FAIL:
+            case ApiUtils.HTTP_REQUEST_EXCEPTION:
+                //todo 网络请求失败
+                //初始化过程中
+
+                //轮循查询订阅状态过程中
+                //网络异常，退出
+
+                //使用过程中浏览过程中
+                //null
+                //重新获取token过程中
+
+                MemExchange.getInstance().setRequestTokenTimes(0);
+
+                break;
             case ApiUtils.reqResErrorAuthFail:
             case ApiUtils.reqResErrorAuthError:
-                //todo re request
-                //todo 次数需要限制
-                MemExchange.getInstance().setIsTokenInvalid(true);
-                RequestBean lastBean = MemExchange.getInstance().getLastestReqBean();
-                if(lastBean != null){
-                    if(lastBean.getRequestType()>ApiUtils.requestAllCategory){
-                        RequestManager.getInstance().request(lastBean.getUrl(),getMyHandler(),lastBean.getRequestType());
-                    }
+
+                if(MemExchange.getInstance().getRequestTokenTimes()<Config.requestTokenMaxTimes) {
+                    MemExchange.getInstance().addRequestTokenTimes();
+
+                    //请求token
+                    MemExchange.getInstance().setIsTokenInvalid(true);
+                    String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
+                    RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,null);
+                }else{
+                    //todo 清空缓存数据
+                    Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
+                    finish();
+
                 }
 
-                Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
 
                 break;
         }
@@ -169,8 +193,26 @@ public class BaseActivity extends AppCompatActivity {
                     return;
                 }
                 MemExchange.getInstance().setTokenData(tokenData.getData());
+
                 Logger.e(Logger.DEBUG_TAG, "获取token成功");
                 if(MemExchange.getInstance().getIsTokenInvalid()){
+                    Logger.e(Logger.DEBUG_TAG,"上一次token失效，现在重新请求上一次请求");
+                    MemExchange.getInstance().setRequestTokenTimes(0);
+                    //todo 注意同步问题
+
+                    //请求上一次任务
+                    RequestBean lastBean = MemExchange.getInstance().getLastestReqBean();
+                    if(lastBean != null && lastBean.getRequestType()>=ApiUtils.requestToken){
+                        if(lastBean.getRequestType()>ApiUtils.requestAllCategory){
+                            String url = ApiUtils.getQuerypage(lastBean.getNowPage(),Config.PerPageSize,lastBean.getCateId(),MemExchange.getInstance().getTokenData().getToken());
+                            RequestManager.getInstance().request(url,getMyHandler(),lastBean.getRequestType(),null);
+                        }else if(lastBean.getRequestType() == ApiUtils.requestCheckSub){
+                            ((MainActivity)context).sendCheckSubRequest(MemExchange.m_iIMSI);
+                        }else{
+                            Logger.e(Logger.DEBUG_TAG,"last request type = "+lastBean.getRequestType());
+                        }
+                    }
+
                     MemExchange.getInstance().setIsTokenInvalid(false);
                 }
                 break;

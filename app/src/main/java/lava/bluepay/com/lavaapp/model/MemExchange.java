@@ -1,5 +1,7 @@
 package lava.bluepay.com.lavaapp.model;
 
+import android.text.TextUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,20 +18,34 @@ import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 
 public class MemExchange {
 
-    private Boolean isTokenInvalid;//token是否失效
+    private boolean isTokenInvalid;//token是否失效
     public void setIsTokenInvalid(boolean invalid){
         isTokenInvalid = invalid;
     }
-    public Boolean getIsTokenInvalid(){
+    public boolean getIsTokenInvalid(){
         return isTokenInvalid;
     }
-
+    private int requestTokenTimes;
+    public int getRequestTokenTimes(){
+        return requestTokenTimes;
+    }
+    public void addRequestTokenTimes(){
+        requestTokenTimes++;
+    }
+    public void setRequestTokenTimes(int times){
+        requestTokenTimes = times;
+    }
     private RequestBean requestBean;
     public void saveLastestReqBean(RequestBean bean){
         requestBean = bean;
     }
     public RequestBean getLastestReqBean(){
         return requestBean;
+    }
+    public void returnTokenToNormal(){
+        isTokenInvalid = false;
+        requestTokenTimes = 0;
+        requestBean = null;
     }
 
     //region================手机相关====================================
@@ -69,12 +85,8 @@ public class MemExchange {
     //查阅是否订阅数据
     CheckSubBean.DataBean checkSubData;
 
-    private static boolean haveNoSim = false;
-    public void setHaveNoSim(){
-        haveNoSim = true;
-    }
-    public boolean ifHaveSim(){
-        return !haveNoSim;
+    public boolean ifHaveNoSim(){
+        return TextUtils.isEmpty(m_iIMSI);
     }
 
 
@@ -93,6 +105,12 @@ public class MemExchange {
 
     public void clear(){
         Logger.e(Logger.DEBUG_TAG,"MemExchange,clear()");
+
+        requestBean = null;
+        requestTokenTimes = 0;
+        isTokenInvalid = false;
+        m_sPhoneNumber = "";
+        canSee = false;
 
         m_iIMSI = "";
         m_iIMSI1 = "";
@@ -749,17 +767,4 @@ public class MemExchange {
 
 
 
-//    对外方法
-
-    /**
-     * 是否能够正常显示
-     * @return
-     */
-    public boolean canShowOriginal(){
-//        if (getCheckSubData() ==null || getCheckSubData().getStatus())
-        if(haveNoSim){
-            return false;
-        }
-        return false;
-    }
 }

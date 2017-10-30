@@ -153,22 +153,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
 
         final CategoryBean.DataBeanX.DataBean data = mDatas.get(position);
-        if (data == null || TextUtils.isEmpty(data.getThumb())) {
-            return;
-        }
 
-        //todo 图片的url一定要统一
-        if (data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
-            Logger.e(Logger.DEBUG_TAG, "pic url error");
-            return;
-        }
 
         ViewGroup.LayoutParams lp = ((MyViewHolder) holder).imageView.getLayoutParams();
         lp.height = mHeights.get(position);
 
         ((MyViewHolder) holder).imageView.setLayoutParams(lp);
-        if (TextUtils.isEmpty(data.getThumb())) {//默认
-            ((MyViewHolder) holder).imageView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_red_light));
+        if (data == null ||  TextUtils.isEmpty(data.getThumb())) {//默认
+            ((MyViewHolder)holder).imageView.setImageResource(R.drawable.ic_launcher);
         } else {
 
             if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
@@ -177,6 +169,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }else {
                 //非订阅用户
 
+                //todo 图片的url一定要统一
+                if (data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
+                    Logger.e(Logger.DEBUG_TAG, "pic url error");
+                    ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
+                    return;
+                }
 
                 //原图路径
                 final String localFilePath = Config.PHOTO_PATH + data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));//绝对路径

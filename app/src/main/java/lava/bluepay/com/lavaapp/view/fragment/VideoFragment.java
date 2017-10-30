@@ -142,7 +142,7 @@ public class VideoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -209,7 +209,7 @@ public class VideoFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -272,7 +272,7 @@ public class VideoFragment extends BaseFragment {
         rvSportAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveSim()){
+                if(MemExchange.getInstance().ifHaveNoSim()){
                     Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
                     return;
                 }
