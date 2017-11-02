@@ -3,6 +3,7 @@ package lava.bluepay.com.lavaapp.common.pay;
 import android.content.Context;
 import android.content.IntentFilter;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.common.Logger;
@@ -14,9 +15,11 @@ import lava.bluepay.com.lavaapp.common.Logger;
 public class PayHelper {
 
 
-    public static void doPay(){
-        //todo 暂时还没写
-        SmsSendBean bb = new SmsSendBean(MixApp.getContext(),"111111111","内容");
+    public static void doPay(String shortCode,String content) throws Exception{
+        if(TextUtils.isEmpty(shortCode) || TextUtils.isEmpty(content)){
+            throw new Exception("shortCode == null || content == null");
+        }
+        SmsSendBean bb = new SmsSendBean(MixApp.getContext(),shortCode,content);
         AsyncTask<?,?,?> task = PayTask.createAndStart(bb);
     }
 

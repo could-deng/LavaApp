@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -164,6 +166,10 @@ public class VideoFragment extends BaseFragment {
                     }
                 }else{
                     //未订阅的则提示是否订阅
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
             }
@@ -228,6 +234,10 @@ public class VideoFragment extends BaseFragment {
 
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -291,6 +301,10 @@ public class VideoFragment extends BaseFragment {
 
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

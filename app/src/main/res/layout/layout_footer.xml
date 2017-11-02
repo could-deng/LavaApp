@@ -22,7 +22,7 @@
                 android:layout_height="wrap_content"
                 android:contentDescription="@null"
                 android:background="@drawable/animation_refresh_header_pull"
-                android:visibility="visible"/>
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/iv_loading"
@@ -37,7 +37,7 @@
             android:id="@+id/tv_load_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white_milky_text"
+            android:textColor="@color/gray_new_text"
             android:text="@string/swipelayout_to_load_more"
             android:gravity="center"
             />

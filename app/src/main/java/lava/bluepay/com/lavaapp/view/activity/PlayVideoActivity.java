@@ -1,6 +1,9 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -21,13 +24,12 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.squareup.leakcanary.RefWatcher;
-import lava.bluepay.com.lavaapp.MixApp;
+//import com.squareup.leakcanary.RefWatcher;
+//import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.FormatUtils;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.common.Net;
-import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.view.bean.VideoBean;
 import lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView;
 
@@ -195,8 +197,8 @@ public class PlayVideoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
 
-        RefWatcher refWatcher = MixApp.getRefWatcher(this);
-        refWatcher.watch(this);
+//        RefWatcher refWatcher = MixApp.getRefWatcher(this);
+//        refWatcher.watch(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             video_view.setOnInfoListener(null);
@@ -221,6 +223,20 @@ public class PlayVideoActivity extends AppCompatActivity {
         Logger.e(Logger.DEBUG_TAG,"onDestroy");
         super.onDestroy();
     }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new ContextWrapper(newBase) {
+            @Override
+            public Object getSystemService(String name) {
+
+                if (Context.AUDIO_SERVICE.equals(name))
+                    return getApplicationContext().getSystemService(name);
+                return super.getSystemService(name);
+            }
+        });
+    }
+
 
     //region=====================VideoView相关=================
 
@@ -295,12 +311,15 @@ public class PlayVideoActivity extends AppCompatActivity {
         if(TextUtils.isEmpty(video.getVideoUrl())){
             return;
         }
-
+        /**
+         * setVideoURI,VideoView内部的AudioManager会对Activity持有一个强引用，而AudioManager的生命周期比较长，导致这个Activity始终无法被回收，导致内存泄漏
+         * 方案：将AudioManager中context引用改为application的
+         */
         video_view.setVideoURI(Uri.parse(video.getVideoUrl()));
         showProgressBar();
-        Logger.e(Logger.DEBUG_TAG,"before,curPos="+video_view.getCurrentPosition());
-        video_view.seekTo(0);
-        Logger.e(Logger.DEBUG_TAG,"after,curPos="+video_view.getCurrentPosition());
+//        Logger.e(Logger.DEBUG_TAG,"before,curPos="+video_view.getCurrentPosition());
+//        video_view.seekTo(0);
+//        Logger.e(Logger.DEBUG_TAG,"after,curPos="+video_view.getCurrentPosition());
         video_view.start();
         video_view.requestFocus();
     }
@@ -450,7 +469,10 @@ public class PlayVideoActivity extends AppCompatActivity {
                 seekbar_video_bottom.postDelayed(mUpdateProgress,1000);
             }
             int progressValue = video_view.getCurrentPosition();
-            seekbar_video_bottom.setProgress(progressValue);
+            if(seekbar_video_bottom!=null) {
+                seekbar_video_bottom.setProgress(progressValue);
+                seekbar_video_bottom.setSecondaryProgress((int) (videoLength * video_view.getBufferPercentage()/100.0f));
+            }
             tv_video_bottom_played.setText(FormatUtils.formatToVideoPlayTime(progressValue/1000));
             tv_video_bottom_total_size.setText(FormatUtils.formatToVideoPlayTime(videoLength/1000));
         }

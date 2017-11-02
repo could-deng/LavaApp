@@ -29,7 +29,7 @@
 
 
     <!-- swipeLoadLayout-->
-    <string name="swipelayout_to_load_more">Slide up load more</string>
+    <string name="swipelayout_to_load_more">Slide Up Load More</string>
     <string name="swipelayout_release">Loading</string>
     <string name="swipelayout_loading">Loading</string>
     <string name="swipelayout_load_complete">Done</string>
@@ -56,5 +56,27 @@
     <string name="if_sure_to_play_without_wifi">当前网络并非WIFI环境,是否继续播放</string>
     <string name="sure_to_play_without_wifi">继续播放</string>
     <string name="exit_without_wifi">取消播放</string>
+
+
+    <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
+    <string name="tips">Tips</string>
+    <string name="sure">Sure</string>
+    <string name="cancel">cancel</string>
+    <string name="have_no_sms_permission">没有短信权限</string>
+
+
+
+    <!-- premission -->
+    <string name="external_storage_permission_concise">Read and write record files</string>
+    <string name="location_permission_concise">Your position</string>
+    <string name="sensor_permission_concise">Sport sensor</string>
+    <string name="microphone_permission_concise">Microphone</string>
+    <string name="phone_permission_concise">Sim Message</string>
+    <string name="request_permission_format">The following permissions are required:\n\t%1$s</string>
+    <string name="permission_forbid_message_format">Permission:%1$s \n be denied,go to the APP permissions settings?</string>
+
+    <string name="sms_permission_concise">Send sms</string>
+
+    <string name="permission_exception_tips">Have no permissions,Please allow the permission to get play!</string>
 
 </resources>

@@ -151,6 +151,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             Logger.e(Logger.DEBUG_TAG, "RecyclerViewAdapter,onBindViewHolder(),mDatas error");
             return;
         }
+//        ((MyViewHolder) holder).cardview_item.setMaxCardElevation(40);
 
         final CategoryBean.DataBeanX.DataBean data = mDatas.get(position);
 

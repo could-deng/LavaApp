@@ -8,14 +8,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
-import com.squareup.leakcanary.RefWatcher;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import lava.bluepay.com.lavaapp.Config;
-import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
@@ -34,6 +29,7 @@ public class ViewPagerActivity extends BaseActivity {
     private DraweePagerAdapter pagerAdapter;
 
     private List<CategoryBean.DataBeanX.DataBean> picData;
+    private int nowIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +52,10 @@ public class ViewPagerActivity extends BaseActivity {
                 }
             }
         });
-        viewPager.setClickable(true);
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.addOnPageChangeListener(getPageChangeListener());
-
 
         pagerAdapter.setPicUrlList(getVPData());
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.addOnPageChangeListener(getPageChangeListener());
 
         if (pagerAdapter.getPicUrlList().size() > 1) {//当有两个banner 才可以来回滚动
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -72,7 +66,7 @@ public class ViewPagerActivity extends BaseActivity {
             dotViewList.clear();
             for (int i = 0; i < pagerAdapter.getPicUrlList().size(); i++) {
                 ImageView dot = new ImageView(this);
-                if (i == 0) {
+                if (i == nowIndex) {
                     dot.setImageResource(R.drawable.dot_focused);
                 } else {
                     dot.setImageResource(R.drawable.dot_normal);
@@ -81,7 +75,8 @@ public class ViewPagerActivity extends BaseActivity {
                 dotViewList.add(dot);
             }
             dotContainer.setGravity(Gravity.CENTER);
-            viewPager.setCurrentItem(0, false);
+            // 切换到指定页面
+            viewPager.setCurrentItem(nowIndex, false);
         }
 
     }
@@ -141,12 +136,13 @@ public class ViewPagerActivity extends BaseActivity {
         if(categoryId == -1 || index == -1){
             return;
         }
-        int startIndex = (index -Config.ViewPagerMaxSize/2)<0?0:index-(Config.ViewPagerMaxSize/2);
-        int endIndex = (index+ Config.ViewPagerMaxSize/2)>getCategoryList(categoryId).size()?getCategoryList(categoryId).size():(index+ Config.ViewPagerMaxSize/2);
+        int startIndex = (index -Config.ViewPagerMaxSize/2)<0?0:index-(Config.ViewPagerMaxSize/2);//包括
+        int endIndex = (index+ Config.ViewPagerMaxSize/2)>getCategoryList(categoryId).size()?getCategoryList(categoryId).size():(index+ (Config.ViewPagerMaxSize/2));//包括
         if(picData == null){
             picData = new ArrayList<>();
         }
         picData = getCategoryList(categoryId).subList(startIndex,endIndex);
+        nowIndex = index-startIndex;//包括
 
     }
 
@@ -184,8 +180,8 @@ public class ViewPagerActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        RefWatcher refWatcher = MixApp.getRefWatcher(this);
-        refWatcher.watch(this);
+//        RefWatcher refWatcher = MixApp.getRefWatcher(this);
+//        refWatcher.watch(this);
         super.onDestroy();
 
     }

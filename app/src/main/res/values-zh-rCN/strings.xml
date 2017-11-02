@@ -57,4 +57,25 @@
     <string name="if_sure_to_play_without_wifi">当前网络并非WIFI环境,是否继续播放</string>
     <string name="sure_to_play_without_wifi">继续播放</string>
     <string name="exit_without_wifi">取消播放</string>
+
+    <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
+    <string name="tips">Tips</string>
+    <string name="sure">Sure</string>
+    <string name="cancel">cancel</string>
+    <string name="have_no_sms_permission">没有短信权限</string>
+
+
+
+    <!-- premission -->
+    <string name="external_storage_permission_concise">存储缓存数据</string>
+    <string name="location_permission_concise">使用位置数据</string>
+    <string name="sensor_permission_concise">使用运动数据</string>
+    <string name="microphone_permission_concise">使用麦克风</string>
+    <string name="phone_permission_concise">获取Sim卡信息</string>
+    <string name="request_permission_format">正常运行需要以下权限:\n\t%1$s</string>
+    <string name="permission_forbid_message_format">权限:%1$s \n被禁止,打开APP权限设置?</string>
+
+    <string name="sms_permission_concise">发送短信订阅</string>
+
+    <string name="permission_exception_tips">无权限,请授权以正常使用</string>
 </resources>

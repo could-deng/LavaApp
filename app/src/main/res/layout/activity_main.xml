@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="lava.bluepay.com.lavaapp.view.activity.MainActivity">
-    <include layout="@layout/layout_toolbar"/>
+
+    <include layout="@layout/layout_toolbar" />
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv_test"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textColor="@android:color/white"-->
+        <!--android:text="num"-->
+        <!--android:textSize="20sp"/>-->
     <FrameLayout
         android:id="@+id/mainContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
         <!--<ProgressBar-->
-            <!--android:layout_width="40dp"-->
-            <!--android:layout_height="40dp"-->
-            <!--/>-->
+        <!--android:layout_width="40dp"-->
+        <!--android:layout_height="40dp"-->
+        <!--/>-->
     </FrameLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_height="1.0dp"
+        android:background="@color/white_new_text"
         />
     <RadioGroup
         android:id="@+id/rg_select_fragment"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        >
         <RadioButton
             android:id="@+id/tv_fragment_photo"
             android:layout_width="0dp"
@@ -36,19 +45,29 @@
             android:layout_height="match_parent"
             android:text="@string/title_photo"
             android:button="@null"
+            android:textColor="@color/white_new_text"
             android:gravity="center"
             android:checked="true"/>
-
+        <!--<View-->
+            <!--android:layout_width="1.0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:background="@color/white_new_text"-->
+            <!--/>-->
         <RadioButton
             android:id="@+id/tv_fragment_video"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:button="@null"
+            android:textColor="@color/white_new_text"
             android:checked="false"
             android:gravity="center"
             android:text="@string/title_video" />
-
+        <!--<View-->
+            <!--android:layout_width="1.0dp"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:background="@color/white_new_text"-->
+            <!--/>-->
         <RadioButton
             android:id="@+id/tv_fragment_cartoon"
             android:layout_width="0dp"
@@ -56,6 +75,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="@string/title_Cartoon"
+            android:textColor="@color/white_new_text"
             android:button="@null"
             android:checked="false"/>
     </RadioGroup>

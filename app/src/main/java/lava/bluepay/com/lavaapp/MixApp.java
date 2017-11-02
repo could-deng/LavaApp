@@ -5,30 +5,28 @@ import android.content.Context;
 import android.os.Build;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
-import com.github.moduth.blockcanary.BlockCanary;
-import com.squareup.leakcanary.LeakCanary;
-import com.squareup.leakcanary.RefWatcher;
-
 import lava.bluepay.com.lavaapp.common.FileUtils;
-import lava.bluepay.com.lavaapp.test.AppBlockCanaryContext;
-
+import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
 /**
  * Created by bluepay on 2017/10/14.
  */
 
 public class MixApp extends Application {
     private static Context context;
-        private RefWatcher refWatcher;
+//    private RefWatcher refWatcher;
 
-    public static RefWatcher getRefWatcher(Context context) {
-        MixApp application = (MixApp) context.getApplicationContext();
-        return application.refWatcher;
-    }
+//    public static RefWatcher getRefWatcher(Context context) {
+//        MixApp application = (MixApp) context.getApplicationContext();
+//        return application.refWatcher;
+//    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         context = this;
+
+
+
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             initFresco();//facebook fresco框架
         }else{
@@ -36,9 +34,12 @@ public class MixApp extends Application {
         }
         FileUtils.makeFolders(Config.PHOTO_PATH);
 
-        BlockCanary.install(this, new AppBlockCanaryContext()).start();
-        refWatcher = LeakCanary.install(this);//LeakCanary
+        UmengAnalysisHelper.getInstance().onApplicationCreate(true);
+
+//        BlockCanary.install(this, new AppBlockCanaryContext()).start();
+//        refWatcher = LeakCanary.install(this);//LeakCanary
     }
+
 
 
     public static Context getContext(){
@@ -59,4 +60,6 @@ public class MixApp extends Application {
                 .build();
         Fresco.initialize(getApplicationContext(), imagePipelineConfig);
     }
+
+
 }

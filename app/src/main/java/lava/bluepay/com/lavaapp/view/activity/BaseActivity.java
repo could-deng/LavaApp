@@ -1,12 +1,21 @@
 package lava.bluepay.com.lavaapp.view.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,12 +25,17 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
@@ -42,10 +56,37 @@ public class BaseActivity extends AppCompatActivity {
     protected TextView tv_title;
     protected NewVPIndicator indicator;
 
+    private String mPageName;
+
+
+    private AlertDialog permissionDialog;
+
+    /**
+     * 设置页面标题,用于友盟统计
+     */
+    protected void setPageName(String name) {
+        mPageName = name;
+
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         context = this;
+        if (mPageName == null) return;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UmengAnalysisHelper.getInstance().onActivityResume(context,mPageName);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        UmengAnalysisHelper.getInstance().onActivityPause(context,mPageName);
     }
 
     public void initToolbar(){
@@ -251,4 +292,312 @@ public class BaseActivity extends AppCompatActivity {
         builder.setCancelable(false);//不可取消
         builder.create().show();
     }
+
+
+
+    //region ============================== Android M 权限 ==============================
+
+    /**
+     * 申请单个权限的请求
+     */
+    private static final int REQUEST_CODE_ASK_PERMISSIONS = 185;
+    /**
+     * 申请多个权限的请求
+     */
+    private static final int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 186;
+
+    /**
+     * 检查是否获得了指定权限
+     *
+     * @param permissionName 权限名称,如 Manifest.permission.ACCESS_FINE_LOCATION
+     * @return true:已获取了权限,false:未获取权限
+     */
+    protected boolean permissionIsGranted(String permissionName) {
+        if (TextUtils.isEmpty(permissionName))
+            return false;
+        return ContextCompat.checkSelfPermission(this, permissionName) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * 检查并处理权限申请
+     *
+     * @param permissionName permissionName 权限名称,如 Manifest.permission.ACCESS_FINE_LOCATION等
+     */
+    protected void getPermission(final String permissionName) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        boolean hasPermission = permissionIsGranted(permissionName);
+        if (!hasPermission) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionName)) {
+                String message = String.format(getString(R.string.request_permission_format), getPermissionConciseName(permissionName));
+                permissionDialog = new AlertDialog.Builder(this)
+//                        .iconRes(R.drawable.ic_notification)
+                        .setTitle(R.string.tips)
+                        .setMessage(message)
+                        .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
+                                        REQUEST_CODE_ASK_PERMISSIONS);
+                                dialog.dismiss();
+                            }
+                        }).create();
+//                        .onAny(new MaterialDialog.SingleButtonCallback() {
+//                            @Override
+//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
+//                                        REQUEST_CODE_ASK_PERMISSIONS);
+//                                dialog.dismiss();
+//                            }
+//                        }).build();
+                if (permissionDialog != null) {
+                    permissionDialog.show();
+                }
+            } else {
+                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
+                        REQUEST_CODE_ASK_PERMISSIONS);
+            }
+        }
+    }
+
+    /**
+     * 是否全部权限允许
+     * @param permissionNames
+     * @return
+     */
+    protected boolean ifAllPermissionAllo(String[] permissionNames){
+        for (String permission : permissionNames) {
+            if(!permissionIsGranted(permission)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 检查并处理单个或多个权限申请
+     *
+     * @param permissionNames 权限名称组成的字符串数组,如Manifest.permission.ACCESS_FINE_LOCATION等
+     */
+    protected void getPermissions(String[] permissionNames) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        List<String> permissionsNeeded = new ArrayList<>();
+        final List<String> permissionsList = new ArrayList<>();
+
+        if (permissionNames == null)
+            return;
+
+        for (String permissionName : permissionNames) {
+            if (!addPermission(permissionsList, permissionName)) {
+                permissionsNeeded.add(getPermissionConciseName(permissionName));
+            }
+        }
+
+        if (permissionsList.size() > 0) {
+            if (permissionsNeeded.size() > 0) {
+                // Need Rationale
+                String message = permissionsNeeded.get(0);
+                for (int i = 1; i < permissionsNeeded.size(); i++) {
+                    message = message + "\n\t" + permissionsNeeded.get(i);
+                }
+
+                String msg = String.format(getString(R.string.request_permission_format), message);
+                permissionDialog = new AlertDialog.Builder(this)
+//                        .iconRes(R.drawable.ic_notification)
+                        .setTitle(R.string.tips)
+                        .setMessage(msg)
+                        .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(BaseActivity.this,
+                                        permissionsList.toArray(new String[permissionsList.size()]),
+                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                permissionDialog.dismiss();
+                                Toast.makeText(context,getResources().getString(R.string.permission_exception_tips),Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        })
+                        .setCancelable(false)
+                        .create();
+//                        .onAny(new MaterialDialog.SingleButtonCallback() {
+//                            @Override
+//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                ActivityCompat.requestPermissions(BaseActivity.this,
+//                                        permissionsList.toArray(new String[permissionsList.size()]),
+//                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+//                                dialog.dismiss();
+//                            }
+//                        }).build();
+                if (permissionDialog != null) {
+                    permissionDialog.show();
+                }
+                return;
+            }
+            ActivityCompat.requestPermissions(this,
+                    permissionsList.toArray(new String[permissionsList.size()]),
+                    REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+        }
+    }
+
+    /**
+     * 判断指定权限是否已经被获取
+     *
+     * @param permissionsList 需要请求权限的权限集合
+     * @param permission      指定的权限名称
+     * @return true:已获取权限,false:未获取权限
+     */
+    private boolean addPermission(List<String> permissionsList, String permission) {
+        if (!permissionIsGranted(permission)) {
+            permissionsList.add(permission);
+            // Check for Rationale Option
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * 根据android manifest权限名转换成相应的权限提示信息
+     *
+     * @param permission manifest权限名,如Manifest.permission.READ_EXTERNAL_STORAGE 等
+     */
+    private String getPermissionConciseName(String permission) {
+        if (TextUtils.isEmpty(permission))
+            return "";
+        switch (permission) {
+            case Manifest.permission.READ_EXTERNAL_STORAGE://读写外部存储器权限
+            case Manifest.permission.WRITE_EXTERNAL_STORAGE:
+                return getString(R.string.external_storage_permission_concise);
+//            case Manifest.permission.ACCESS_COARSE_LOCATION://定位权限
+//            case Manifest.permission.ACCESS_FINE_LOCATION:
+//                return getString(R.string.location_permission_concise);
+//            case Manifest.permission.BODY_SENSORS://传感器
+//                return getString(R.string.sensor_permission_concise);
+//            case Manifest.permission.RECORD_AUDIO://麦克风
+//                return getString(R.string.microphone_permission_concise);
+            case Manifest.permission.READ_PHONE_STATE://电话状态
+                return getString(R.string.phone_permission_concise);
+            case Manifest.permission.SEND_SMS:
+                return getString(R.string.sms_permission_concise);
+
+        }
+        return "";
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
+//            Logger.i(Logger.DEBUG_TAG, "onRequestPermissionsResult-->permission:" + permissions[i] + " status:" + grantResults[i]);
+//        }
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS://单个权限请求
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {//权限被允许
+                    if (permissions[0] != null) {
+                        handlePermissionAllowed(permissions[0]);
+                    }
+                } else {//权限被禁止
+                    if (permissions[0] != null) {
+                        String message = String.format(Locale.getDefault(), getString(R.string.permission_forbid_message_format),
+                                getPermissionConciseName(permissions[0]));
+//                        showAppMessage(message, AppMsg.STYLE_ALERT);
+                        Toast.makeText(context,message,Toast.LENGTH_SHORT).show();
+                        handlePermissionForbidden(permissions[0]);
+                    }
+                }
+                break;
+            case REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS://多个权限请求
+                String msg = "";
+                if (permissions != null && grantResults != null) {
+                    for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
+                        if (permissions[i] != null) {
+                            if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {//权限被允许
+                                handlePermissionAllowed(permissions[i]);
+                            } else {//权限被禁止
+                                msg += "\n\t\t" + getPermissionConciseName(permissions[i]);
+                                handlePermissionForbidden(permissions[i]);
+                            }
+                        }
+                    }
+                    if (msg != null && msg.length() > 0) {
+                        String message = String.format(Locale.getDefault(), getString(R.string.permission_forbid_message_format), msg);
+                        if (message != null)
+                            permissionDialog = new AlertDialog.Builder(this)
+//                                    .iconRes(R.drawable.ic_notification)
+                                    .setTitle(R.string.tips)
+                                    .setMessage(message)
+                                    .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
+
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            openAppDetail();
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    })
+                                    .create();
+//                                    .onAny(new MaterialDialog.SingleButtonCallback() {
+//                                        @Override
+//                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                                            dialog.dismiss();
+//                                            switch (which) {
+//                                                case POSITIVE:
+//                                                    openAppDetail();
+//                                                    break;
+//                                            }
+//                                        }
+//                                    }).build();
+                        if (permissionDialog != null) {
+                            permissionDialog.show();
+                        }
+                    }
+                }
+                break;
+//            default:
+//                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    /**
+     * 应用权限被禁止后续处理
+     *
+     * @param permissionName manifest权限名,如Manifest.permission.READ_EXTERNAL_STORAGE 等
+     */
+    protected void handlePermissionForbidden(String permissionName) {
+    }
+
+    /**
+     * 应用权限被允许后续处理
+     *
+     * @param permissionName manifest权限名,如Manifest.permission.READ_EXTERNAL_STORAGE 等
+     */
+    protected void handlePermissionAllowed(String permissionName) {
+    }
+
+    /**
+     * 打开系统设置中的乐享动详情界面
+     */
+    protected void openAppDetail() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        if (intent != null && intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    //endregion ============================== Android M 权限 ==============================
 }

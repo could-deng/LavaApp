@@ -13,6 +13,8 @@ import android.widget.RadioGroup;
 import java.lang.ref.WeakReference;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
+import okhttp3.internal.Util;
 
 /**
  * viewPager的指示器
@@ -100,7 +102,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
             onPageSelected(mCurrentPosition);
             mTabCount = mTitles.length;
             if(mTabCount>0) {
-                mTabWidth = getWidth()/mTabCount;
+                mTabWidth = ((getWidth()== 0)?(ViewUtils.dp2px(getContext(),180)):getWidth())/mTabCount;
             }
             generateTitleView();
         }
@@ -195,7 +197,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if(mTabCount>0){
-            mTabCount = w/mTabCount;
+            mTabWidth = w/mTabCount;
         }
     }
 
@@ -209,12 +211,17 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         scroll(position,positionOffset);
     }
 
     private void scroll(final int position, float offset){
-        mTranslationX = getWidth() / mTabCount * (position + offset);
+        mTranslationX = ((getWidth()== 0)?(ViewUtils.dp2px(getContext(),180)):getWidth()) / mTabCount * (position + offset);
         if (tabGroup != null && position < tabGroup.getChildCount()) {
             if (tabGroup.getChildAt(position) instanceof TabItemView) {
                 for (int i = 0; i < tabGroup.getChildCount(); i++) {

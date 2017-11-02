@@ -10,11 +10,18 @@ import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
 
 /**
  * Created by bluepay on 2017/10/20.
@@ -443,5 +450,79 @@ public class Utils {
         }
         return min;
     }
+    public static int getViewRandomHeight(Context context){
+        int height = ViewUtils.dp2px(context,(int) (170 + Math.random() * 80));
+        return height;
+    }
 
+    public static String formatTime(long iTime) {
+        long iMinute = iTime / 60;
+        long iSecond = iTime % 60;
+        long iHour = iSecond / 60;
+
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", iHour, iMinute, iSecond);
+    }
+
+    /**
+     *
+     * @param time 传过来的时间区间   03:10:00,10:00:00
+     * @return
+     */
+    public static boolean ifTimeIn(String time){
+        boolean stayBetween = false;
+        try {
+            String startTime = time.substring(0,time.indexOf(","));
+            String endTime = time.substring(time.indexOf(",")+1,time.length());
+
+            long now = Utils.dateToStamp(Utils.stampToDate(String.valueOf(System.currentTimeMillis()/1000)));
+            long startT = Utils.dateToStamp(startTime);
+            long endT = Utils.dateToStamp(endTime);
+            if(now>=startT && now<=endT){
+                return true;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return stayBetween;
+    }
+
+    /*
+     * 将时间转换为时间戳
+     */
+    public static long dateToStamp(String s) {
+        long res = 0;
+        try {
+
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+            Date date = simpleDateFormat.parse(s);
+            long ts = date.getTime();
+//            res = String.valueOf(ts);
+            res = ts;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return res;
+    }
+    /*
+     * 将时间戳转换为时间
+     */
+    public static String stampToDate(String s){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        long lt = new Long(s);
+        Date date = new Date(lt);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
+    public static void WriteFile(String info) {
+        try {
+            File file = new File(Config.Bug_PATH);
+            FileOutputStream fos = new FileOutputStream(file);
+            fos.write(info.getBytes());
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

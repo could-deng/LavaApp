@@ -5,8 +5,10 @@ import android.text.TextUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
@@ -240,7 +242,7 @@ public class MemExchange {
             popularHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            popularHeights.add((int) (450 + Math.random() * 200));
+            popularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
     }
 
@@ -258,7 +260,7 @@ public class MemExchange {
             popularHeights = new ArrayList<>();
             if(getPhotoPopularList() != null && popularHeights.size() ==0) {
                 for (int i = 0; i < getPhotoPopularList().size(); i++) {
-                    popularHeights.add((int) (450 + Math.random() * 200));
+                    popularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -366,7 +368,7 @@ public class MemExchange {
             photoSceneryHeights = new ArrayList<>();
             if(getPhotoSceneryList() != null && photoSceneryHeights.size() == 0) {
                 for (int i = 0; i < getPhotoSceneryList().size(); i++) {
-                    photoSceneryHeights.add((int) (450 + Math.random() * 200));
+                    photoSceneryHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -381,7 +383,7 @@ public class MemExchange {
             photoSceneryHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            photoSceneryHeights.add((int) (450 + Math.random() * 200));
+            photoSceneryHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -429,7 +431,7 @@ public class MemExchange {
             videoPopularHeights = new ArrayList<>();
             if(getVideoPopularList() != null && videoPopularHeights.size() == 0) {
                 for (int i = 0; i < getVideoPopularList().size(); i++) {
-                    videoPopularHeights.add((int) (450 + Math.random() * 200));
+                    videoPopularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -444,7 +446,7 @@ public class MemExchange {
             videoPopularHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            videoPopularHeights.add((int) (450 + Math.random() * 200));
+            videoPopularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -491,7 +493,7 @@ public class MemExchange {
             videoFunnyHeights = new ArrayList<>();
             if(getVideoFunnyList() != null && videoFunnyHeights.size() == 0) {
                 for (int i = 0; i < getVideoFunnyList().size(); i++) {
-                    videoFunnyHeights.add((int) (450 + Math.random() * 200));
+                    videoFunnyHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -506,7 +508,7 @@ public class MemExchange {
             videoFunnyHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            videoFunnyHeights.add((int) (450 + Math.random() * 200));
+            videoFunnyHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -553,7 +555,7 @@ public class MemExchange {
             videoSportHeights = new ArrayList<>();
             if(getVideoSportList() != null && videoSportHeights.size() == 0) {
                 for (int i = 0; i < getVideoSportList().size(); i++) {
-                    videoSportHeights.add((int) (450 + Math.random() * 200));
+                    videoSportHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -568,7 +570,7 @@ public class MemExchange {
             videoSportHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            videoSportHeights.add((int) (450 + Math.random() * 200));
+            videoSportHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -617,7 +619,7 @@ public class MemExchange {
             cartoonPopularHeights = new ArrayList<>();
             if(getCartoonPopularList() != null && cartoonPopularHeights.size() == 0) {
                 for (int i = 0; i < getCartoonPopularList().size(); i++) {
-                    cartoonPopularHeights.add((int) (450 + Math.random() * 200));
+                    cartoonPopularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -632,7 +634,7 @@ public class MemExchange {
             cartoonPopularHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            cartoonPopularHeights.add((int) (450 + Math.random() * 200));
+            cartoonPopularHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -680,7 +682,7 @@ public class MemExchange {
             cartoonFunnyHeights = new ArrayList<>();
             if(getCartoonFunnyList() != null && cartoonFunnyHeights.size() == 0) {
                 for (int i = 0; i < getCartoonFunnyList().size(); i++) {
-                    cartoonFunnyHeights.add((int) (450 + Math.random() * 200));
+                    cartoonFunnyHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -695,7 +697,7 @@ public class MemExchange {
             cartoonFunnyHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            cartoonFunnyHeights.add((int) (450 + Math.random() * 200));
+            cartoonFunnyHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }
@@ -743,7 +745,7 @@ public class MemExchange {
             cartoonHorrorHeights = new ArrayList<>();
             if(getCartoonHorrorList() != null && cartoonHorrorHeights.size() == 0) {
                 for (int i = 0; i < getCartoonHorrorList().size(); i++) {
-                    cartoonHorrorHeights.add((int) (450 + Math.random() * 200));
+                    cartoonHorrorHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -758,7 +760,7 @@ public class MemExchange {
             cartoonHorrorHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            cartoonHorrorHeights.add((int) (450 + Math.random() * 200));
+            cartoonHorrorHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }

@@ -152,6 +152,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -212,6 +216,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -270,6 +278,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

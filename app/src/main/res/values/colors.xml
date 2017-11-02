@@ -4,11 +4,11 @@
     <color name="colorPrimaryDark">#FF201F26</color>
     <color name="textColorPrimary">#FFFFFF</color>
 
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#7A378B</color>
 
 
 
-    <color name="windowBackground">#FFFFFF</color>
+    <color name="windowBackground">#FF201F26</color>
 
 
     <color name="activity_main_nav_radio_text">#000000</color>
@@ -18,8 +18,6 @@
     <color name="activity_main_nav_radio_bg">#FFFFFF</color>
 
     <color name="activity_indicator_textColor_def">#FFFFFF</color>
-
-
 
 
     <color name="gray_new_text">#5D5C64</color>
