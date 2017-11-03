@@ -9,6 +9,7 @@ import android.os.CountDownTimer;
 import android.telephony.SmsManager;
 import android.widget.Toast;
 
+import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.view.activity.BaseActivity;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
@@ -63,6 +64,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 int resultCode =getResultCode();
                 if(resultCode == Activity.RESULT_OK) {
                     Logger.i(Logger.DEBUG_TAG, "短信发送成功");
+                    Toast.makeText(context,context.getResources().getString(R.string.execute_success),Toast.LENGTH_SHORT).show();
                     ((MainActivity) context).continueCheckSubSituation();
                 }
                 else {
@@ -73,6 +75,7 @@ public class SmsReceiver extends BroadcastReceiver {
 //                    case SmsManager.RESULT_ERROR_LIMIT_EXCEEDED:
 //                    case SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE:
                     Logger.i(Logger.DEBUG_TAG, "短信发送失败");
+                    Toast.makeText(context,context.getResources().getString(R.string.execute_fail),Toast.LENGTH_SHORT).show();
                     ((MainActivity)context).showSmsSendError();
                     //todo 测试代码
                     ((MainActivity) context).continueCheckSubSituation();

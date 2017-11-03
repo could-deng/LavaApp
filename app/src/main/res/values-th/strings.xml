@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LavaApp</string>
     <string name="AppTitle">LavaApp</string>
@@ -44,18 +45,18 @@
 
     <string name="sms_send_error">Sms Send Failure! Subscribe Failue!</string>
     <string name="sms_subscribe_success">Subscribe Done!</string>
-    <string name="sms_miss_can_not_see">无Sim卡,无法观看</string>
+    <string name="sms_miss_can_not_see">Have no Sim,Can not Play!</string>
 
-    <string name="initial_error">初始化错误,请重新启动</string>
+    <string name="initial_error">Initial failure,Please restart~</string>
 
 
     <string name="try_later">Please Try Later</string>
     <string name="have_no_network">Have no network,please try later</string>
 
 
-    <string name="if_sure_to_play_without_wifi">当前网络并非WIFI环境,是否继续播放</string>
-    <string name="sure_to_play_without_wifi">继续播放</string>
-    <string name="exit_without_wifi">取消播放</string>
+    <string name="if_sure_to_play_without_wifi">The current network is not WIFI, whether to continue to play?</string>
+    <string name="sure_to_play_without_wifi">Continue</string>
+    <string name="exit_without_wifi">Cancel</string>
 
 
     <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
@@ -63,7 +64,7 @@
     <string name="tips">Tips</string>
     <string name="sure">Sure</string>
     <string name="cancel">cancel</string>
-    <string name="have_no_sms_permission">没有短信权限</string>
+    <string name="have_no_sms_permission">Have not been granted Sms Permission</string>
 
 
 
@@ -77,7 +78,7 @@
 
     <string name="permission_exception_tips">Have no permissions,Please allow the permission to get play!</string>
 
-    <string name="execute_success">Execute Successfully,work in progress</string>
+    <string name="execute_success">Execute Successfully,App work in progress</string>
     <string name="execute_fail">Execute Fail,Please try again...</string>
 
     <string name="suscribe_tips">ชื่อบริการ

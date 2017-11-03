@@ -2,7 +2,6 @@ package lava.bluepay.com.lavaapp.view.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,11 +23,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
@@ -42,6 +39,8 @@ import lava.bluepay.com.lavaapp.model.api.MD5Util;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
+import lava.bluepay.com.lavaapp.view.dialog.material.DialogAction;
+import lava.bluepay.com.lavaapp.view.dialog.material.MaterialDialog;
 import lava.bluepay.com.lavaapp.view.widget.NewVPIndicator;
 
 
@@ -59,7 +58,7 @@ public class BaseActivity extends AppCompatActivity {
     private String mPageName;
 
 
-    private AlertDialog permissionDialog;
+    private MaterialDialog permissionDialog;
 
     /**
      * 设置页面标题,用于友盟统计
@@ -275,22 +274,32 @@ public class BaseActivity extends AppCompatActivity {
 
 
 
+    /**
+     * 退出游戏、或者退出支付页面，需要调用Client.exit();方法释放资源
+     *
+     * */
     public void showExitDialog() {
-        // 弹框确认是否退出
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(R.string.request_out_of_date);
-        builder.setTitle("tips");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                ((BaseActivity)context).finish();
-                dialog.dismiss();
-                System.exit(0);
-            }
-        });
-
-        builder.setCancelable(false);//不可取消
-        builder.create().show();
+        new MaterialDialog.Builder(this)
+                .title(R.string.tips)
+                .content(R.string.if_sure_to_exit)
+                .positiveText(R.string.sure)
+                .positiveColor(getResources().getColor(R.color.colorPrimary))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        BaseActivity.this.finish();
+                        dialog.dismiss();
+                        System.exit(0);
+                    }
+                })
+                .negativeText(R.string.cancel)
+                .negativeColor(getResources().getColor(R.color.colorPrimary))
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
 
@@ -318,48 +327,48 @@ public class BaseActivity extends AppCompatActivity {
         return ContextCompat.checkSelfPermission(this, permissionName) == PackageManager.PERMISSION_GRANTED;
     }
 
-    /**
-     * 检查并处理权限申请
-     *
-     * @param permissionName permissionName 权限名称,如 Manifest.permission.ACCESS_FINE_LOCATION等
-     */
-    protected void getPermission(final String permissionName) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-        boolean hasPermission = permissionIsGranted(permissionName);
-        if (!hasPermission) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionName)) {
-                String message = String.format(getString(R.string.request_permission_format), getPermissionConciseName(permissionName));
-                permissionDialog = new AlertDialog.Builder(this)
-//                        .iconRes(R.drawable.ic_notification)
-                        .setTitle(R.string.tips)
-                        .setMessage(message)
-                        .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
-                                        REQUEST_CODE_ASK_PERMISSIONS);
-                                dialog.dismiss();
-                            }
-                        }).create();
-//                        .onAny(new MaterialDialog.SingleButtonCallback() {
+//    /**
+//     * 检查并处理权限申请
+//     *
+//     * @param permissionName permissionName 权限名称,如 Manifest.permission.ACCESS_FINE_LOCATION等
+//     */
+//    protected void getPermission(final String permissionName) {
+//        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+//            return;
+//        }
+//        boolean hasPermission = permissionIsGranted(permissionName);
+//        if (!hasPermission) {
+//            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionName)) {
+//                String message = String.format(getString(R.string.request_permission_format), getPermissionConciseName(permissionName));
+//                permissionDialog = new AlertDialog.Builder(this)
+////                        .iconRes(R.drawable.ic_notification)
+//                        .setTitle(R.string.tips)
+//                        .setMessage(message)
+//                        .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
 //                            @Override
-//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                            public void onClick(DialogInterface dialog, int which) {
 //                                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
 //                                        REQUEST_CODE_ASK_PERMISSIONS);
 //                                dialog.dismiss();
 //                            }
-//                        }).build();
-                if (permissionDialog != null) {
-                    permissionDialog.show();
-                }
-            } else {
-                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
-                        REQUEST_CODE_ASK_PERMISSIONS);
-            }
-        }
-    }
+//                        }).create();
+////                        .onAny(new MaterialDialog.SingleButtonCallback() {
+////                            @Override
+////                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+////                                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
+////                                        REQUEST_CODE_ASK_PERMISSIONS);
+////                                dialog.dismiss();
+////                            }
+////                        }).build();
+//                if (permissionDialog != null) {
+//                    permissionDialog.show();
+//                }
+//            } else {
+//                ActivityCompat.requestPermissions(BaseActivity.this, new String[]{permissionName},
+//                        REQUEST_CODE_ASK_PERMISSIONS);
+//            }
+//        }
+//    }
 
     /**
      * 是否全部权限允许
@@ -405,38 +414,21 @@ public class BaseActivity extends AppCompatActivity {
                 }
 
                 String msg = String.format(getString(R.string.request_permission_format), message);
-                permissionDialog = new AlertDialog.Builder(this)
+                permissionDialog = new MaterialDialog.Builder(this)
 //                        .iconRes(R.drawable.ic_notification)
-                        .setTitle(R.string.tips)
-                        .setMessage(msg)
-                        .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
+                        .title(R.string.tips)
+                        .content(msg)
+                        .positiveText(R.string.sure)
+                        .positiveColor(getResources().getColor(R.color.colorPrimary))
+                        .onAny(new MaterialDialog.SingleButtonCallback() {
                             @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 ActivityCompat.requestPermissions(BaseActivity.this,
                                         permissionsList.toArray(new String[permissionsList.size()]),
                                         REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
                                 dialog.dismiss();
                             }
-                        })
-                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                permissionDialog.dismiss();
-                                Toast.makeText(context,getResources().getString(R.string.permission_exception_tips),Toast.LENGTH_SHORT).show();
-                                finish();
-                            }
-                        })
-                        .setCancelable(false)
-                        .create();
-//                        .onAny(new MaterialDialog.SingleButtonCallback() {
-//                            @Override
-//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                ActivityCompat.requestPermissions(BaseActivity.this,
-//                                        permissionsList.toArray(new String[permissionsList.size()]),
-//                                        REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-//                                dialog.dismiss();
-//                            }
-//                        }).build();
+                        }).build();
                 if (permissionDialog != null) {
                     permissionDialog.show();
                 }
@@ -477,13 +469,6 @@ public class BaseActivity extends AppCompatActivity {
             case Manifest.permission.READ_EXTERNAL_STORAGE://读写外部存储器权限
             case Manifest.permission.WRITE_EXTERNAL_STORAGE:
                 return getString(R.string.external_storage_permission_concise);
-//            case Manifest.permission.ACCESS_COARSE_LOCATION://定位权限
-//            case Manifest.permission.ACCESS_FINE_LOCATION:
-//                return getString(R.string.location_permission_concise);
-//            case Manifest.permission.BODY_SENSORS://传感器
-//                return getString(R.string.sensor_permission_concise);
-//            case Manifest.permission.RECORD_AUDIO://麦克风
-//                return getString(R.string.microphone_permission_concise);
             case Manifest.permission.READ_PHONE_STATE://电话状态
                 return getString(R.string.phone_permission_concise);
             case Manifest.permission.SEND_SMS:
@@ -530,35 +515,23 @@ public class BaseActivity extends AppCompatActivity {
                     if (msg != null && msg.length() > 0) {
                         String message = String.format(Locale.getDefault(), getString(R.string.permission_forbid_message_format), msg);
                         if (message != null)
-                            permissionDialog = new AlertDialog.Builder(this)
+                            permissionDialog = new MaterialDialog.Builder(this)
 //                                    .iconRes(R.drawable.ic_notification)
-                                    .setTitle(R.string.tips)
-                                    .setMessage(message)
-                                    .setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener(){
-
+                                    .title(R.string.tips)
+                                    .content(message)
+                                    .positiveText(getResources().getString(R.string.sure))
+                                    .positiveColor(getResources().getColor(R.color.colorPrimary))
+                                    .onAny(new MaterialDialog.SingleButtonCallback() {
                                         @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            openAppDetail();
+                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                            dialog.dismiss();
+                                            switch (which) {
+                                                case POSITIVE:
+                                                    openAppDetail();
+                                                    break;
+                                            }
                                         }
-                                    })
-                                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-
-                                        }
-                                    })
-                                    .create();
-//                                    .onAny(new MaterialDialog.SingleButtonCallback() {
-//                                        @Override
-//                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-//                                            dialog.dismiss();
-//                                            switch (which) {
-//                                                case POSITIVE:
-//                                                    openAppDetail();
-//                                                    break;
-//                                            }
-//                                        }
-//                                    }).build();
+                                    }).build();
                         if (permissionDialog != null) {
                             permissionDialog.show();
                         }

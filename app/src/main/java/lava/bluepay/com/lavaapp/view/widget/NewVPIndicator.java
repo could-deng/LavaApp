@@ -13,8 +13,6 @@ import android.widget.RadioGroup;
 import java.lang.ref.WeakReference;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
-import lava.bluepay.com.lavaapp.common.Utils;
-import okhttp3.internal.Util;
 
 /**
  * viewPager的指示器
@@ -78,15 +76,16 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
             return;
         }
         //todo 资源
-        mIndicatorColor = getResources().getColor(R.color.activity_main_nav_radio_bg_check);
+        mIndicatorColor = getResources().getColor(R.color.indicator_textColor_check);
 
-        mIndicatorWidth = ViewUtils.dp2px(getContext().getResources(),65);
+        mIndicatorWidth = ViewUtils.dp2px(getContext().getResources(),50);
         mIndicatorHeight = ViewUtils.dp2px(context.getResources(),1);
-        mTextColor = getResources().getColor(R.color.activity_indicator_textColor_def);
+        mTextColor = getResources().getColor(R.color.indicator_textColor_def);
         mTextSize = 18;
 
         mPaint = new Paint();
         mPaint.setColor(mIndicatorColor);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
         mPaint.setStrokeWidth(2 * mIndicatorHeight);
     }
 
@@ -205,7 +204,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         canvas.save();
-        canvas.translate(mTranslationX,getHeight()-4);
+        canvas.translate(mTranslationX,getHeight()-2*mPaint.getStrokeWidth());
         canvas.drawLine((mTabWidth - mIndicatorWidth) / 2, 0, (mTabWidth + mIndicatorWidth) / 2, 0, mPaint);
         canvas.restore();
     }

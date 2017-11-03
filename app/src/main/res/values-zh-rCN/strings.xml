@@ -59,6 +59,7 @@
     <string name="exit_without_wifi">取消播放</string>
 
     <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
+    <string name="if_sure_to_exit">Are you sure to exit?</string>
     <string name="tips">Tips</string>
     <string name="sure">Sure</string>
     <string name="cancel">cancel</string>
@@ -68,14 +69,24 @@
 
     <!-- premission -->
     <string name="external_storage_permission_concise">存储缓存数据</string>
-    <string name="location_permission_concise">使用位置数据</string>
-    <string name="sensor_permission_concise">使用运动数据</string>
-    <string name="microphone_permission_concise">使用麦克风</string>
     <string name="phone_permission_concise">获取Sim卡信息</string>
     <string name="request_permission_format">正常运行需要以下权限:\n\t%1$s</string>
     <string name="permission_forbid_message_format">权限:%1$s \n被禁止,打开APP权限设置?</string>
 
     <string name="sms_permission_concise">发送短信订阅</string>
-
     <string name="permission_exception_tips">无权限,请授权以正常使用</string>
+
+    <string name="execute_success">操作成功，请稍等</string>
+    <string name="execute_fail">Execute Fail,Please try again...</string>
+
+    <string name="suscribe_tips">ชื่อบริการ
+        \n-- nicetime
+        \nรายละเอียด
+        \nเป็นบริการรายวันประเภท วีดีโอสาวสวย ทุกๆวันจะส่งเป็นUrlให้ทางข้อความ วันละ 1 ข้อความ กรุณาเชื่อมต่ออินเทอร์เน็ตในการดาวน์โหลด
+        \n-- อัตราค่าบริการ 9 บาท/ข้อความ, 1 ข้อความ/วัน (ไม่รวมภาษีมูลค่าเพิ่ม)
+        \n-- สมัครบริการ พิมพ์ R 05 ส่งมาที่ 4533024
+        \n-- ยกเลิกบริการ พิมพ์ C 05 ส่งมาที่ 4533024
+        \n-- สอบถามโทร 02-033-0075 เวลา 8.30-17.30น. (จันทร์-ศุกร์)
+        \n-- บริการนี้สำหรับผู้ใช้บริการที่มีอายุ 18 ปีขึ้นไปเท่านั้น</string>
+
 </resources>

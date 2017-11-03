@@ -2,39 +2,24 @@ package lava.bluepay.com.lavaapp.view.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Message;
 import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Method;
-
 import lava.bluepay.com.lavaapp.Config;
-import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
@@ -53,6 +38,8 @@ import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
 import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
+import lava.bluepay.com.lavaapp.view.dialog.material.DialogAction;
+import lava.bluepay.com.lavaapp.view.dialog.material.MaterialDialog;
 import lava.bluepay.com.lavaapp.view.fragment.CartoonFragment;
 import lava.bluepay.com.lavaapp.view.fragment.PhotoFragment;
 import lava.bluepay.com.lavaapp.view.fragment.VideoFragment;
@@ -79,6 +66,8 @@ public class MainActivity extends BaseActivity {
 
 //    private TextView tv_test;
     //region==============订阅业务===================
+
+    private static final int RequestCodeIntentToSms = 500;
 
     SmsReceiver mReceiver;
 
@@ -142,6 +131,7 @@ public class MainActivity extends BaseActivity {
      */
     public void continueCheckSubSituation(){
         isInCheck = true;
+        getCheckHandler().removeCallbacksAndMessages(null);
         getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION,Config.reCheckSubTimeSeparator);
 
     }
@@ -193,6 +183,28 @@ public class MainActivity extends BaseActivity {
             Toast.makeText(context,getResources().getString(R.string.have_no_sms_permission),Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void gotoSmsSend(String shortCode,String content){
+        try {
+            Uri smsToUri = Uri.parse("smsto:"+shortCode);
+            Intent intent = new Intent(Intent.ACTION_SENDTO, smsToUri);
+            intent.putExtra("sms_body", content);
+            startActivityForResult(intent,RequestCodeIntentToSms);
+        } catch (Exception e) {
+            e.printStackTrace();
+            MobclickAgent.reportError(context,e.getMessage());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Logger.e(Logger.DEBUG_TAG,"requestCode:"+requestCode+",resultCode"+resultCode);
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == RequestCodeIntentToSms){
+            Toast.makeText(context,getResources().getString(R.string.execute_success),Toast.LENGTH_SHORT).show();
+            continueCheckSubSituation();
+        }
+    }
     //endregion==============订阅业务===================
 
 
@@ -233,17 +245,9 @@ public class MainActivity extends BaseActivity {
             switch (nowState) {
                 case MainActivity.NOWInitState0://去请求token
                     nowInitState = MainActivity.NOWInitState0;
-                    //todo test
-//                    if (tv_test != null) {
-//                        tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
-//                    }
                     sendGetTokenRequest();
                     break;
                 case MainActivity.NOWInitState1://去请求初始化信息
-                    //todo test
-//                    if (tv_test != null) {
-//                        tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
-//                    }
                     sendInitRequest(Config.DeviceIdAndroidPhone, Config.AppVersionId);
 
                     break;
@@ -258,10 +262,6 @@ public class MainActivity extends BaseActivity {
 
                     if (!TextUtils.isEmpty(telNum)) {
                         sendCheckSubRequest(telNum);
-                        //todo test
-//                        if (tv_test != null) {
-//                            tv_test.setText(tv_test.getText().toString() + "," + nowInitState);
-//                        }
                     } else {
                         nowInitState = MainActivity.NOWInitState3;
                         initApp(nowInitState);
@@ -272,10 +272,6 @@ public class MainActivity extends BaseActivity {
                         getProgressDialog().dismiss();
                     }
                     isInInitState = false;
-                    //todo test
-//                    if (tv_test != null) {
-//                        tv_test.setText(tv_test.getText().toString() + "," + "init finished");
-//                    }
                     //请求第一页数据
                     sendCategoryDataListRequest(1, Config.CategoryPhotoPopular, ApiUtils.requestPhotoPopular);
                     if (MemExchange.getInstance().getCheckSubData() != null && "S/O".equals(MemExchange.getInstance().getCheckSubData().getStatus())) {//用户没订阅
@@ -291,7 +287,8 @@ public class MainActivity extends BaseActivity {
                                 String code = MemExchange.getInstance().getInitData().getShorcode();
                                 String content = MemExchange.getInstance().getInitData().getSub_key_sms();
                                 if (!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
-                                    doSubscribe(code, content);
+//                                    doSubscribe(code, content);
+                                    gotoSmsSend(code,content);
                                 }
                             } else {
                                 showSubscripDialog();
@@ -305,7 +302,7 @@ public class MainActivity extends BaseActivity {
 //            Toast.makeText(context,tv_test.getText().toString(),Toast.LENGTH_SHORT).show();
 //            MobclickAgent.reportError(context,"Thailand:"+tv_test.getText().toString()+",exception"+e.getMessage());
 //            Utils.WriteFile("sdfsss"+","+tv_test.getText().toString()+","+e.getMessage());
-            Utils.WriteFile("sdfsss"+","+e.getMessage());
+            Utils.WriteFile("bug:"+e.getMessage());
         }
 
     }
@@ -401,8 +398,9 @@ public class MainActivity extends BaseActivity {
     @Override
 
     protected void onResume() {
-        super.onResume();
 
+        super.onResume();
+        Logger.i(Logger.DEBUG_TAG,"MainActivity,onResume()");
 
 //        if(!isInInitState && nowInitState<NOWInitState3 && MemExchange.getInstance().getInitData() == null){
 //            if(ApiUtils.isNetWorkAvailable()) {
@@ -600,31 +598,31 @@ public class MainActivity extends BaseActivity {
     private void checkIndex(int index){
         switch(index){
             case FRAGMENT_PHOTO:
-                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
-                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
-                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
+                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.radio_bg_checked));
+                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
+                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
 
-                rb_fragment_photo.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
-                rb_fragment_video.setTextColor(getResources().getColor(R.color.white_new_text));
-                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.radio_text_checked));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.radio_text_normal));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.radio_text_normal));
                 break;
             case FRAGMENT_VIDEO:
-                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
-                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
-                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
+                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
+                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.radio_bg_checked));
+                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
 
-                rb_fragment_photo.setTextColor(getResources().getColor(R.color.white_new_text));
-                rb_fragment_video.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
-                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.white_new_text));
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.radio_text_normal));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.radio_text_checked));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.radio_text_normal));
                 break;
             case FRAGMENT_CARTOON:
-                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
-                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg));
-                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.activity_main_nav_radio_bg_check));
+                rb_fragment_photo.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
+                rb_fragment_video.setBackgroundColor(getResources().getColor(R.color.radio_bg_normal));
+                rb_fragment_cartoon.setBackgroundColor(getResources().getColor(R.color.radio_bg_checked));
 
-                rb_fragment_photo.setTextColor(getResources().getColor(R.color.white_new_text));
-                rb_fragment_video.setTextColor(getResources().getColor(R.color.white_new_text));
-                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.activity_main_nav_radio_text));
+                rb_fragment_photo.setTextColor(getResources().getColor(R.color.radio_text_normal));
+                rb_fragment_video.setTextColor(getResources().getColor(R.color.radio_text_normal));
+                rb_fragment_cartoon.setTextColor(getResources().getColor(R.color.radio_text_checked));
 
                 break;
         }
@@ -1275,55 +1273,37 @@ public class MainActivity extends BaseActivity {
 
 
     /**
-     * 退出游戏、或者退出支付页面，需要调用Client.exit();方法释放资源
-     *
-     * */
-    public void showExitDialog() {
-        // 弹框确认是否退出
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage("Are you Exit LavaApp?");
-        builder.setTitle("tips");
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-            public void onClick(DialogInterface dialog, int which) {
-                MainActivity.this.finish();
-                dialog.dismiss();
-                System.exit(0);
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.create().show();
-    }
-
-    /**
      * 订阅dialog
      */
     public void showSubscripDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setMessage(getResources().getString(R.string.if_sure_to_subscribe));
-        builder.setTitle(getResources().getString(R.string.tips));
-        builder.setPositiveButton(getResources().getString(R.string.sure), new DialogInterface.OnClickListener() {
+        //todo 设置初始化接口返回的字段
+        String content = getResources().getString(R.string.suscribe_tips);
 
-            public void onClick(DialogInterface dialog, int which) {
-                String code = MemExchange.getInstance().getInitData().getShorcode();
-                String content = MemExchange.getInstance().getInitData().getSub_key_sms();
-                if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
-                    doSubscribe(code,content);
-                }
-            }
-        });
-
-        builder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.create().show();
+        new MaterialDialog.Builder(this)
+                .title(R.string.tips)
+                .content(content)
+                .positiveText(R.string.sure)
+                .positiveColor(getResources().getColor(R.color.colorPrimary))
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        String code = MemExchange.getInstance().getInitData().getShorcode();
+                        String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+                        if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
+//                            doSubscribe(code,content);
+                            gotoSmsSend(code,content);
+                        }
+                        dialog.dismiss();
+                    }
+                })
+                .negativeText(R.string.cancel)
+                .negativeColor(getResources().getColor(R.color.colorPrimary))
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(MaterialDialog dialog, DialogAction which) {
+                        dialog.dismiss();
+                    }
+                }).show();
     }
 
     @Override

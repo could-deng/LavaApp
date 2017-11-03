@@ -49,7 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:orientation="horizontal"
-        android:background="@color/colorPrimaryDark"
+        android:background="@color/video_view_bottom_bar_bg"
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical">
         <TextView
