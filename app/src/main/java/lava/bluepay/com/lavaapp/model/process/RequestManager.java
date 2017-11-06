@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
@@ -161,6 +162,7 @@ public class RequestManager {
 
 
     private void sendRequestResultMessage(String sResult,Handler handler,int iRequestType) {
+        Utils.WriteFile(sResult+"\n");
         if(isHttpResultValid(sResult)) {
             sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_FINISH);
         }else{

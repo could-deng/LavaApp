@@ -34,7 +34,7 @@ public class MixApp extends Application {
         }
         FileUtils.makeFolders(Config.PHOTO_PATH);
 
-        UmengAnalysisHelper.getInstance().onApplicationCreate(true);
+        UmengAnalysisHelper.getInstance().onApplicationCreate(false);
 
 //        BlockCanary.install(this, new AppBlockCanaryContext()).start();
 //        refWatcher = LeakCanary.install(this);//LeakCanary

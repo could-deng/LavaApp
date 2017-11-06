@@ -445,13 +445,19 @@ public class PhotoFragment extends BaseFragment {
         vp_photo.setCurrentItem(0);
 
         //todo bug
-        Activity activity = getActivity();
-        String[] titles;
+        final Activity activity = getActivity();
+
         if(activity!=null && activity instanceof MainActivity){
-            titles = new String[]{getContext().getString(R.string.photo_popular),
+            final String[] titles = new String[]{getContext().getString(R.string.photo_popular),
             getContext().getString(R.string.photo_portray),getContext().getString(R.string.photo_scenery)};
             ((MainActivity)activity).setToolbar(false);
-            ((MainActivity)activity).setIndicator(vp_photo,titles);
+            ((MainActivity)(activity)).getIndicator().post(new Runnable() {
+                @Override
+                public void run() {
+                    ((MainActivity)activity).setIndicator(vp_photo,titles);
+                }
+            });
+
         }
         return view;
     }

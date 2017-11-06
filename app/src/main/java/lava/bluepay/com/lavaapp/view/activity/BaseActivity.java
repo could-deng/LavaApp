@@ -68,6 +68,10 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
+    public NewVPIndicator getIndicator() {
+        return indicator;
+    }
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,6 +183,9 @@ public class BaseActivity extends AppCompatActivity {
         Logger.e(Logger.DEBUG_TAG,"processReqError(),result = "+msg.getData().getString("resultString"));
         String mResult = msg.getData().getString("resultString");
         BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
+        if(bean == null){
+            return;
+        }
         switch (bean.getCode()){
             case ApiUtils.HTTP_NETWORK_FAIL:
             case ApiUtils.HTTP_REQUEST_EXCEPTION:
@@ -408,30 +415,31 @@ public class BaseActivity extends AppCompatActivity {
         if (permissionsList.size() > 0) {
             if (permissionsNeeded.size() > 0) {
                 // Need Rationale
-                String message = permissionsNeeded.get(0);
-                for (int i = 1; i < permissionsNeeded.size(); i++) {
-                    message = message + "\n\t" + permissionsNeeded.get(i);
-                }
-
-                String msg = String.format(getString(R.string.request_permission_format), message);
-                permissionDialog = new MaterialDialog.Builder(this)
-//                        .iconRes(R.drawable.ic_notification)
-                        .title(R.string.tips)
-                        .content(msg)
-                        .positiveText(R.string.sure)
-                        .positiveColor(getResources().getColor(R.color.colorPrimary))
-                        .onAny(new MaterialDialog.SingleButtonCallback() {
-                            @Override
-                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+//                String message = permissionsNeeded.get(0);
+//                for (int i = 1; i < permissionsNeeded.size(); i++) {
+//                    message = message + "\n\t" + permissionsNeeded.get(i);
+//                }
+//
+//                String msg = String.format(getString(R.string.request_permission_format), message);
+//                permissionDialog = new MaterialDialog.Builder(this)
+////                        .iconRes(R.drawable.ic_notification)
+//                        .title(R.string.tips)
+//                        .content(msg)
+//                        .positiveText(R.string.sure)
+//                        .positiveColor(getResources().getColor(R.color.colorPrimary))
+//                        .cancelable(false)
+//                        .onAny(new MaterialDialog.SingleButtonCallback() {
+//                            @Override
+//                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                 ActivityCompat.requestPermissions(BaseActivity.this,
                                         permissionsList.toArray(new String[permissionsList.size()]),
                                         REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
-                                dialog.dismiss();
-                            }
-                        }).build();
-                if (permissionDialog != null) {
-                    permissionDialog.show();
-                }
+//                                dialog.dismiss();
+//                            }
+//                        }).build();
+//                if (permissionDialog != null) {
+//                    permissionDialog.show();
+//                }
                 return;
             }
             ActivityCompat.requestPermissions(this,
@@ -505,10 +513,10 @@ public class BaseActivity extends AppCompatActivity {
                     for (int i = 0; i < permissions.length && i < grantResults.length; i++) {
                         if (permissions[i] != null) {
                             if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {//权限被允许
-                                handlePermissionAllowed(permissions[i]);
+//                                handlePermissionAllowed(permissions[i]);
                             } else {//权限被禁止
                                 msg += "\n\t\t" + getPermissionConciseName(permissions[i]);
-                                handlePermissionForbidden(permissions[i]);
+//                                handlePermissionForbidden(permissions[i]);
                             }
                         }
                     }
@@ -521,6 +529,7 @@ public class BaseActivity extends AppCompatActivity {
                                     .content(message)
                                     .positiveText(getResources().getString(R.string.sure))
                                     .positiveColor(getResources().getColor(R.color.colorPrimary))
+                                    .cancelable(false)
                                     .onAny(new MaterialDialog.SingleButtonCallback() {
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -535,6 +544,8 @@ public class BaseActivity extends AppCompatActivity {
                         if (permissionDialog != null) {
                             permissionDialog.show();
                         }
+                    }else{
+                        handlePermissionAllowed("");
                     }
                 }
                 break;
@@ -568,7 +579,8 @@ public class BaseActivity extends AppCompatActivity {
         Uri uri = Uri.fromParts("package", getPackageName(), null);
         intent.setData(uri);
         if (intent != null && intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+//            startActivity(intent);
+            startActivityForResult(intent,MainActivity.RequestCodeIntentToPermissionSetting);
         }
     }
 

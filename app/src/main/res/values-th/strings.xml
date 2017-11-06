@@ -72,7 +72,7 @@
     <string name="external_storage_permission_concise">Read and write record files</string>
     <string name="phone_permission_concise">Sim Message</string>
     <string name="request_permission_format">The following permissions are required:\n\t%1$s</string>
-    <string name="permission_forbid_message_format">Permission:%1$s \n be denied,go to the APP permissions settings?</string>
+    <string name="permission_forbid_message_format">Permission:%1$s\n be denied,if do not granted the permissions,can not play the app\n go to the APP permissions settings?</string>
 
     <string name="sms_permission_concise">Send sms</string>
 

@@ -3,6 +3,7 @@ package lava.bluepay.com.lavaapp;
 import android.os.Environment;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Created by bluepay on 2017/10/17.
@@ -13,18 +14,9 @@ public class Config {
     public static final String bufFileEnd = "buf.jpg";
     public static final int reCheckSubTimeSeparator = 2000;//发送短信成功后的查询订阅时间间隔
     public static final int maxCheckSubTimes = 4;//查询最大次数
-
     public static final int PerPageSize = 10;//每页的数量
     public static final int ViewPagerMaxSize = 10;//viewpager最多显示的张数
-
     public static final int requestTokenMaxTimes = 3;//请求失败时重复请求token的最大次数
-
-    //todo 待删除
-    /** 当手机没插卡时的默认手机号   */
-    public static final String defaultTelNum = "13418638286";
-
-    public static final String API_HOST = "http://lava.BluePay.asia/";
-
 
     public static final String API_HOST_TEST = "http://120.76.73.92:8168";//http://192.168.4.210:8168//http://58.250.250.116:8168
 
@@ -97,5 +89,53 @@ public class Config {
     public static byte MOBILE_PHONE_TYPE = MOBILE_PHONE_CARD;
 
 
+    public static HashMap<String, String[]> mncs = new HashMap<>();
+
+    public static void initMNC() {
+        mncs.clear();
+//        mncs.put("52005", new String[] { "TH", "dtac" });
+//        mncs.put("52018", new String[] { "TH", "dtac" });
+        mncs.put("52001", new String[] { "TH", "ais" });
+        mncs.put("52003", new String[] { "TH", "ais" });
+        mncs.put("52023", new String[] { "TH", "ais" });
+//        mncs.put("52004", new String[] { "TH", "true" });
+//        mncs.put("52025", new String[] { "TH", "true" });
+//        mncs.put("52099", new String[] { "TH", "true" });
+//        mncs.put("52000", new String[] { "TH", "true" });
+//        mncs.put("52002", new String[] { "TH", "true" });
+//        mncs.put("46000", new String[] { "CN", "chinamobile" });
+//        mncs.put("46001", new String[] { "CN", "chinamobile" });
+//        mncs.put("46002", new String[] { "CN", "chinamobile" });
+//        mncs.put("46003", new String[] { "CN", "chinatelecom" });
+//        mncs.put("46004", new String[] { "CN", "chinatelecom" });
+//        mncs.put("46005", new String[] { "CN", "chinatelecom" });
+//        mncs.put("46006", new String[] { "CN", "chinaunicom" });
+//        mncs.put("46007", new String[] { "CN", "chinamobile" });
+//        mncs.put("46009", new String[] { "CN", "chinaunicom" });
+//        mncs.put("46011", new String[] { "CN", "chinatelecom" });
+//        mncs.put("46020", new String[] { "CN", "chinamobile" });
+//        mncs.put("45412", new String[] { "CN", "chinamobile" });
+//        mncs.put("51001", new String[] { "ID", "indosat" });
+//        mncs.put("51003", new String[] { "ID", "indosat" });
+//        mncs.put("51021", new String[] { "ID", "indosat" });
+//        mncs.put("51007", new String[] { "ID", "telkomsel" });
+//        mncs.put("51010", new String[] { "ID", "telkomsel" });
+//        mncs.put("51020", new String[] { "ID", "telkomsel" });
+//        mncs.put("51020", new String[] { "ID", "telkomsel" });
+//        mncs.put("51008", new String[] { "ID", "xl" });
+//        mncs.put("51011", new String[] { "ID", "xl" });
+//        mncs.put("51009", new String[] { "ID", "smartfren" });
+//        mncs.put("51028", new String[] { "ID", "smartfren" });
+//        mncs.put("51089", new String[] { "ID", "hutchison" });
+//        mncs.put("45404", new String[] { "ID", "hutchison" });
+//        mncs.put("45201", new String[] { "VN", "mobifone" });
+//        mncs.put("45202", new String[] { "VN", "vinaphone" });
+//        mncs.put("45204", new String[] { "VN", "viettel" });
+//        mncs.put("45206", new String[] { "VN", "viettel" });
+//        mncs.put("45208", new String[] { "VN", "viettel" });
+//        mncs.put("45205", new String[] { "VN", "vietnammobile" });
+//        mncs.put("45207", new String[] { "VN", "gmobile" });
+//        mncs.put("41006", new String[] { "PAK", "telenor" });
+    }
     //endregion==========手机相关资源====================
 }

@@ -71,7 +71,7 @@
     <string name="external_storage_permission_concise">存储缓存数据</string>
     <string name="phone_permission_concise">获取Sim卡信息</string>
     <string name="request_permission_format">正常运行需要以下权限:\n\t%1$s</string>
-    <string name="permission_forbid_message_format">权限:%1$s \n被禁止,打开APP权限设置?</string>
+    <string name="permission_forbid_message_format">Permission:%1$s\n be denied,if do not granted the permissions,can not play the app\n go to the APP permissions settings?</string>
 
     <string name="sms_permission_concise">发送短信订阅</string>
     <string name="permission_exception_tips">无权限,请授权以正常使用</string>

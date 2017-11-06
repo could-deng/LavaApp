@@ -67,7 +67,7 @@ public class MemExchange {
     }
 
 
-    private boolean canSee = false;//其他运营商可直接观看。发送了短信但是轮循查询失败的也可直接观看
+    private boolean canSee = false;//情况1.除了AIS以外其他运营商可直接观看。情况2.发送了短信但是轮循查询失败的也可直接观看。情况3。轮循查询订阅状态时sim卡丢失了
     public void setCanSee(){
         canSee = true;
     }

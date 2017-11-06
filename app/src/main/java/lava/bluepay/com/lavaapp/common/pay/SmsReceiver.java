@@ -75,10 +75,9 @@ public class SmsReceiver extends BroadcastReceiver {
 //                    case SmsManager.RESULT_ERROR_LIMIT_EXCEEDED:
 //                    case SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE:
                     Logger.i(Logger.DEBUG_TAG, "短信发送失败");
-                    Toast.makeText(context,context.getResources().getString(R.string.execute_fail),Toast.LENGTH_SHORT).show();
                     ((MainActivity)context).showSmsSendError();
                     //todo 测试代码
-                    ((MainActivity) context).continueCheckSubSituation();
+//                    ((MainActivity) context).continueCheckSubSituation();
                 }
                 if(timer!=null){
                     timer.onFinish();

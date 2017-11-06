@@ -39,8 +39,6 @@ import lava.bluepay.com.lavaapp.view.widget.video.FullScreenVideoView;
 
 public class PlayVideoActivity extends AppCompatActivity {
 
-
-
     LinearLayout header_view;
     TextView tv_video_title;
     ImageView iv_back;
@@ -317,9 +315,6 @@ public class PlayVideoActivity extends AppCompatActivity {
          */
         video_view.setVideoURI(Uri.parse(video.getVideoUrl()));
         showProgressBar();
-//        Logger.e(Logger.DEBUG_TAG,"before,curPos="+video_view.getCurrentPosition());
-//        video_view.seekTo(0);
-//        Logger.e(Logger.DEBUG_TAG,"after,curPos="+video_view.getCurrentPosition());
         video_view.start();
         video_view.requestFocus();
     }
@@ -488,7 +483,7 @@ public class PlayVideoActivity extends AppCompatActivity {
     /**
      * 动态设置状态栏是否显示
      *
-     * @param enable 1、true 显示  2、false 不显示
+     * @param enable 1、true 全屏,不显示  2、false 不全屏,显示
      */
     private void full(boolean enable) {
         if (enable) {
@@ -528,7 +523,7 @@ public class PlayVideoActivity extends AppCompatActivity {
      */
     private void showVideoControllerLayout(){
         bControllerHide = false;
-        full(false);
+//        full(false);
         error_layout.setVisibility(View.VISIBLE);
         ll_video_bottom_layout.setVisibility(View.VISIBLE);
         header_view.setVisibility(View.VISIBLE);
@@ -542,7 +537,7 @@ public class PlayVideoActivity extends AppCompatActivity {
 
     private void hideLayout(){
         bControllerHide = true;
-        full(true);
+//        full(true);
         error_layout.setVisibility(View.GONE);
         header_view.setVisibility(View.GONE);
         ll_video_bottom_layout.setVisibility(View.GONE);
