@@ -101,8 +101,8 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
             onPageSelected(mCurrentPosition);
             mTabCount = mTitles.length;
             if(mTabCount>0) {
-//                mTabWidth = ((getWidth()== 0)?(ViewUtils.dp2px(getContext(),180)):getWidth())/mTabCount;
-                mTabWidth = getWidth()/mTabCount;
+                mTabWidth = ((getWidth()== 0)?(ViewUtils.dp2px(getContext(),180)):getWidth())/mTabCount;
+//                mTabWidth = getWidth()/mTabCount;
             }
             generateTitleView();
         }

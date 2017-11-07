@@ -7,6 +7,7 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import lava.bluepay.com.lavaapp.common.FileUtils;
 import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
+
 /**
  * Created by bluepay on 2017/10/14.
  */
@@ -14,7 +15,7 @@ import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
 public class MixApp extends Application {
     private static Context context;
 //    private RefWatcher refWatcher;
-
+//
 //    public static RefWatcher getRefWatcher(Context context) {
 //        MixApp application = (MixApp) context.getApplicationContext();
 //        return application.refWatcher;

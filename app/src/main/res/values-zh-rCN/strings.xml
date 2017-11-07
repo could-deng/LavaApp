@@ -3,9 +3,9 @@
     <string name="app_name">LavaApp</string>
     <string name="AppTitle">LavaApp</string>
 
-    <string name="title_photo">Photo</string>
-    <string name="title_video">Video</string>
-    <string name="title_Cartoon">Cartoon</string>
+    <string name="title_photo">图片</string>
+    <string name="title_video">视频</string>
+    <string name="title_Cartoon">卡通</string>
 
 
     <!--图片-->
@@ -58,11 +58,11 @@
     <string name="sure_to_play_without_wifi">继续播放</string>
     <string name="exit_without_wifi">取消播放</string>
 
-    <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
-    <string name="if_sure_to_exit">Are you sure to exit?</string>
-    <string name="tips">Tips</string>
-    <string name="sure">Sure</string>
-    <string name="cancel">cancel</string>
+    <string name="if_sure_to_subscribe">确定订阅？</string>
+    <string name="if_sure_to_exit">确定退出？</string>
+    <string name="tips">提示</string>
+    <string name="sure">确定</string>
+    <string name="cancel">取消</string>
     <string name="have_no_sms_permission">没有短信权限</string>
 
 
@@ -76,17 +76,17 @@
     <string name="sms_permission_concise">发送短信订阅</string>
     <string name="permission_exception_tips">无权限,请授权以正常使用</string>
 
-    <string name="execute_success">操作成功，请稍等</string>
-    <string name="execute_fail">Execute Fail,Please try again...</string>
+    <string name="execute_success">操作成功,请稍等</string>
+    <string name="execute_fail">操作失败,请重新操作</string>
 
-    <string name="suscribe_tips">ชื่อบริการ
-        \n-- nicetime
-        \nรายละเอียด
-        \nเป็นบริการรายวันประเภท วีดีโอสาวสวย ทุกๆวันจะส่งเป็นUrlให้ทางข้อความ วันละ 1 ข้อความ กรุณาเชื่อมต่ออินเทอร์เน็ตในการดาวน์โหลด
-        \n-- อัตราค่าบริการ 9 บาท/ข้อความ, 1 ข้อความ/วัน (ไม่รวมภาษีมูลค่าเพิ่ม)
-        \n-- สมัครบริการ พิมพ์ R 05 ส่งมาที่ 4533024
-        \n-- ยกเลิกบริการ พิมพ์ C 05 ส่งมาที่ 4533024
-        \n-- สอบถามโทร 02-033-0075 เวลา 8.30-17.30น. (จันทร์-ศุกร์)
-        \n-- บริการนี้สำหรับผู้ใช้บริการที่มีอายุ 18 ปีขึ้นไปเท่านั้น</string>
+    <!--<string name="suscribe_tips">ชื่อบริการ-->
+        <!--\n&#45;&#45; nicetime-->
+        <!--\nรายละเอียด-->
+        <!--\nเป็นบริการรายวันประเภท วีดีโอสาวสวย ทุกๆวันจะส่งเป็นUrlให้ทางข้อความ วันละ 1 ข้อความ กรุณาเชื่อมต่ออินเทอร์เน็ตในการดาวน์โหลด-->
+        <!--\n&#45;&#45; อัตราค่าบริการ 9 บาท/ข้อความ, 1 ข้อความ/วัน (ไม่รวมภาษีมูลค่าเพิ่ม)-->
+        <!--\n&#45;&#45; สมัครบริการ พิมพ์ R 05 ส่งมาที่ 4533024-->
+        <!--\n&#45;&#45; ยกเลิกบริการ พิมพ์ C 05 ส่งมาที่ 4533024-->
+        <!--\n&#45;&#45; สอบถามโทร 02-033-0075 เวลา 8.30-17.30น. (จันทร์-ศุกร์)-->
+        <!--\n&#45;&#45; บริการนี้สำหรับผู้ใช้บริการที่มีอายุ 18 ปีขึ้นไปเท่านั้น</string>-->
 
 </resources>

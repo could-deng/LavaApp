@@ -177,10 +177,10 @@ public class PhotoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
                     Intent intent = new Intent();
@@ -253,10 +253,10 @@ public class PhotoFragment extends BaseFragment {
         rvPortrayAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
                     Intent intent = new Intent();
@@ -338,10 +338,10 @@ public class PhotoFragment extends BaseFragment {
         rvSceneryAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
                     Intent intent = new Intent();
@@ -451,12 +451,12 @@ public class PhotoFragment extends BaseFragment {
             final String[] titles = new String[]{getContext().getString(R.string.photo_popular),
             getContext().getString(R.string.photo_portray),getContext().getString(R.string.photo_scenery)};
             ((MainActivity)activity).setToolbar(false);
-            ((MainActivity)(activity)).getIndicator().post(new Runnable() {
-                @Override
-                public void run() {
+//            ((MainActivity)(activity)).getIndicator().post(new Runnable() {
+//                @Override
+//                public void run() {
                     ((MainActivity)activity).setIndicator(vp_photo,titles);
-                }
-            });
+//                }
+//            });
 
         }
         return view;

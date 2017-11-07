@@ -44,18 +44,18 @@
 
     <string name="sms_send_error">Sms Send Failure! Subscribe Failue!</string>
     <string name="sms_subscribe_success">Subscribe Done!</string>
-    <string name="sms_miss_can_not_see">无Sim卡,无法观看</string>
+    <string name="sms_miss_can_not_see">Have no Sim,Can not Play!</string>
 
-    <string name="initial_error">初始化错误,请重新启动</string>
+    <string name="initial_error">Initial failure,Please restart!</string>
 
 
     <string name="try_later">Please Try Later</string>
     <string name="have_no_network">Have no network,please try later</string>
 
 
-    <string name="if_sure_to_play_without_wifi">当前网络并非WIFI环境,是否继续播放</string>
-    <string name="sure_to_play_without_wifi">继续播放</string>
-    <string name="exit_without_wifi">取消播放</string>
+    <string name="if_sure_to_play_without_wifi">The current network is not WIFI, whether to continue to play?</string>
+    <string name="sure_to_play_without_wifi">Continue</string>
+    <string name="exit_without_wifi">Cancel</string>
 
 
     <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
@@ -63,7 +63,7 @@
     <string name="tips">Tips</string>
     <string name="sure">Sure</string>
     <string name="cancel">cancel</string>
-    <string name="have_no_sms_permission">没有短信权限</string>
+    <string name="have_no_sms_permission">Have not been granted Sms Permission</string>
 
 
 
@@ -80,15 +80,15 @@
     <string name="execute_success">Execute Successfully,work in progress</string>
     <string name="execute_fail">Execute Fail,Please try again...</string>
 
-    <string name="suscribe_tips">ชื่อบริการ
-        \n-- nicetime
-        \nรายละเอียด
-        \nเป็นบริการรายวันประเภท วีดีโอสาวสวย ทุกๆวันจะส่งเป็นUrlให้ทางข้อความ วันละ 1 ข้อความ กรุณาเชื่อมต่ออินเทอร์เน็ตในการดาวน์โหลด
-        \n-- อัตราค่าบริการ 9 บาท/ข้อความ, 1 ข้อความ/วัน (ไม่รวมภาษีมูลค่าเพิ่ม)
-        \n-- สมัครบริการ พิมพ์ R 05 ส่งมาที่ 4533024
-        \n-- ยกเลิกบริการ พิมพ์ C 05 ส่งมาที่ 4533024
-        \n-- สอบถามโทร 02-033-0075 เวลา 8.30-17.30น. (จันทร์-ศุกร์)
-        \n-- บริการนี้สำหรับผู้ใช้บริการที่มีอายุ 18 ปีขึ้นไปเท่านั้น</string>
+    <!--<string name="suscribe_tips">ชื่อบริการ-->
+        <!--\n&#45;&#45; nicetime-->
+        <!--\nรายละเอียด-->
+        <!--\nเป็นบริการรายวันประเภท วีดีโอสาวสวย ทุกๆวันจะส่งเป็นUrlให้ทางข้อความ วันละ 1 ข้อความ กรุณาเชื่อมต่ออินเทอร์เน็ตในการดาวน์โหลด-->
+        <!--\n&#45;&#45; อัตราค่าบริการ 9 บาท/ข้อความ, 1 ข้อความ/วัน (ไม่รวมภาษีมูลค่าเพิ่ม)-->
+        <!--\n&#45;&#45; สมัครบริการ พิมพ์ R 05 ส่งมาที่ 4533024-->
+        <!--\n&#45;&#45; ยกเลิกบริการ พิมพ์ C 05 ส่งมาที่ 4533024-->
+        <!--\n&#45;&#45; สอบถามโทร 02-033-0075 เวลา 8.30-17.30น. (จันทร์-ศุกร์)-->
+        <!--\n&#45;&#45; บริการนี้สำหรับผู้ใช้บริการที่มีอายุ 18 ปีขึ้นไปเท่านั้น</string>-->
 
 
 </resources>

@@ -144,10 +144,10 @@ public class VideoFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
                     if (rvPopularAdapter.getmDatas() != null) {
@@ -215,10 +215,10 @@ public class VideoFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
                     CategoryBean.DataBeanX.DataBean bean = rvFunnyAdapter.getmDatas().get(position);
@@ -282,10 +282,10 @@ public class VideoFragment extends BaseFragment {
         rvSportAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-                if(MemExchange.getInstance().ifHaveNoSim()){
-                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-                    return;
-                }
+//                if(MemExchange.getInstance().ifHaveNoSim()){
+//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
+//                    return;
+//                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
                     CategoryBean.DataBeanX.DataBean bean = rvSportAdapter.getmDatas().get(position);

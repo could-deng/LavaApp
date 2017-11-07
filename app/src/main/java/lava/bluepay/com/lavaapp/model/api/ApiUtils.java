@@ -17,6 +17,7 @@ public class ApiUtils {
     public static final int requestToken = 500;
     public static final int requestInit = 501;
     public static final int requestCheckSub = 502;
+    public static final int requestPhoneNum = 503;
     public static final int requestAllCategory = 10000;
 
     public static final int requestPhotoPopular = 10001;//图片-流行

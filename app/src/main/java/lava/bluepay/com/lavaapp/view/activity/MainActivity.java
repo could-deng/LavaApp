@@ -3,7 +3,6 @@ package lava.bluepay.com.lavaapp.view.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -17,15 +16,15 @@ import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-
 import com.umeng.analytics.MobclickAgent;
-
 import lava.bluepay.com.lavaapp.Config;
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Net;
 import lava.bluepay.com.lavaapp.common.Utils;
 import lava.bluepay.com.lavaapp.common.pay.PayHelper;
 import lava.bluepay.com.lavaapp.common.pay.SmsReceiver;
@@ -37,6 +36,7 @@ import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
+import lava.bluepay.com.lavaapp.model.api.bean.PhoneNumBean;
 import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.dialog.material.DialogAction;
@@ -251,10 +251,11 @@ public class MainActivity extends BaseActivity {
     }
 
     //初始化的三个阶段
-    private static final int NOWInitState0 = 0;
-    private static final int NOWInitState1 = 1;
-    private static final int NOWInitState2 = 2;
-    private static final int NOWInitState3 = 3;
+    private static final int NOWInitState0 = 0;//去请求token
+    private static final int NOWInitState1 = 1;//去请求初始化
+    private static final int NOWInitState2 = 2;//去请求订阅信息或者查手机号
+    private static final int NOWInitState3 = 3;//去拉取第一页信息
+    private static final int NOWInitState4 = 4;//由查手机号步骤完成之后进入的，去请求订阅信息
 
     private int nowInitState = 0;//当前阶段（//todo activity回收的情况）
     private boolean isInInitState = false;
@@ -287,14 +288,39 @@ public class MainActivity extends BaseActivity {
                     Logger.e(Logger.DEBUG_TAG, "imsi1=" + MemExchange.m_iIMSI1 + ",imsi2=" + MemExchange.m_iIMSI2 + ",imsi=" + MemExchange.m_iIMSI
                             + ",imei=" + MemExchange.m_iIMEI + ",pho=" + MemExchange.m_sPhoneNumber);
 
-                    if (!TextUtils.isEmpty(telNum) && Config.mncs.containsKey(telNum.substring(0, 5))) {
-                        Logger.e(Logger.DEBUG_TAG,"####为AIS用户");
-                        sendCheckSubRequest(telNum);
-                    } else {
-                        Logger.e(Logger.DEBUG_TAG,"####不为AIS用户");
+
+                    if(TextUtils.isEmpty(MemExchange.m_iIMSI) && !Net.isWifiActive(context)){
+                        sendAskForPhoneNum();
+                    }else{
+                        if (Config.mncs.containsKey(telNum.substring(0, 5))) {
+                            Logger.e(Logger.DEBUG_TAG,"####为AIS用户");
+                            sendCheckSubRequest(telNum);
+                        }else{
+                            Logger.e(Logger.DEBUG_TAG,"####不为AIS用户");
+                            MemExchange.getInstance().setCanSee();
+                            nowInitState = MainActivity.NOWInitState3;
+                            initApp(nowInitState);
+                        }
+                    }
+                    break;
+                case MainActivity.NOWInitState4:
+                    String tel = MemExchange.m_iIMSI;
+                    if(TextUtils.isEmpty(tel)){//肯定是没有sim卡了
+                        Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,无Sim卡");
                         MemExchange.getInstance().setCanSee();
                         nowInitState = MainActivity.NOWInitState3;
                         initApp(nowInitState);
+                    }else{
+                        if (Config.mncs.containsKey(tel.substring(0, 5))) {
+                            Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,为AIS用户");
+                            nowInitState = MainActivity.NOWInitState2;
+                            sendCheckSubRequest(tel);
+                        }else{
+                            Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,不为AIS用户");
+                            MemExchange.getInstance().setCanSee();
+                            nowInitState = MainActivity.NOWInitState3;
+                            initApp(nowInitState);
+                        }
                     }
                     break;
                 case MainActivity.NOWInitState3:
@@ -585,7 +611,6 @@ public class MainActivity extends BaseActivity {
         }
         return photoFragment;
     }
-
     private CartoonFragment getCartoonFragment(){
         if(cartoonFragment == null){
             cartoonFragment = new CartoonFragment();
@@ -673,6 +698,18 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
+     * 向运营商请求sim卡信息,获取手机号
+     */
+    public void sendAskForPhoneNum(){
+        try {
+            String sRequest = "http://www.jmtt.co.th/detection/index.php?token=66a8a0d8c66e4d18235c95085eb411b0";
+            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestPhoneNum,null);
+        }catch (Exception e){
+            e.printStackTrace();
+            //todo 上传错误日志
+        }
+    }
+    /**
      * 请求查询用户订阅状态
      * @param telNum
      */
@@ -725,8 +762,33 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processReqError(Message msg) {
         super.processReqError(msg);
-
         String mResult = getMessgeResult(msg);
+
+        if(msg.arg1 == ApiUtils.requestPhoneNum){
+
+            try {
+                PhoneNumBean phoneNumBean = JsonHelper.getObject(mResult, PhoneNumBean.class);
+                if (phoneNumBean != null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())) {
+                    Logger.e(Logger.DEBUG_TAG, "####经过运营商查询成功");
+                    MemExchange.m_iIMSI = phoneNumBean.getMsisdn();
+                    nowInitState = MainActivity.NOWInitState4;
+                    initApp(nowInitState);
+                } else {
+                    Logger.e(Logger.DEBUG_TAG, "####运营商查询失败,认为无Sim卡");
+                    MemExchange.getInstance().setCanSee();
+                    nowInitState = MainActivity.NOWInitState3;
+                    initApp(nowInitState);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+                Utils.WriteFile(e.getMessage().toString()+"\n");
+                MemExchange.getInstance().setCanSee();
+                nowInitState = MainActivity.NOWInitState3;
+                initApp(nowInitState);
+            }
+            return;
+        }
+
         BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
         if(bean.getCode() == ApiUtils.HTTP_NETWORK_FAIL || bean.getCode() == ApiUtils.HTTP_REQUEST_EXCEPTION) {
             switch (msg.arg1) {
@@ -745,6 +807,7 @@ public class MainActivity extends BaseActivity {
                     Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
                     finish();
                     break;
+
                 case ApiUtils.requestCheckSub:
                     if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
                         //初始化
@@ -793,7 +856,14 @@ public class MainActivity extends BaseActivity {
                     initApp(nowInitState);
                 }
                 break;
-
+            case ApiUtils.requestPhoneNum:
+                PhoneNumBean phoneNumBean = JsonHelper.getObject(result,PhoneNumBean.class);
+                if(phoneNumBean!=null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())){
+                    MemExchange.m_iIMSI = phoneNumBean.getMsisdn();
+                }
+                nowInitState = MainActivity.NOWInitState4;
+                initApp(nowInitState);
+                break;
             case ApiUtils.requestCheckSub:
                 CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
                 MemExchange.getInstance().setCheckSubData(subBean.getData());
@@ -813,9 +883,9 @@ public class MainActivity extends BaseActivity {
                             isInCheck = false;
                             nowCheckTime = 0;
                             getCheckHandler().removeCallbacksAndMessages(null);
-                            if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {//如果是后台直接发短信的情况,发送成功后轮循三遍都失败的话，可以看
+                            //如果是后台直接发短信的情况,发送成功后轮循三遍都失败的话，可以看
+                            if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
                                 MemExchange.getInstance().setCanSee();
-                                //todo 刷新界面
                                 SubSuccess();
                             }
                         }
@@ -823,7 +893,6 @@ public class MainActivity extends BaseActivity {
                         isInCheck = false;
                         nowCheckTime = 0;
                         getCheckHandler().removeCallbacksAndMessages(null);
-                        //todo 刷新界面
                         SubSuccess();
                     }
                 }
@@ -1285,8 +1354,10 @@ public class MainActivity extends BaseActivity {
      */
     public void showSubscripDialog(){
         //todo 设置初始化接口返回的字段
-        String content = (!TextUtils.isEmpty(MemExchange.getInstance().getInitData().getContent()))?(MemExchange.getInstance().getInitData().getContent()):getResources().getString(R.string.suscribe_tips);
-
+        String content = "";
+        if(MemExchange.getInstance().getInitData()!=null) {
+            content = (MemExchange.getInstance().getInitData().getContent());
+        }
         new MaterialDialog.Builder(this)
                 .title(R.string.tips)
                 .content(content)
@@ -1320,6 +1391,8 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+//        RefWatcher refWatcher = MixApp.getRefWatcher(this);
+//        refWatcher.watch(this);
         getCheckHandler().removeCallbacksAndMessages(null);
         getMyHandler().removeCallbacksAndMessages(null);//推出时清空全部消息
     }
