@@ -63,13 +63,13 @@ public class PhotoFragment extends BaseFragment {
                 break;
         }
         if(rvPopularAdapter!=null) {
-            rvPopularAdapter.notifyItemRangeChanged(0, (getPopularList().size() < 4) ? getPopularList().size() : 4);
+            rvPopularAdapter.notifyItemRangeChanged(0, (getPopularList().size() < 4) ? getPopularList().size() : 6);
         }
         if(rvPortrayAdapter!=null) {
-            rvPortrayAdapter.notifyItemRangeChanged(0, (getPortrayList().size() < 4) ? getPortrayList().size() : 4);
+            rvPortrayAdapter.notifyItemRangeChanged(0, (getPortrayList().size() < 4) ? getPortrayList().size() : 6);
         }
         if(rvSceneryAdapter!=null) {
-            rvSceneryAdapter.notifyItemRangeChanged(0, (getSceneryList().size() < 4) ? getSceneryList().size() : 4);
+            rvSceneryAdapter.notifyItemRangeChanged(0, (getSceneryList().size() < 4) ? getSceneryList().size() : 6);
         }
     }
 
@@ -182,7 +182,7 @@ public class PhotoFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -191,10 +191,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -214,11 +214,8 @@ public class PhotoFragment extends BaseFragment {
 //        bt_test.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
-//                String time = MemExchange.getInstance().getInitData().getTime();
-//                if (time.indexOf(",") == -1) {
-//                    return;
-//                }
-//                Logger.e(Logger.DEBUG_TAG,Utils.ifTimeIn(time)?"true":"false");
+//                boolean result = Utils.recordTrans(getActivity(),MemExchange.m_iIMSI,"");
+//                Logger.e(Logger.DEBUG_TAG,"result:"+(result?"success":"fail"));
 //            }
 //        });
 //
@@ -258,7 +255,7 @@ public class PhotoFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -267,10 +264,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -342,8 +339,9 @@ public class PhotoFragment extends BaseFragment {
 //                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
 //                    return;
 //                }
+
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -352,10 +350,10 @@ public class PhotoFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

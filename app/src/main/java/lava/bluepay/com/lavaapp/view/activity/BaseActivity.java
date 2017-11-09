@@ -253,9 +253,11 @@ public class BaseActivity extends AppCompatActivity {
                         if(lastBean.getRequestType()>ApiUtils.requestAllCategory){
                             String url = ApiUtils.getQuerypage(lastBean.getNowPage(),Config.PerPageSize,lastBean.getCateId(),MemExchange.getInstance().getTokenData().getToken());
                             RequestManager.getInstance().request(url,getMyHandler(),lastBean.getRequestType(),null);
-                        }else if(lastBean.getRequestType() == ApiUtils.requestCheckSub){
+                        }
+                        else if(lastBean.getRequestType() == ApiUtils.requestCheckSub){
                             ((MainActivity)context).sendCheckSubRequest(MemExchange.m_iIMSI);
-                        }else{
+                        }
+                        else{
                             Logger.e(Logger.DEBUG_TAG,"last request type = "+lastBean.getRequestType());
                         }
                     }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lava.bluepay.com.lavaapp.Config;
+import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
 import lava.bluepay.com.lavaapp.model.MemExchange;
@@ -143,7 +144,7 @@ public class CartoonFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -152,10 +153,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -207,7 +208,7 @@ public class CartoonFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -216,10 +217,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -269,7 +270,7 @@ public class CartoonFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())){
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
                     intent.setClass(getContext(), ViewPagerActivity.class);
                     Bundle bundle = new Bundle();
@@ -278,10 +279,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

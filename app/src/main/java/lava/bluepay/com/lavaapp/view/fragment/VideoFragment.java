@@ -149,7 +149,7 @@ public class VideoFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {
                     if (rvPopularAdapter.getmDatas() != null) {
                         CategoryBean.DataBeanX.DataBean bean = rvPopularAdapter.getmDatas().get(position);
                         if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
@@ -166,10 +166,10 @@ public class VideoFragment extends BaseFragment {
                     }
                 }else{
                     //未订阅的则提示是否订阅
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
             }
@@ -220,7 +220,7 @@ public class VideoFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {
                     CategoryBean.DataBeanX.DataBean bean = rvFunnyAdapter.getmDatas().get(position);
                     if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
                         return;
@@ -234,10 +234,10 @@ public class VideoFragment extends BaseFragment {
 
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -287,7 +287,7 @@ public class VideoFragment extends BaseFragment {
 //                    return;
 //                }
                 //订阅了的则进入
-                if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+                if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {
                     CategoryBean.DataBeanX.DataBean bean = rvSportAdapter.getmDatas().get(position);
                     if (bean == null || TextUtils.isEmpty(bean.getTitle()) || TextUtils.isEmpty(bean.getSeeds())) {
                         return;
@@ -301,10 +301,10 @@ public class VideoFragment extends BaseFragment {
 
                     startActivity(intent);
                 }else{
-                    if(((MainActivity)getActivity()).getIsInCheck()){
-                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+//                    if(((MainActivity)getActivity()).getIsInCheck()){
+//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

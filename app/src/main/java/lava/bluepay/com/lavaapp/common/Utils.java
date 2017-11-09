@@ -12,15 +12,17 @@ import android.text.TextUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
+import java.util.List;
 
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.model.MemExchange;
+import lava.bluepay.com.lavaapp.model.db.RecordDao;
+import lava.bluepay.com.lavaapp.model.db.autoSendRecord;
+import lava.bluepay.com.lavaapp.model.db.phoneNumRecord;
 import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
 
 /**
@@ -515,14 +517,81 @@ public class Utils {
 //        return res;
 //    }
 
-    public static void WriteFile(String info) {
-        try {
-            File file = new File(Config.Bug_PATH);
-            FileOutputStream fos = new FileOutputStream(file);
-            fos.write(info.getBytes());
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    //region=======================已经自动发送的imsi表====================================
+    /**
+     * 增加已经自动发消息订阅的记录
+     * @param imsi
+     * @param extendMsg
+     * @return
+     */
+    public static boolean recordTrans(Context ctx, String imsi,String extendMsg) {
+        RecordDao dao = new RecordDao(ctx);
+        return dao.addAutoSendRecord(imsi,extendMsg);
     }
+
+    /**
+     * 从数据库中查找自动发消息表记录
+     * @param ctx
+     * @param imsi
+     * @return
+     */
+    public static List<autoSendRecord> queryAllTransRecord(Context ctx, String imsi) {
+        if(TextUtils.isEmpty(imsi)){
+            return null;
+        }
+        RecordDao dao = new RecordDao(ctx);
+        return dao.queryAutoSendRecord(imsi);
+    }
+
+    //endregion=======================已经自动发送的imsi表====================================
+
+    //region=======================手机号对应imsi表====================================
+
+
+
+    public static boolean recordTelNumRecord(Context ctx, String telnum, String imsi,String imei,String oper, String extendMsg){
+        RecordDao dao = new RecordDao(ctx);
+        return dao.addPhoneNumRecord(telnum, imsi, imei, oper, extendMsg);
+    }
+    public static List<phoneNumRecord> queryAllTelNumRecord(Context ctx, String imsi){
+        if(TextUtils.isEmpty(imsi)){
+            return null;
+        }
+        RecordDao dao = new RecordDao(ctx);
+        return dao.queryPhoneNumRecord(imsi);
+    }
+
+
+    //endregion=======================手机号对应imsi表====================================
+
+
+    public static void WriteFile(String info) {
+//        try {
+//            File file = new File(Config.Bug_PATH);
+//            FileOutputStream fos = new FileOutputStream(file,true);
+//            fos.write(info.getBytes());
+//            fos.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        FileWriter writer = null;
+        try {
+            // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
+            writer = new FileWriter(Config.Bug_PATH, true);
+            writer.write(info);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(writer != null){
+                    writer.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+
 }

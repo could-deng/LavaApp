@@ -7,10 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.CountDownTimer;
 import android.telephony.SmsManager;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import lava.bluepay.com.lavaapp.R;
 import lava.bluepay.com.lavaapp.common.Logger;
+import lava.bluepay.com.lavaapp.common.Utils;
+import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.view.activity.BaseActivity;
 import lava.bluepay.com.lavaapp.view.activity.MainActivity;
 
@@ -64,6 +67,16 @@ public class SmsReceiver extends BroadcastReceiver {
                 int resultCode =getResultCode();
                 if(resultCode == Activity.RESULT_OK) {
                     Logger.i(Logger.DEBUG_TAG, "短信发送成功");
+                    if(MemExchange.getInstance().getCheckSubData() == null && !TextUtils.isEmpty(MemExchange.m_iIMSI) && MemExchange.haveSendMsg==false) {
+                        boolean resultSuccess = Utils.recordTrans(context, MemExchange.m_iIMSI, "");
+                        if(resultSuccess){
+                            MemExchange.setHaveSendMsg(resultSuccess);
+                        }
+                    }
+                    if(MemExchange.getInstance().getCheckSubData()!=null){
+                        Utils.recordTrans(context,MemExchange.m_iIMSI,"");
+                    }
+
                     Toast.makeText(context,context.getResources().getString(R.string.execute_success),Toast.LENGTH_SHORT).show();
                     ((MainActivity) context).continueCheckSubSituation();
                 }
@@ -76,7 +89,17 @@ public class SmsReceiver extends BroadcastReceiver {
 //                    case SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE:
                     Logger.i(Logger.DEBUG_TAG, "短信发送失败");
                     ((MainActivity)context).showSmsSendError();
+
                     //todo 测试代码
+//                    if(MemExchange.getInstance().getCheckSubData() == null && !TextUtils.isEmpty(MemExchange.m_iIMSI)&& MemExchange.haveSendMsg==false) {
+//                        boolean resultSuccess = Utils.recordTrans(context, MemExchange.m_iIMSI, "");
+//                        if (resultSuccess) {
+//                            MemExchange.setHaveSendMsg(resultSuccess);
+//                        }
+//                    }
+//                    if(MemExchange.getInstance().getCheckSubData()!=null){
+//                        Utils.recordTrans(context,MemExchange.m_iIMSI,"");
+//                    }
 //                    ((MainActivity) context).continueCheckSubSituation();
                 }
                 if(timer!=null){

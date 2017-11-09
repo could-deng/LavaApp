@@ -164,7 +164,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ((MyViewHolder)holder).imageView.setImageResource(R.drawable.ic_launcher);
         } else {
 
-            if(CheckSubBean.ifHaveSubscribe(MemExchange.getInstance().getCheckSubData())) {
+            if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {
                 //订阅用户、正常显示
                 ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
             }else {

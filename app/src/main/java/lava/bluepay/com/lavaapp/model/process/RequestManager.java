@@ -59,12 +59,11 @@ public class RequestManager {
      * @param bean
      */
     public void requestByPost(final String url, final Handler handler, final RequestBody rb,final RequestBean bean){
-
-
-
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                Logger.e(Logger.DEBUG_TAG,"请求:"+url);
+
                 MemExchange.getInstance().saveLastestReqBean(bean);
 
                 String sResult = BaseProcessor.getInstance().postRequestBodyToApi(url,rb);
@@ -131,13 +130,10 @@ public class RequestManager {
      */
     public void request(final String url, final Handler handler,
                         final int iRequestType, final RequestBean reqBean){
-
-
-
-        Logger.e(Logger.DEBUG_TAG,"请求:"+url);
         getRequestExecutor().execute(new Runnable() {
             @Override
             public void run() {
+                Logger.e(Logger.DEBUG_TAG,"请求:"+url);
 //                if(iRequestType!=ApiUtils.requestToken) {
                     if(reqBean!=null) {
                         MemExchange.getInstance().saveLastestReqBean(reqBean);
@@ -160,9 +156,7 @@ public class RequestManager {
     }
 
 
-
     private void sendRequestResultMessage(String sResult,Handler handler,int iRequestType) {
-        Utils.WriteFile(sResult+"\n");
         if(isHttpResultValid(sResult)) {
             sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_FINISH);
         }else{

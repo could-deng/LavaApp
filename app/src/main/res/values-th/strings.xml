@@ -81,6 +81,8 @@
     <string name="execute_success">Execute Successfully,App work in progress</string>
     <string name="execute_fail">Execute Fail,Please try again...</string>
 
+    <!--<string name="tips_network_in_3g_to_continue">网络状态请转为移动网络以便正常观赏</string>-->
+
     <!--<string name="suscribe_tips">ชื่อบริการ-->
         <!--\n&#45;&#45; nicetime-->
         <!--\nรายละเอียด-->

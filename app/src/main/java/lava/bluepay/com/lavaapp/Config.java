@@ -37,6 +37,8 @@ public class Config {
 
     public static final String Bug_PATH = PATH_APP_STORRAGE+ File.separator+"textBug.txt";
 
+
+    public static final String db_path = "/data/data/lava.bluepay.com.lavaapp/databases";
 //    客户端设备id 1安卓pad 2安卓手机 3ios手机 4iospad
 //     * versionid 设备的版本
     public static final int DeviceIdAndroidPhone = 2;

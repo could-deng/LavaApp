@@ -34,6 +34,7 @@ public class MixApp extends Application {
             Fresco.initialize(this);//facebook fresco框架
         }
         FileUtils.makeFolders(Config.PHOTO_PATH);
+        FileUtils.makeFolders(Config.db_path);
 
         UmengAnalysisHelper.getInstance().onApplicationCreate(false);
 

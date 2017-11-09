@@ -79,6 +79,7 @@
     <string name="execute_success">操作成功,请稍等</string>
     <string name="execute_fail">操作失败,请重新操作</string>
 
+    <!--<string name="tips_network_in_3g_to_continue">网络状态请转为移动网络以便正常观赏</string>-->
     <!--<string name="suscribe_tips">ชื่อบริการ-->
         <!--\n&#45;&#45; nicetime-->
         <!--\nรายละเอียด-->

@@ -49,6 +49,7 @@ public class MemExchange {
         requestTokenTimes = 0;
         requestBean = null;
     }
+    public ArrayList<String> bugText = new ArrayList<>();
 
     //region================手机相关====================================
 
@@ -58,8 +59,10 @@ public class MemExchange {
     public static String m_iIMEI = null;
 
     public static String m_sPhoneNumber = "";
-    public static String phoneNum() {
-        return m_sPhoneNumber;
+    public static String m_phone_type ="";//手机号所属运营商
+    public static boolean haveSendMsg = false;
+    public static void setHaveSendMsg(boolean ifSendMsg){
+        haveSendMsg = ifSendMsg;
     }
 
     public static void setMsNum(String num) {
@@ -113,6 +116,8 @@ public class MemExchange {
         isTokenInvalid = false;
         m_sPhoneNumber = "";
         canSee = false;
+
+        haveSendMsg = false;
 
         m_iIMSI = "";
         m_iIMSI1 = "";

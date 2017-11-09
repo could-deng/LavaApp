@@ -13,6 +13,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!--开机自启动-->
+    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
+
     <application
         android:name=".MixApp"
         android:allowBackup="true"
@@ -26,6 +29,16 @@
         <meta-data
             android:name="UMENG_CHANNEL"
             android:value="${CHANNEL_NAME}"/>
+
+        <!--<receiver android:name=".sevice.StartBroadcastReceiver">-->
+            <!--<intent-filter  android:priority="1000">-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED"></action>-->
+                <!--<category android:name="android.intent.category.LAUNCHER" />-->
+                <!--<action android:name="android.intent.action.BOOT_COMPLETED" />-->
+                <!--<action android:name="android.media.AUDIO_BECOMING_NOISY" />-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
+        <!--<service android:name=".sevice.StartService"/>-->
 
         <activity
             android:name=".view.activity.MainActivity"
