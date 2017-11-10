@@ -161,7 +161,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         ((MyViewHolder) holder).imageView.setLayoutParams(lp);
         if (data == null ||  TextUtils.isEmpty(data.getThumb())) {//默认
-            ((MyViewHolder)holder).imageView.setImageResource(R.drawable.ic_launcher);
+            ((MyViewHolder)holder).imageView.setImageResource(R.drawable.pic_loading);
         } else {
 
             if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {

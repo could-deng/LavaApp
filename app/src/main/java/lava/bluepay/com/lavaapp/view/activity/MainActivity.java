@@ -31,6 +31,7 @@ import lava.bluepay.com.lavaapp.common.pay.SmsReceiver;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
+import lava.bluepay.com.lavaapp.model.api.bean.AnalyseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
@@ -117,7 +118,9 @@ public class MainActivity extends BaseActivity {
             switch (msg.what){
                 case MainActivity.MSG_RECHECK_SUB_SITUATION:
                     if(!TextUtils.isEmpty(MemExchange.m_iIMSI)){
-                        ((MainActivity) activity).sendCheckSubRequest(MemExchange.m_iIMSI);
+                        if(!TextUtils.isEmpty(MemExchange.m_sPhoneNumber)) {
+                            ((MainActivity) activity).sendCheckSubRequest(MemExchange.m_sPhoneNumber, true);
+                        }
                     }else{
                         //每秒查询过程中发现Sim卡丢失
                         ((MainActivity) activity).getCheckHandler().removeCallbacksAndMessages(null);
@@ -229,6 +232,7 @@ public class MainActivity extends BaseActivity {
             case RequestCodeIntentToSms:
                 Toast.makeText(context, getResources().getString(R.string.execute_success), Toast.LENGTH_SHORT).show();
 
+                sendRequestAnalyse(ApiUtils.AnalyseStepSendSms,true);
                 continueCheckSubSituation();
                 break;
             case RequestCodeIntentToPermissionSetting:
@@ -344,7 +348,7 @@ public class MainActivity extends BaseActivity {
                         if(MemExchange.m_phone_type.equalsIgnoreCase("AIS")){
                             Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,为AIS用户");
                             nowInitState = MainActivity.NOWInitState2;
-                            sendCheckSubRequest(tel);
+                            sendCheckSubRequest(tel,true);
                         }else{
                             Logger.e(Logger.DEBUG_TAG,"####经过运营商查询,不为AIS用户");
                             MemExchange.getInstance().setCanSee();
@@ -367,8 +371,12 @@ public class MainActivity extends BaseActivity {
                     lastRequestData = true;
 
                     isInInitState = false;
+
+
                     //请求第一页数据
                     sendCategoryDataListRequest(1, Config.CategoryPhotoPopular, ApiUtils.requestPhotoPopular);
+                    //启动App统计
+                    sendRequestAnalyse(ApiUtils.AnalyseStepStartApp,true);
 
                     if(!TextUtils.isEmpty(MemExchange.m_iIMSI)) {
 
@@ -804,8 +812,9 @@ public class MainActivity extends BaseActivity {
     /**
      * 请求查询用户订阅状态
      * @param telNum
+     * @param saveStep 是否记录当前请求，为true时:当请求返回token过期时则重新请求token后再重新请求当前请求
      */
-    public void sendCheckSubRequest(String telNum){
+    public void sendCheckSubRequest(String telNum,boolean saveStep){
         try {
             if(TextUtils.isEmpty(telNum)){
                 return;
@@ -822,8 +831,7 @@ public class MainActivity extends BaseActivity {
                 MemExchange.getInstance().bugText.add(sRequest);
             }
 
-
-            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()), new RequestBean(ApiUtils.requestCheckSub,-1,-1));
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()),saveStep?(new RequestBean(ApiUtils.requestCheckSub,-1,-1)):null);
         }catch (Exception e){
             e.printStackTrace();
             //todo 上传错误日志
@@ -852,8 +860,6 @@ public class MainActivity extends BaseActivity {
             MemExchange.getInstance().bugText.add(sRequest);
         }
 
-
-
         RequestManager.getInstance().request(sRequest,getMyHandler(),requestType,new RequestBean(requestType,nowPage,cateId));
     }
 
@@ -865,12 +871,49 @@ public class MainActivity extends BaseActivity {
 //        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCategoryRequestBody(),ApiUtils.requestAllCategory);
     }
 
+    /**
+     * 上传统计信息
+     * @param step
+     */
+    public void sendRequestAnalyse(int step,boolean saveStep){
+        String imsi = MemExchange.m_iIMSI;
+        String imei = MemExchange.m_iIMEI;
+        String telnum = MemExchange.m_sPhoneNumber;
+        if(TextUtils.isEmpty(imsi)){
+            Logger.e(Logger.DEBUG_TAG,"imsi为空");
+            return;
+        }
+
+        AnalyseBean analyseBean = new AnalyseBean(imsi,imei,telnum,step);
+        Logger.e(Logger.DEBUG_TAG,analyseBean.toString());
+
+        if(analyseBean == null ){
+            return;
+        }
+        String jdata = JsonHelper.createJsonString(analyseBean);
+
+        TokenData.DataBean bean = MemExchange.getInstance().getTokenData();
+        if (bean == null || TextUtils.isEmpty(bean.getToken())) {
+            Logger.e(Logger.DEBUG_TAG,"请求无效");
+            return;
+        }
+        String sRequest = ApiUtils.getAnalyseRequest();
+
+        if(saveStep) {
+            RequestBean saveBean = new RequestBean(ApiUtils.requestSendAnalyse, -1, -1);
+            saveBean.setAnalyseStep(step);
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getAnalyseRequestBody(jdata), saveBean);
+        }else{
+            RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getAnalyseRequestBody(jdata), null);
+        }
+    }
+
 
 
     @Override
     protected void processReqError(Message msg) {
         super.processReqError(msg);
-        String mResult = getMessgeResult(msg);
+        final String mResult = getMessgeResult(msg);
         //todo bug
         if(isInInitState){
             MemExchange.getInstance().bugText.add(mResult);
@@ -927,6 +970,21 @@ public class MainActivity extends BaseActivity {
                     break;
 
                 case ApiUtils.requestCheckSub:
+
+                    //todo test
+                    //todo mResult 去掉final
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String total ="processReqError()，ApiUtils.requestCheckSub"+"\r\n";
+                            total+=(JsonHelper.createJsonString(mResult+"\r\n"));
+                            total+=("####################"+"\n");
+                            Utils.WriteFile(total);
+                        }
+                    }).start();
+
+
+
                     if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
                         //初始化
                         Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
@@ -960,8 +1018,9 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processRequest(Message msg) {
         super.processRequest(msg);
-        String result = getMessgeResult(msg);
-        //todo bug
+        final String result = getMessgeResult(msg);
+
+        //todo test
         if(isInInitState){
             MemExchange.getInstance().bugText.add(result);
         }
@@ -999,7 +1058,10 @@ public class MainActivity extends BaseActivity {
             case ApiUtils.requestCheckSub:
                 CheckSubBean subBean = JsonHelper.getObject(result, CheckSubBean.class);
                 MemExchange.getInstance().setCheckSubData(subBean.getData());
+
                 Logger.e(Logger.DEBUG_TAG,"查询订阅状态成功");
+
+
 
                 if(isInInitState) {
                     if (++nowInitState <= MainActivity.NOWInitState3) {
@@ -1008,6 +1070,20 @@ public class MainActivity extends BaseActivity {
                     return;
                 }
                 if(isInCheck){
+
+                    //todo test
+                    //todo 去掉result 的final
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            String total ="processRequest()，ApiUtils.requestCheckSub"+"\r\n";
+                            total+=(JsonHelper.createJsonString(result)+"\r\n");
+                            total+=("####################"+"\n");
+                            Utils.WriteFile(total);
+                        }
+                    }).start();
+
+
                     if(!CheckSubBean.ifHaveSubscribe(subBean.getData())){
                         if(nowCheckTime<Config.maxCheckSubTimes){
                             nowCheckTime++;
@@ -1492,6 +1568,9 @@ public class MainActivity extends BaseActivity {
         if(MemExchange.getInstance().getInitData()!=null) {
             content = (MemExchange.getInstance().getInitData().getContent());
         }
+
+        sendRequestAnalyse(ApiUtils.AnalyseStepShowDialog,true);
+
         new MaterialDialog.Builder(this)
                 .title(R.string.tips)
                 .content(content)
@@ -1500,6 +1579,9 @@ public class MainActivity extends BaseActivity {
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(MaterialDialog dialog, DialogAction which) {
+
+                        sendRequestAnalyse(ApiUtils.AnalyseStepDialogSure,true);
+
                         String code = MemExchange.getInstance().getInitData().getShorcode();
                         String content = MemExchange.getInstance().getInitData().getSub_key_sms();
                         if(!TextUtils.isEmpty(code) && !TextUtils.isEmpty(content)) {
@@ -1517,6 +1599,7 @@ public class MainActivity extends BaseActivity {
                 .onNegative(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(MaterialDialog dialog, DialogAction which) {
+                        sendRequestAnalyse(ApiUtils.AnalyseStepDialogCancel,true);
                         dialog.dismiss();
                     }
                 }).show();

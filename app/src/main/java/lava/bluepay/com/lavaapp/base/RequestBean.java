@@ -10,6 +10,8 @@ public class RequestBean {
     private int nowPage = -1;
     private int cateId = -1;
 
+    private int analyseStep = -1;
+
     public RequestBean() {
     }
 
@@ -41,5 +43,13 @@ public class RequestBean {
 
     public void setCateId(int cateId) {
         this.cateId = cateId;
+    }
+
+    public int getAnalyseStep() {
+        return analyseStep;
+    }
+
+    public void setAnalyseStep(int analyseStep) {
+        this.analyseStep = analyseStep;
     }
 }

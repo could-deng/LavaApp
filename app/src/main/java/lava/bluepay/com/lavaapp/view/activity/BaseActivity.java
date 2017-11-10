@@ -255,7 +255,12 @@ public class BaseActivity extends AppCompatActivity {
                             RequestManager.getInstance().request(url,getMyHandler(),lastBean.getRequestType(),null);
                         }
                         else if(lastBean.getRequestType() == ApiUtils.requestCheckSub){
-                            ((MainActivity)context).sendCheckSubRequest(MemExchange.m_iIMSI);
+                            if(!TextUtils.isEmpty(MemExchange.m_sPhoneNumber)) {
+                                ((MainActivity) context).sendCheckSubRequest(MemExchange.m_sPhoneNumber, false);
+                            }
+                        }
+                        else if(lastBean.getRequestType() == ApiUtils.requestSendAnalyse){
+                            ((MainActivity)context).sendRequestAnalyse(lastBean.getAnalyseStep(),false);
                         }
                         else{
                             Logger.e(Logger.DEBUG_TAG,"last request type = "+lastBean.getRequestType());

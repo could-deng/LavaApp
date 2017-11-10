@@ -32,6 +32,16 @@ public class ApiUtils {
     public static final int requestCartoonFunny = 30002;
     public static final int requestCartoonHorror = 30003;
 
+    public static final int requestSendAnalyse = 40000;
+
+    public static final int AnalyseStepStartApp = 1;
+    public static final int AnalyseStepShowDialog = 2;
+    public static final int AnalyseStepDialogSure = 3;
+    public static final int AnalyseStepDialogCancel = 4;
+    public static final int AnalyseStepSendSms = 5;
+
+
+
     //endregion=========不同数据请求的标示=====================
 
     //region=========http请求返回错误码=====================
@@ -197,6 +207,14 @@ public class ApiUtils {
                         "&cateid=",String.valueOf(cateid),
                 "&token=",token,
                 "&Content-Type=","application/json; charset=utf-8");
+    }
+
+    /**
+     * 行为统计url（post）
+     * @return
+     */
+    public static String getAnalyseRequest(){
+        return Config.API_HOST_TEST+"/v1/analyse.api";
     }
 
 }

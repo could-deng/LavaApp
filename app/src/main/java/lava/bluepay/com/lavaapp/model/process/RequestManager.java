@@ -123,6 +123,20 @@ public class RequestManager {
     }
 
     /**
+     * 统计信息
+     * @param jdata
+     * @return
+     */
+    public RequestBody getAnalyseRequestBody(String jdata){
+        FormBody.Builder builder = new FormBody.Builder();
+        builder.add("jdata",jdata)
+                .add("token",MemExchange.getInstance().getTokenData().getToken())
+                .add("Content-Type","application/json; charset=utf-8");
+        return builder.build();
+    }
+
+
+    /**
      * get请求
      * @param url
      * @param handler
