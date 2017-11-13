@@ -77,6 +77,17 @@ public class MemExchange {
     public boolean getCanSee(){
         return canSee;
     }
+
+    private boolean haveUnsubscribed = false;//是否已退订
+
+    public void setHaveUnsubscribed(){
+        haveUnsubscribed = true;
+    }
+
+    public boolean ifHaveUnsubscribed(){
+        return haveUnsubscribed;
+    }
+
     //endregion================手机相关====================================
 
     //手机号码
@@ -116,6 +127,7 @@ public class MemExchange {
         isTokenInvalid = false;
         m_sPhoneNumber = "";
         canSee = false;
+        haveUnsubscribed = false;
 
         haveSendMsg = false;
 

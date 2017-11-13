@@ -397,7 +397,11 @@ public class MainActivity extends BaseActivity {
                                     MemExchange.getInstance().setCanSee();
                                 }
                             }else{//不能订阅就可以直接看
-                                MemExchange.getInstance().setCanSee();
+                                if(("N/E").equalsIgnoreCase(MemExchange.getInstance().getCheckSubData().getStatus()) || ("B/W").equalsIgnoreCase(MemExchange.getInstance().getCheckSubData().getStatus())){
+                                    MemExchange.getInstance().setHaveUnsubscribed();
+                                }else {
+                                    MemExchange.getInstance().setCanSee();
+                                }
                             }
 
                             return;
@@ -1089,8 +1093,7 @@ public class MainActivity extends BaseActivity {
                             nowCheckTime++;
                             getCheckHandler().sendEmptyMessageDelayed(MainActivity.MSG_RECHECK_SUB_SITUATION,Config.reCheckSubTimeSeparator);
                         }else{
-                            isInCheck = false;
-                            nowCheckTime = 0;
+                            setCheckStop();
                             getCheckHandler().removeCallbacksAndMessages(null);
                             //如果是后台直接发短信的情况,发送成功后轮循三遍都失败的话，可以看
                             if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
@@ -1099,8 +1102,7 @@ public class MainActivity extends BaseActivity {
                             }
                         }
                     }else{
-                        isInCheck = false;
-                        nowCheckTime = 0;
+                        setCheckStop();
                         getCheckHandler().removeCallbacksAndMessages(null);
                         SubSuccess();
                     }

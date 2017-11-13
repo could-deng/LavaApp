@@ -104,6 +104,10 @@ public class CheckSubBean extends BaseBean {
      */
     public static boolean ifHaveSubscribe(String imsi){
 
+        //最高优先级,如果已经退订了，不在订阅状态，不能看。同时就不能订阅了。
+        if(MemExchange.getInstance().ifHaveUnsubscribed()){
+            return false;
+        }
 
         if(TextUtils.isEmpty(imsi) || MemExchange.getInstance().getCanSee()){
             return true;

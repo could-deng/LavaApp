@@ -50,7 +50,7 @@
     <string name="initial_error">Initial failure,Please restart!</string>
 
 
-    <string name="try_later">Please Try Later</string>
+    <string name="try_later">Checking subscription statement,Please Try Later</string>
     <string name="have_no_network">Have no network,please try later</string>
 
 

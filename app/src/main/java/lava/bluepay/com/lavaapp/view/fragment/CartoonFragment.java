@@ -139,10 +139,11 @@ public class CartoonFragment extends BaseFragment {
         rvPopularAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-//                if(MemExchange.getInstance().ifHaveNoSim()){
-//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
+                //已退订或者黑名单,不能看
+                if(MemExchange.getInstance().ifHaveUnsubscribed()){
+                    return;
+                }
+
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
@@ -153,10 +154,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-//                    if(((MainActivity)getActivity()).getIsInCheck()){
-//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-//                        return;
-//                    }
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -203,10 +204,10 @@ public class CartoonFragment extends BaseFragment {
         rvFunnyAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-//                if(MemExchange.getInstance().ifHaveNoSim()){
-//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
+                //已退订或者黑名单,不能看
+                if(MemExchange.getInstance().ifHaveUnsubscribed()){
+                    return;
+                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
@@ -217,10 +218,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-//                    if(((MainActivity)getActivity()).getIsInCheck()){
-//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-//                        return;
-//                    }
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }
@@ -265,10 +266,10 @@ public class CartoonFragment extends BaseFragment {
         rvHorrorAdapter.setItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
-//                if(MemExchange.getInstance().ifHaveNoSim()){
-//                    Toast.makeText((getActivity()),getActivity().getResources().getString(R.string.sms_miss_can_not_see),Toast.LENGTH_SHORT).show();
-//                    return;
-//                }
+                //已退订或者黑名单,不能看
+                if(MemExchange.getInstance().ifHaveUnsubscribed()){
+                    return;
+                }
                 //订阅了的则进入
                 if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)){
                     Intent intent = new Intent();
@@ -279,10 +280,10 @@ public class CartoonFragment extends BaseFragment {
                     intent.putExtras(bundle);
                     startActivity(intent);
                 }else{
-//                    if(((MainActivity)getActivity()).getIsInCheck()){
-//                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
-//                        return;
-//                    }
+                    if(((MainActivity)getActivity()).getIsInCheck()){
+                        Toast.makeText(getContext(),getResources().getString(R.string.try_later),Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     //未订阅的则提示是否订阅
                     ((MainActivity)getActivity()).showSubscripDialog();
                 }

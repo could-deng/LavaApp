@@ -161,6 +161,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         ((MyViewHolder) holder).imageView.setLayoutParams(lp);
         if (data == null ||  TextUtils.isEmpty(data.getThumb())) {//默认
+            ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.FIT_XY);
             ((MyViewHolder)holder).imageView.setImageResource(R.drawable.pic_loading);
         } else {
 
