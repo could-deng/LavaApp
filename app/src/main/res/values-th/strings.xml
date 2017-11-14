@@ -1,85 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LavaApp</string>
-    <string name="AppTitle">LavaApp</string>
+    <string name="app_name">HappyTime</string>
+    <string name="AppTitle">HappyTime</string>
 
-    <string name="title_photo">Photo</string>
-    <string name="title_video">Video</string>
-    <string name="title_Cartoon">Cartoon</string>
+    <string name="title_photo">รูปภาพ</string>
+    <string name="title_video">วิดีโอ</string>
+    <string name="title_Cartoon">การ์ตูน</string>
 
 
     <!--图片-->
-    <string name="photo_popular">Popular</string>
-    <string name="photo_scenery">Scenery</string>
-    <string name="photo_portray">Portray</string>
+    <string name="photo_popular">เป็นที่นิยม</string>
+    <string name="photo_scenery">วิว ทิวทัศน์</string>
+    <string name="photo_portray">ภาพวาด</string>
 
     <!--视屏-->
-    <string name="video_popular">Popular</string>
-    <string name="video_funny">Funny</string>
-    <string name="video_sports">Sport</string>
+    <string name="video_popular">เป็นที่นิยม</string>
+    <string name="video_funny">สนุกสนาน</string>
+    <string name="video_sports">เคลื่อนไหว,ออกกำลังกาย</string>
 
     <!--卡通-->
-    <string name="cartoon_popular">Popular</string>
-    <string name="cartoon_funny">Funny</string>
-    <string name="cartoon_horror">Horror</string>
+    <string name="cartoon_popular">เป็นที่นิยม</string>
+    <string name="cartoon_funny">สนุกสนาน</string>
+    <string name="cartoon_horror">หวาดกลัว</string>
 
 
-    <string name="lastpage">Last Page</string>
-    <string name="nextpage">Next Page</string>
+    <string name="lastpage">หน้าก่อนหน้า</string>
+    <string name="nextpage">หน้าถัดไป</string>
 
 
 
     <!-- swipeLoadLayout-->
-    <string name="swipelayout_to_load_more">Slide Up Load More</string>
-    <string name="swipelayout_release">Loading</string>
-    <string name="swipelayout_loading">Loading</string>
-    <string name="swipelayout_load_complete">Done</string>
-    <string name="swipelayout_load_nothing">No more</string>
-    <string name="swipelayout_load_failure">Load fail</string>
+    <string name="swipelayout_to_load_more">เลื่อนขึ้นเพื่อโหลดข้อมูลเพิ่มเติม</string>
+    <string name="swipelayout_release">ปล่อยเพื่อโหลด</string>
+    <string name="swipelayout_loading">กำลังโหลด</string>
+    <string name="swipelayout_load_complete">ดาวน์โหลดสำเร็จ</string>
+    <string name="swipelayout_load_nothing">ไม่มีข้อมูล</string>
+    <string name="swipelayout_load_failure">ดาวน์โหลดไม่สำเร็จ</string>
 
 
-    <string name="request_out_of_date">Request out of date! Please Restart App!</string>
+    <string name="request_out_of_date">คำขอหมดอายุ กรุณาทำรายการใหม่</string>
 
-    <string name="app_initial">Initial progress!</string>
-    <string name="video_path_error">Video Error</string>
+    <string name="app_initial">กำลังเริ่มต้น</string>
+    <string name="video_path_error">วีดีโอมีปัญหา</string>
 
-    <string name="sms_send_error">Sms Send Failure! Subscribe Failue!</string>
-    <string name="sms_subscribe_success">Subscribe Done!</string>
-    <string name="sms_miss_can_not_see">Have no Sim,Can not Play!</string>
+    <string name="sms_send_error">ส่งsmsไม่สำเร็จ, สมัครสมาชิกล้มเหลว</string>
+    <string name="sms_subscribe_success">สมัครสมาชิกสำเร็จ</string>
+    <string name="sms_miss_can_not_see">ไม่มีSim card,...</string>
 
-    <string name="initial_error">Initial failure,Please restart!</string>
-
-
-    <string name="try_later">Checking subscription statement,Please Try Later</string>
-    <string name="have_no_network">Have no network,please try later</string>
+    <string name="initial_error">เกิดข้อผิดพลาดในการเริ่มต้น กรุณาทำรายการใหม่</string>
 
 
-    <string name="if_sure_to_play_without_wifi">The current network is not WIFI, whether to continue to play?</string>
-    <string name="sure_to_play_without_wifi">Continue</string>
-    <string name="exit_without_wifi">Cancel</string>
+    <string name="try_later">โปรดลองอีกครั้งในภายหลัง</string>
+    <string name="have_no_network">ไม่มีเครือข่าย กรุณาลองอีกครั้งในภายหลัง</string>
 
 
-    <string name="if_sure_to_subscribe">Are you sure to subscribe?</string>
-    <string name="if_sure_to_exit">Are you sure to exit?</string>
-    <string name="tips">Tips</string>
-    <string name="sure">Sure</string>
-    <string name="cancel">cancel</string>
-    <string name="have_no_sms_permission">Have not been granted Sms Permission</string>
+    <string name="if_sure_to_play_without_wifi">เครือข่ายปัจจุบันไม่ได้เชื่อมต่อแบบWIFI ต้องการที่จะใช้งานต่อหรือไม่?</string>
+    <string name="sure_to_play_without_wifi">ใช้งานต่อ</string>
+    <string name="exit_without_wifi">ยกเลิกใช้งาน</string>
+
+
+    <string name="if_sure_to_subscribe">ยืนยันการสมัครบริการหรือไม่?</string>
+    <string name="if_sure_to_exit">ยืนยันการออก?</string>
+    <string name="tips">คำเตือน</string>
+    <string name="sure">ยืนยัน</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="have_no_sms_permission">ไม่สามารถใช้ SMS ได้</string>
 
 
 
     <!-- premission -->
-    <string name="external_storage_permission_concise">Read and write record files</string>
-    <string name="phone_permission_concise">Sim Message</string>
-    <string name="request_permission_format">The following permissions are required:\n\t%1$s</string>
-    <string name="permission_forbid_message_format">Permission:%1$s\n be denied,if do not granted the permissions,can not play the app\n go to the APP permissions settings?</string>
+    <string name="external_storage_permission_concise">จัดเก็บข้อมูลแคชไว้</string>
+    <string name="phone_permission_concise">รับข้อมูลSim Card</string>
+    <string name="request_permission_format">เพื่อการใช้งานราบรื่นต้องการการอนุญาติตามด้านล่าง:\n\t%1$s</string>
+    <string name="permission_forbid_message_format">การอนุญาติ:%1$s\n ไม่ได้รับอนุญาติ,หากไม่ได้รับอนุญาติจะไม่สามรถใช้แอปพลิเคชั่นได้,\n ต้องการตั้งค่าใหม่หรือไม่??</string>
 
-    <string name="sms_permission_concise">Send sms</string>
+    <string name="sms_permission_concise">สมัครแบบ SMS</string>
 
-    <string name="permission_exception_tips">Have no permissions,Please allow the permission to get play!</string>
+    <string name="permission_exception_tips">ไมไ่ด้รับการอนุญาติ,กรุณาตั้งค่าใหม่</string>
 
-    <string name="execute_success">Execute Successfully,App work in progress</string>
-    <string name="execute_fail">Execute Fail,Please try again...</string>
+    <string name="execute_success">สำเร็จ,กรุณารอ</string>
+    <string name="execute_fail">ไม่สำเร็จ,กรุณาทำรายการใหม่</string>
 
     <!--<string name="tips_network_in_3g_to_continue">网络状态请转为移动网络以便正常观赏</string>-->
 

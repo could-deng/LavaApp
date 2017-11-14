@@ -6,7 +6,6 @@ import android.os.Build;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import lava.bluepay.com.lavaapp.common.FileUtils;
-import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
 
 /**
  * Created by bluepay on 2017/10/14.
@@ -36,7 +35,8 @@ public class MixApp extends Application {
         FileUtils.makeFolders(Config.PHOTO_PATH);
         FileUtils.makeFolders(Config.db_path);
 
-        UmengAnalysisHelper.getInstance().onApplicationCreate(false);
+
+//        UmengAnalysisHelper.getInstance().onApplicationCreate(false);
 
 //        BlockCanary.install(this, new AppBlockCanaryContext()).start();
 //        refWatcher = LeakCanary.install(this);//LeakCanary

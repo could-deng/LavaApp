@@ -3,7 +3,6 @@ package lava.bluepay.com.lavaapp.view.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -32,7 +31,6 @@ import lava.bluepay.com.lavaapp.base.RequestBean;
 import lava.bluepay.com.lavaapp.base.WeakHandler;
 import lava.bluepay.com.lavaapp.common.JsonHelper;
 import lava.bluepay.com.lavaapp.common.Logger;
-import lava.bluepay.com.lavaapp.common.UmengAnalysisHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.ApiUtils;
 import lava.bluepay.com.lavaapp.model.api.MD5Util;
@@ -83,13 +81,13 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        UmengAnalysisHelper.getInstance().onActivityResume(context,mPageName);
+//        UmengAnalysisHelper.getInstance().onActivityResume(context,mPageName);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        UmengAnalysisHelper.getInstance().onActivityPause(context,mPageName);
+//        UmengAnalysisHelper.getInstance().onActivityPause(context,mPageName);
     }
 
     public void initToolbar(){

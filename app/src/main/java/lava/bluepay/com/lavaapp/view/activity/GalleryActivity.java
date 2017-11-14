@@ -2,7 +2,6 @@ package lava.bluepay.com.lavaapp.view.activity;
 
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;

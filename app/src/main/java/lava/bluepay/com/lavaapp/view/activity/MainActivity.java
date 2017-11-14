@@ -16,7 +16,6 @@ import android.view.KeyEvent;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
-import com.umeng.analytics.MobclickAgent;
 import java.util.List;
 import lava.bluepay.com.lavaapp.Config;
 import lava.bluepay.com.lavaapp.R;
@@ -34,7 +33,6 @@ import lava.bluepay.com.lavaapp.model.api.MD5Util;
 import lava.bluepay.com.lavaapp.model.api.bean.AnalyseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.BaseBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
-import lava.bluepay.com.lavaapp.model.api.bean.CategoryListBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
 import lava.bluepay.com.lavaapp.model.api.bean.InitData;
 import lava.bluepay.com.lavaapp.model.api.bean.PhoneNumBean;
@@ -220,7 +218,7 @@ public class MainActivity extends BaseActivity {
             startActivityForResult(intent,RequestCodeIntentToSms);
         } catch (Exception e) {
             e.printStackTrace();
-            MobclickAgent.reportError(context,e.getMessage());
+//            MobclickAgent.reportError(context,e.getMessage());
         }
     }
 
