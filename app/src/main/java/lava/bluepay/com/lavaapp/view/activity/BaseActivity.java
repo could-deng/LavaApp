@@ -185,6 +185,12 @@ public class BaseActivity extends AppCompatActivity {
             return;
         }
         switch (bean.getCode()){
+            case ApiUtils.reqResError:
+            case ApiUtils.reqResErrorException:
+            case ApiUtils.reqResErrorParametersError:
+
+                break;
+
             case ApiUtils.HTTP_NETWORK_FAIL:
             case ApiUtils.HTTP_REQUEST_EXCEPTION:
                 //todo 网络请求失败
@@ -197,7 +203,7 @@ public class BaseActivity extends AppCompatActivity {
                 //null
                 //重新获取token过程中
 
-                MemExchange.getInstance().setRequestTokenTimes(0);
+//                MemExchange.getInstance().setRequestTokenTimes(0);
 
                 break;
             case ApiUtils.reqResErrorAuthFail:
@@ -242,7 +248,8 @@ public class BaseActivity extends AppCompatActivity {
                 Logger.e(Logger.DEBUG_TAG, "获取token成功");
                 if(MemExchange.getInstance().getIsTokenInvalid()){
                     Logger.e(Logger.DEBUG_TAG,"上一次token失效，现在重新请求上一次请求");
-                    MemExchange.getInstance().setRequestTokenTimes(0);
+
+//                    MemExchange.getInstance().setRequestTokenTimes(0);
                     //todo 注意同步问题
 
                     //请求上一次任务
@@ -264,8 +271,8 @@ public class BaseActivity extends AppCompatActivity {
                             Logger.e(Logger.DEBUG_TAG,"last request type = "+lastBean.getRequestType());
                         }
                     }
-
-                    MemExchange.getInstance().setIsTokenInvalid(false);
+                    MemExchange.getInstance().returnTokenToNormal();
+//                    MemExchange.getInstance().setIsTokenInvalid(false);
                 }
                 break;
         }

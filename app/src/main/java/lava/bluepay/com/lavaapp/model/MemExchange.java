@@ -34,9 +34,9 @@ public class MemExchange {
     public void addRequestTokenTimes(){
         requestTokenTimes++;
     }
-    public void setRequestTokenTimes(int times){
-        requestTokenTimes = times;
-    }
+//    public void setRequestTokenTimes(int times){
+//        requestTokenTimes = times;
+//    }
     private RequestBean requestBean;
     public void saveLastestReqBean(RequestBean bean){
         requestBean = bean;

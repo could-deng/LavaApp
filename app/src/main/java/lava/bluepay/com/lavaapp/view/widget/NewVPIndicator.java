@@ -36,7 +36,7 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
     private float mTranslationX;//底部线开始位置
     private Paint mPaint;//画底部线
     private LinearLayout tabGroup;
-    private OnTabClickListener tabClickListener;
+//    private OnTabClickListener tabClickListener;
 
 
     private String[] mTitles;
@@ -45,18 +45,18 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
         mTitles = titles;
     }
 
-    private OnTabClickListener mListener;
-
-    public interface OnTabClickListener {
-        void onTabClick(int index);
-    }
-
-    /**
-     * 设置tab点击回调事件
-     */
-    public void setOnTabClickListener(OnTabClickListener listener) {
-        mListener = listener;
-    }
+//    private OnTabClickListener mListener;
+//
+//    public interface OnTabClickListener {
+//        void onTabClick(int index);
+//    }
+//
+//    /**
+//     * 设置tab点击回调事件
+//     */
+//    public void setOnTabClickListener(OnTabClickListener listener) {
+//        mListener = listener;
+//    }
 
 
     public NewVPIndicator(Context context) {
@@ -134,8 +134,11 @@ public class NewVPIndicator extends LinearLayout implements ViewPager.OnPageChan
             tabItemView.setOnCheckedListener(new TabItemView.onCheckedListener() {
                 @Override
                 public void onChecked(boolean isChecked) {
-                    if (mListener != null) {
-                        mListener.onTabClick(index);
+//                    if (mListener != null) {
+//                        mListener.onTabClick(index);
+//                    }
+                    if(index == mViewpager.get().getCurrentItem()){
+                        return;
                     }
                     if(mViewpager.get() != null) {
                         mViewpager.get().setCurrentItem(index, false);

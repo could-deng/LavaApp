@@ -49,7 +49,7 @@ import lava.bluepay.com.lavaapp.view.fragment.VideoFragment;
 public class MainActivity extends BaseActivity {
 
 
-    public boolean lastRequestData = false;
+//    public boolean lastRequestData = false;
 
     private static final int FRAGMENT_PHOTO = 0;
     private static final int FRAGMENT_VIDEO = 1;
@@ -366,7 +366,7 @@ public class MainActivity extends BaseActivity {
                         getProgressDialog().dismiss();
                     }
 
-                    lastRequestData = true;
+//                    lastRequestData = true;
 
                     isInInitState = false;
 
@@ -432,10 +432,11 @@ public class MainActivity extends BaseActivity {
                     break;
             }
         }catch (Exception e){
+            e.printStackTrace();
 //            Toast.makeText(context,tv_test.getText().toString(),Toast.LENGTH_SHORT).show();
 //            MobclickAgent.reportError(context,"Thailand:"+tv_test.getText().toString()+",exception"+e.getMessage());
 //            Utils.WriteFile("sdfsss"+","+tv_test.getText().toString()+","+e.getMessage());
-            Utils.WriteFile("bug:"+e.getMessage());
+//            Utils.WriteFile("bug:"+e.getMessage());
         }
 
     }
@@ -855,22 +856,15 @@ public class MainActivity extends BaseActivity {
             Logger.e(Logger.DEBUG_TAG,"请求无效");
             return;
         }
+
         String sRequest = ApiUtils.getQuerypage(nowPage,Config.PerPageSize,cateId,MemExchange.getInstance().getTokenData().getToken());
 
-        //todo bug
-        if(lastRequestData){
-            MemExchange.getInstance().bugText.add(sRequest);
-        }
+//        //todo bug
+//        if(lastRequestData){
+//            MemExchange.getInstance().bugText.add(sRequest);
+//        }
 
         RequestManager.getInstance().request(sRequest,getMyHandler(),requestType,new RequestBean(requestType,nowPage,cateId));
-    }
-
-    public void sendAllCategoryListRequest(){
-//        if(MemExchange.getInstance().getTokenData() == null){
-//            return;
-//        }
-//        String sRequest = ApiUtils.getCategoryList();
-//        RequestManager.getInstance().requestByPost(sRequest,getMyHandler(),RequestManager.getInstance().getCategoryRequestBody(),ApiUtils.requestAllCategory);
     }
 
     /**
@@ -915,19 +909,17 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processReqError(Message msg) {
         super.processReqError(msg);
-        final String mResult = getMessgeResult(msg);
-        //todo bug
-        if(isInInitState){
-            MemExchange.getInstance().bugText.add(mResult);
-        }
+        String mResult = getMessgeResult(msg);
+
+//        //todo bug
+//        if(isInInitState){
+//            MemExchange.getInstance().bugText.add(mResult);
+//        }
 
         if(msg.arg1 == ApiUtils.requestPhoneNum){
 
             try {
                 PhoneNumBean phoneNumBean = JsonHelper.getObject(mResult, PhoneNumBean.class);
-//                PhoneNumBean phoneNumBean = new PhoneNumBean();
-//                phoneNumBean.setMsisdn("13418638286");
-//                phoneNumBean.setOper("AIS");
                 if (phoneNumBean != null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())) {
                     Logger.e(Logger.DEBUG_TAG, "####经过运营商查询成功");
                     MemExchange.m_sPhoneNumber = phoneNumBean.getMsisdn();
@@ -961,10 +953,11 @@ public class MainActivity extends BaseActivity {
                         Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
                         finish();
                         return;
-                    }else if(MemExchange.getInstance().getIsTokenInvalid()) {
-                        //过期查询
-                        MemExchange.getInstance().returnTokenToNormal();
                     }
+//                    else if(MemExchange.getInstance().getIsTokenInvalid()) {
+//                        //过期查询
+//                        MemExchange.getInstance().returnTokenToNormal();
+//                    }
                     break;
                 case ApiUtils.requestInit:
                     Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
@@ -973,17 +966,17 @@ public class MainActivity extends BaseActivity {
 
                 case ApiUtils.requestCheckSub:
 
-                    //todo test
-                    //todo mResult 去掉final
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String total ="processReqError()，ApiUtils.requestCheckSub"+"\r\n";
-                            total+=(JsonHelper.createJsonString(mResult+"\r\n"));
-                            total+=("####################"+"\n");
-                            Utils.WriteFile(total);
-                        }
-                    }).start();
+//                    //todo test
+//                    //todo mResult 去掉final
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            String total ="processReqError()，ApiUtils.requestCheckSub"+"\r\n";
+//                            total+=(JsonHelper.createJsonString(mResult+"\r\n"));
+//                            total+=("####################"+"\n");
+//                            Utils.WriteFile(total);
+//                        }
+//                    }).start();
 
 
 
@@ -1000,7 +993,6 @@ public class MainActivity extends BaseActivity {
 
                         if(MemExchange.getInstance().getInitData().getSwitchX() == 1 || MemExchange.getInstance().getInitData().getSwitchX() == 2) {
                             MemExchange.getInstance().setCanSee();
-                            //todo 刷新界面
                             SubSuccess();
                         }
                     }
@@ -1020,28 +1012,28 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void processRequest(Message msg) {
         super.processRequest(msg);
-        final String result = getMessgeResult(msg);
+        String result = getMessgeResult(msg);
 
-        //todo test
-        if(isInInitState){
-            MemExchange.getInstance().bugText.add(result);
-        }
-        if(lastRequestData){
-            MemExchange.getInstance().bugText.add(result);
-            lastRequestData = false;
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    String total ="";
-                    for( String itemString:MemExchange.getInstance().bugText){
-                        total+=(itemString+"\r\n");
-                    }
-                    total+=("#####################################"+"\n");
-                    Utils.WriteFile(total);
-                    MemExchange.getInstance().bugText.clear();
-                }
-            }).start();
-        }
+//        //todo test
+//        if(isInInitState){
+//            MemExchange.getInstance().bugText.add(result);
+//        }
+//        if(lastRequestData){
+//            MemExchange.getInstance().bugText.add(result);
+//            lastRequestData = false;
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    String total ="";
+//                    for( String itemString:MemExchange.getInstance().bugText){
+//                        total+=(itemString+"\r\n");
+//                    }
+//                    total+=("#####################################"+"\n");
+//                    Utils.WriteFile(total);
+//                    MemExchange.getInstance().bugText.clear();
+//                }
+//            }).start();
+//        }
 
         switch (msg.arg1){
             case ApiUtils.requestToken:
@@ -1073,17 +1065,17 @@ public class MainActivity extends BaseActivity {
                 }
                 if(isInCheck){
 
-                    //todo test
-                    //todo 去掉result 的final
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String total ="processRequest()，ApiUtils.requestCheckSub"+"\r\n";
-                            total+=(JsonHelper.createJsonString(result)+"\r\n");
-                            total+=("####################"+"\n");
-                            Utils.WriteFile(total);
-                        }
-                    }).start();
+//                    //todo test
+//                    //todo 去掉result 的final
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            String total ="processRequest()，ApiUtils.requestCheckSub"+"\r\n";
+//                            total+=(JsonHelper.createJsonString(result)+"\r\n");
+//                            total+=("####################"+"\n");
+//                            Utils.WriteFile(total);
+//                        }
+//                    }).start();
 
 
                     if(!CheckSubBean.ifHaveSubscribe(subBean.getData())){
@@ -1112,7 +1104,6 @@ public class MainActivity extends BaseActivity {
 //
 //                Logger.e(Logger.DEBUG_TAG,"获取所有激活分类数据成功");
 //                break;
-
 
 
             //图片

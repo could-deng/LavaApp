@@ -453,7 +453,7 @@ public class Utils {
         return min;
     }
     public static int getViewRandomHeight(Context context){
-        int height = ViewUtils.dp2px(context,(int) (170 + Math.random() * 80));
+        int height = ViewUtils.dp2px(context,(int) (170 + Math.random() * 60));
         return height;
     }
 
@@ -565,33 +565,25 @@ public class Utils {
     //endregion=======================手机号对应imsi表====================================
 
 
-    public static void WriteFile(String info) {
+//    public static void WriteFile(String info) {
+//        FileWriter writer = null;
 //        try {
-//            File file = new File(Config.Bug_PATH);
-//            FileOutputStream fos = new FileOutputStream(file,true);
-//            fos.write(info.getBytes());
-//            fos.close();
-//        } catch (Exception e) {
+//            // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
+//            writer = new FileWriter(Config.Bug_PATH, true);
+//            writer.write(info);
+//        } catch (IOException e) {
 //            e.printStackTrace();
+//        } finally {
+//            try {
+//                if(writer != null){
+//                    writer.close();
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 //        }
-        FileWriter writer = null;
-        try {
-            // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-            writer = new FileWriter(Config.Bug_PATH, true);
-            writer.write(info);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if(writer != null){
-                    writer.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
+//
+//    }
 
 
 }

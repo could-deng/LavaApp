@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -25,6 +26,7 @@ import lava.bluepay.com.lavaapp.common.fresco.FrescoHelper;
 import lava.bluepay.com.lavaapp.model.MemExchange;
 import lava.bluepay.com.lavaapp.model.api.bean.CategoryBean;
 import lava.bluepay.com.lavaapp.model.api.bean.CheckSubBean;
+import lava.bluepay.com.lavaapp.view.widget.ViewUtils;
 
 /**
  * Created by bluepay on 2017/10/14.
@@ -159,6 +161,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ViewGroup.LayoutParams lp = ((MyViewHolder) holder).imageView.getLayoutParams();
         lp.height = mHeights.get(position);
 
+//        Logger.e(Logger.DEBUG_TAG,"screenWidth="+ViewUtils.getScreenWidth(context));
+//        Logger.e(Logger.DEBUG_TAG,"height="+lp.height+",width="+lp.width);
+
         ((MyViewHolder) holder).imageView.setLayoutParams(lp);
         if (data == null ||  TextUtils.isEmpty(data.getThumb())) {//默认
             ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -172,19 +177,27 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 //非订阅用户
 
                 //todo 图片的url一定要统一
-                if (data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
+                if (data.getThumb().indexOf(".") == -1 ||data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
                     Logger.e(Logger.DEBUG_TAG, "pic url error");
                     ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
                     return;
                 }
 
                 //原图路径
-                final String localFilePath = Config.PHOTO_PATH + data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));//绝对路径
+
+                String filePath = data.getThumb().substring(data.getThumb().lastIndexOf(File.separator));
+                int dou = filePath.indexOf(".");
+                if(dou == -1){
+                    Logger.e(Logger.DEBUG_TAG, "pic url error");
+                    ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
+                    return;
+                }
+                final String localFilePath = Config.PHOTO_PATH + filePath.substring(0,dou)+Config.sourceFileEnd;//绝对路径
                 File localFile = new File(localFilePath);
                 //模糊图片路径
                 String localBufPath = localFilePath + Config.bufFileEnd;
                 File localBufFile = new File(localBufPath);
-
+                Logger.e(Logger.DEBUG_TAG,"Data:"+data.getThumb()+",sources:"+localFilePath+",buffer:"+localBufPath);
                 if (localBufFile.exists()) {
                     Logger.i(Logger.DEBUG_TAG, "模糊图片存在,pos" + position);
                     //todo 将图片File转为bitmap，bitmap大小拉升至控件的大小
@@ -213,11 +226,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     Uri uri = Uri.parse(localFilePath);
                     Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
 
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                         blur = ImageUtils.blur(context, bitmap);
-//                    }else{
-//                    blur = ImageUtils.newBlur(bitmap, ((MyViewHolder) holder).imageView);
-//                    }
+                    }else{
+                        blur = ImageUtils.newBlur(bitmap, ((MyViewHolder) holder).imageView);
+                    }
 
                     setImageBlur(blur, ((MyViewHolder) holder).imageView);
                     ImageUtils.saveBitmap2File(blur, localBufPath);

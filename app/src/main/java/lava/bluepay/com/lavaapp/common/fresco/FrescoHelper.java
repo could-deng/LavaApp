@@ -107,21 +107,21 @@ public class FrescoHelper {
             Logger.i(Logger.DEBUG_TAG,"saveBitmap2File,bitmap == null");
             return;
         }
-        String fileExtension = lava.bluepay.com.lavaapp.common.FileUtils.getFileExtension(localPath);
-        if(TextUtils.isEmpty(fileExtension)){
-            Logger.i(Logger.DEBUG_TAG,"saveBitmap2File,fileExtension == null");
-            return;
-        }
+//        String fileExtension = lava.bluepay.com.lavaapp.common.FileUtils.getFileExtension(localPath);
+//        if(TextUtils.isEmpty(fileExtension)){
+//            Logger.i(Logger.DEBUG_TAG,"saveBitmap2File,fileExtension == null");
+//            return;
+//        }
         File file = new File(localPath);
         try {
             FileOutputStream fos = new FileOutputStream(file);
             Boolean result = false;
             assert bitmap !=null;
-            if(fileExtension!=null && fileExtension.equals("png")){
+//            if(fileExtension!=null && fileExtension.equals("png")){
                 result = bitmap.compress(Bitmap.CompressFormat.PNG,100 ,fos);
-            }else {
-                result = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            }
+//            }else {
+//                result = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+//            }
             listener.onDownloadFinish(result);
 
             fos.flush();

@@ -10,15 +10,15 @@ import java.util.HashMap;
  */
 
 public class Config {
-
-    public static final String bufFileEnd = "buf.jpg";
+    public static final String sourceFileEnd = "r";
+    public static final String bufFileEnd = "b";
     public static final int reCheckSubTimeSeparator = 2000;//发送短信成功后的查询订阅时间间隔
     public static final int maxCheckSubTimes = 4;//查询最大次数
     public static final int PerPageSize = 10;//每页的数量
     public static final int ViewPagerMaxSize = 10;//viewpager最多显示的张数
     public static final int requestTokenMaxTimes = 3;//请求失败时重复请求token的最大次数
 
-    public static final String API_HOST_TEST = "http://120.76.73.92:8168";//http://192.168.4.210:8168//http://58.250.250.116:8168
+    public static final String API_HOST_TEST = "http://203.151.201.170:21801";//http://192.168.4.210:8168//http://58.250.250.116:8168////http://120.76.73.92:8168
 
 
     //todo 暂时写死,后面需要改
@@ -33,9 +33,9 @@ public class Config {
             + File.separator+PRODUCT_DIC+File.separator;
     public static final String PHOTO_PATH = PATH_APP_STORRAGE + File.separator + "Pic"+ File.separator;
 
-    public static final String APATCH_PATH = PATH_APP_STORRAGE+ File.separator+"fix.apatch"; // 补丁文件名
+//    public static final String APATCH_PATH = PATH_APP_STORRAGE+ File.separator+"fix.apatch"; // 补丁文件名
 
-    public static final String Bug_PATH = PATH_APP_STORRAGE+ File.separator+"textBug.txt";
+//    public static final String Bug_PATH = PATH_APP_STORRAGE+ File.separator+"textBug.txt";
 
 
     public static final String db_path = "/data/data/lava.bluepay.com.lavaapp/databases";

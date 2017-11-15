@@ -32,7 +32,6 @@ public class SmsReceiver extends BroadcastReceiver {
     boolean isUnregistered;
     boolean isReceived;
 
-
     private Context context;
 
     public SmsReceiver(Context context) {
@@ -69,15 +68,15 @@ public class SmsReceiver extends BroadcastReceiver {
                 if(resultCode == Activity.RESULT_OK) {
                     Logger.i(Logger.DEBUG_TAG, "短信发送成功");
 
-                    //todo test
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String total ="短信发送成功"+"\r\n";
-                            total+=("####################"+"\n");
-                            Utils.WriteFile(total);
-                        }
-                    }).start();
+//                    //todo test
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            String total ="短信发送成功"+"\r\n";
+//                            total+=("####################"+"\n");
+//                            Utils.WriteFile(total);
+//                        }
+//                    }).start();
 
                     //针对不查订阅状态的流程
                     if(MemExchange.getInstance().getCheckSubData() == null && !TextUtils.isEmpty(MemExchange.m_iIMSI) && MemExchange.haveSendMsg==false) {
@@ -106,30 +105,18 @@ public class SmsReceiver extends BroadcastReceiver {
 //                    case SmsManager.RESULT_ERROR_FDN_CHECK_FAILURE:
                     Logger.i(Logger.DEBUG_TAG, "短信发送失败");
 
-                    //todo test
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String total ="短信发送失败"+"\r\n";
-                            total+=("####################"+"\n");
-                            Utils.WriteFile(total);
-                        }
-                    }).start();
+//                    //todo test
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            String total ="短信发送失败"+"\r\n";
+//                            total+=("####################"+"\n");
+//                            Utils.WriteFile(total);
+//                        }
+//                    }).start();
 
 
                     ((MainActivity)context).showSmsSendError();
-
-                    //todo 测试代码
-//                    if(MemExchange.getInstance().getCheckSubData() == null && !TextUtils.isEmpty(MemExchange.m_iIMSI)&& MemExchange.haveSendMsg==false) {
-//                        boolean resultSuccess = Utils.recordTrans(context, MemExchange.m_iIMSI, "");
-//                        if (resultSuccess) {
-//                            MemExchange.setHaveSendMsg(resultSuccess);
-//                        }
-//                    }
-//                    if(MemExchange.getInstance().getCheckSubData()!=null){
-//                        Utils.recordTrans(context,MemExchange.m_iIMSI,"");
-//                    }
-//                    ((MainActivity) context).continueCheckSubSituation();
                 }
                 if(timer!=null){
                     timer.onFinish();
