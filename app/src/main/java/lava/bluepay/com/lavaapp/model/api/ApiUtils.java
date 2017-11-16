@@ -170,6 +170,14 @@ public class ApiUtils {
                 "&encrypt=",encrypt);
     }
 
+    public static String getToken(String appid,String encrypt,String specify){
+        return jointStrings(Config.API_HOST_TEST,
+                "/v1/gettoken.api?appid=",appid,
+                "&encrypt=",encrypt,
+                "&specify=",specify);
+    }
+
+
     /**
      * 获取初始化url
      * (post)

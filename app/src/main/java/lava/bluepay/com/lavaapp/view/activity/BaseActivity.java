@@ -184,49 +184,27 @@ public class BaseActivity extends AppCompatActivity {
         if(bean == null){
             return;
         }
-        switch (bean.getCode()){
-            case ApiUtils.reqResError:
-            case ApiUtils.reqResErrorException:
-            case ApiUtils.reqResErrorParametersError:
 
-                break;
+        if(bean.getCode() == ApiUtils.reqResErrorAuthFail || bean.getCode() == ApiUtils.reqResErrorAuthError){
+            if(MemExchange.getInstance().getRequestTokenTimes()<Config.requestTokenMaxTimes) {
+                MemExchange.getInstance().addRequestTokenTimes();
 
-            case ApiUtils.HTTP_NETWORK_FAIL:
-            case ApiUtils.HTTP_REQUEST_EXCEPTION:
-                //todo 网络请求失败
-                //初始化过程中
+                //请求token
+//                    MemExchange.getInstance().setIsTokenInvalid(true);
 
-                //轮循查询订阅状态过程中
-                //网络异常，退出
+                //上次请求的类别
+                int lastRequestType = msg.arg1;
+                Logger.e(Logger.DEBUG_TAG,"processReqError(),token过期,lastRequestType=" + lastRequestType);
+                String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT), String.valueOf(lastRequestType));
+                RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,null);
+            }else{
+                //todo 清空缓存数据
+                Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
+                finish();
 
-                //使用过程中浏览过程中
-                //null
-                //重新获取token过程中
-
-//                MemExchange.getInstance().setRequestTokenTimes(0);
-
-                break;
-            case ApiUtils.reqResErrorAuthFail:
-            case ApiUtils.reqResErrorAuthError:
-
-                if(MemExchange.getInstance().getRequestTokenTimes()<Config.requestTokenMaxTimes) {
-                    MemExchange.getInstance().addRequestTokenTimes();
-
-                    //请求token
-                    MemExchange.getInstance().setIsTokenInvalid(true);
-                    String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
-                    RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,null);
-                }else{
-                    //todo 清空缓存数据
-                    Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
-                    finish();
-
-                }
-
-
-//                Toast.makeText(context,R.string.request_out_of_date,Toast.LENGTH_SHORT).show();
-
-                break;
+            }
+        }else{
+            MemExchange.getInstance().removeLastRequestBean(msg.arg1);
         }
     }
 
@@ -246,34 +224,41 @@ public class BaseActivity extends AppCompatActivity {
                 MemExchange.getInstance().setTokenData(tokenData.getData());
 
                 Logger.e(Logger.DEBUG_TAG, "获取token成功");
-                if(MemExchange.getInstance().getIsTokenInvalid()){
-                    Logger.e(Logger.DEBUG_TAG,"上一次token失效，现在重新请求上一次请求");
 
-//                    MemExchange.getInstance().setRequestTokenTimes(0);
-                    //todo 注意同步问题
+                String specify = tokenData.getData().getSpecify();
 
-                    //请求上一次任务
-                    RequestBean lastBean = MemExchange.getInstance().getLastestReqBean();
-                    if(lastBean != null && lastBean.getRequestType()>=ApiUtils.requestToken){
-                        if(lastBean.getRequestType()>ApiUtils.requestAllCategory){
-                            String url = ApiUtils.getQuerypage(lastBean.getNowPage(),Config.PerPageSize,lastBean.getCateId(),MemExchange.getInstance().getTokenData().getToken());
-                            RequestManager.getInstance().request(url,getMyHandler(),lastBean.getRequestType(),null);
-                        }
-                        else if(lastBean.getRequestType() == ApiUtils.requestCheckSub){
-                            if(!TextUtils.isEmpty(MemExchange.m_sPhoneNumber)) {
-                                ((MainActivity) context).sendCheckSubRequest(MemExchange.m_sPhoneNumber, false);
+//                if(MemExchange.getInstance().getIsTokenInvalid()){
+                try {
+                    if (!TextUtils.isEmpty(specify)) {
+                        int specifyKey = Integer.parseInt(specify);
+                        Logger.e(Logger.DEBUG_TAG, "上一次token失效，现在重新请求上一次请求");
+
+                        //请求上一次任务
+                        RequestBean lastBean = MemExchange.getInstance().getLastestReqBean(specifyKey);
+
+                        MemExchange.getInstance().returnTokenToNormal(specifyKey);
+
+                        if (lastBean != null && lastBean.getRequestType() >= ApiUtils.requestToken) {
+                            if (lastBean.getRequestType() > ApiUtils.requestAllCategory) {
+                                String url = ApiUtils.getQuerypage(lastBean.getNowPage(), Config.PerPageSize, lastBean.getCateId(), MemExchange.getInstance().getTokenData().getToken());
+                                RequestManager.getInstance().request(url, getMyHandler(), lastBean.getRequestType(), null);
+                            } else if (lastBean.getRequestType() == ApiUtils.requestCheckSub) {
+                                if (!TextUtils.isEmpty(MemExchange.m_sPhoneNumber)) {
+                                    ((MainActivity) context).sendCheckSubRequest(MemExchange.m_sPhoneNumber, false);
+                                }
+                            } else if (lastBean.getRequestType() == ApiUtils.requestSendAnalyse) {
+                                ((MainActivity) context).sendRequestAnalyse(lastBean.getAnalyseStep(), false);
+                            } else {
+                                Logger.e(Logger.DEBUG_TAG, "last request type = " + lastBean.getRequestType());
                             }
                         }
-                        else if(lastBean.getRequestType() == ApiUtils.requestSendAnalyse){
-                            ((MainActivity)context).sendRequestAnalyse(lastBean.getAnalyseStep(),false);
-                        }
-                        else{
-                            Logger.e(Logger.DEBUG_TAG,"last request type = "+lastBean.getRequestType());
-                        }
                     }
-                    MemExchange.getInstance().returnTokenToNormal();
-//                    MemExchange.getInstance().setIsTokenInvalid(false);
+                }catch (Exception e){
+                    MemExchange.getInstance().removeLastRequestAnyway();
+                    e.printStackTrace();
                 }
+
+
                 break;
         }
     }

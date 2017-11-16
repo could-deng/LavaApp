@@ -172,6 +172,8 @@ public class RequestManager {
 
     private void sendRequestResultMessage(String sResult,Handler handler,int iRequestType) {
         if(isHttpResultValid(sResult)) {
+            MemExchange.getInstance().removeLastRequestBean(iRequestType);
+
             sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_FINISH);
         }else{
             sendResultMessage(sResult, handler, iRequestType, MSG_REQUEST_ERROR);

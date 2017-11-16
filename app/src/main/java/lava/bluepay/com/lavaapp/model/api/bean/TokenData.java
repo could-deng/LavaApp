@@ -29,6 +29,7 @@ public class TokenData extends BaseBean {
 
         private String token;
         private String expired;
+        private String specify;
 
         public String getToken() {
             return token;
@@ -44,6 +45,14 @@ public class TokenData extends BaseBean {
 
         public void setExpired(String expired) {
             this.expired = expired;
+        }
+
+        public String getSpecify() {
+            return specify;
+        }
+
+        public void setSpecify(String specify) {
+            this.specify = specify;
         }
     }
 }

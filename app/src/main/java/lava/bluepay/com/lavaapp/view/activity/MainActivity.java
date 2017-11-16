@@ -754,11 +754,11 @@ public class MainActivity extends BaseActivity {
             String sRequest = ApiUtils.getToken(Config.APPID, MD5Util.getMD5String("appid=" + Config.APPID + Config.APPSALT));
 
             //todo bug
-            if(isInInitState){
-                MemExchange.getInstance().bugText.add(sRequest);
-            }
+//            if(isInInitState){
+//                MemExchange.getInstance().bugText.add(sRequest);
+//            }
 
-            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,new RequestBean());
+            RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestToken,null);
         }catch (Exception e){
             e.printStackTrace();
             //todo 上传错误日志
@@ -780,9 +780,9 @@ public class MainActivity extends BaseActivity {
             String sRequest = ApiUtils.getInit();
 
             //todo bug
-            if(isInInitState){
-                MemExchange.getInstance().bugText.add(sRequest);
-            }
+//            if(isInInitState){
+//                MemExchange.getInstance().bugText.add(sRequest);
+//            }
 
 
             RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getInitRequestBody(dev, versionid,bean.getToken()), new RequestBean(ApiUtils.requestInit,-1,-1));
@@ -800,9 +800,9 @@ public class MainActivity extends BaseActivity {
             String sRequest = "http://www.jmtt.co.th/detection/index.php?token=66a8a0d8c66e4d18235c95085eb411b0";
 
             //todo bug
-            if(isInInitState){
-                MemExchange.getInstance().bugText.add(sRequest);
-            }
+//            if(isInInitState){
+//                MemExchange.getInstance().bugText.add(sRequest);
+//            }
 
 
             RequestManager.getInstance().request(sRequest, getMyHandler(), ApiUtils.requestPhoneNum,null);
@@ -829,11 +829,6 @@ public class MainActivity extends BaseActivity {
             }
             String sRequest = ApiUtils.getCheckSub();
 
-            //todo bug
-            if(isInInitState){
-                MemExchange.getInstance().bugText.add(sRequest);
-            }
-
             RequestManager.getInstance().requestByPost(sRequest, getMyHandler(), RequestManager.getInstance().getCheckSubRequestBody(telNum,bean.getToken()),saveStep?(new RequestBean(ApiUtils.requestCheckSub,-1,-1)):null);
         }catch (Exception e){
             e.printStackTrace();
@@ -846,7 +841,8 @@ public class MainActivity extends BaseActivity {
      */
     public void sendCategoryDataListRequest(int nowPage, int cateId, int requestType){
 
-        if(MemExchange.getInstance().getIsTokenInvalid()){
+//        if(MemExchange.getInstance().getIsTokenInvalid()){
+        if(MemExchange.getInstance().getLastestReqBean(requestType)!=null){
             loadError(requestType);
             Toast.makeText(context,context.getString(R.string.try_later),Toast.LENGTH_SHORT).show();
             return;
@@ -858,11 +854,6 @@ public class MainActivity extends BaseActivity {
         }
 
         String sRequest = ApiUtils.getQuerypage(nowPage,Config.PerPageSize,cateId,MemExchange.getInstance().getTokenData().getToken());
-
-//        //todo bug
-//        if(lastRequestData){
-//            MemExchange.getInstance().bugText.add(sRequest);
-//        }
 
         RequestManager.getInstance().request(sRequest,getMyHandler(),requestType,new RequestBean(requestType,nowPage,cateId));
     }
@@ -911,13 +902,7 @@ public class MainActivity extends BaseActivity {
         super.processReqError(msg);
         String mResult = getMessgeResult(msg);
 
-//        //todo bug
-//        if(isInInitState){
-//            MemExchange.getInstance().bugText.add(mResult);
-//        }
-
         if(msg.arg1 == ApiUtils.requestPhoneNum){
-
             try {
                 PhoneNumBean phoneNumBean = JsonHelper.getObject(mResult, PhoneNumBean.class);
                 if (phoneNumBean != null && !TextUtils.isEmpty(phoneNumBean.getMsisdn())) {
@@ -948,16 +933,22 @@ public class MainActivity extends BaseActivity {
         if(bean.getCode() == ApiUtils.HTTP_NETWORK_FAIL || bean.getCode() == ApiUtils.HTTP_REQUEST_EXCEPTION) {
             switch (msg.arg1) {
                 case ApiUtils.requestToken:
-                    //初始化
-                    if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
-                        Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
-                        finish();
-                        return;
+                    try {
+
+                        //初始化
+                        if (nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null) {
+                            Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                        String specify = MemExchange.getInstance().getTokenData().getSpecify();
+                        if (!TextUtils.isEmpty(specify)) {
+                            MemExchange.getInstance().removeLastRequestBean(Integer.parseInt(specify));
+                        }
+                    }catch(Exception e){
+                        MemExchange.getInstance().removeLastRequestAnyway();
+                        e.printStackTrace();
                     }
-//                    else if(MemExchange.getInstance().getIsTokenInvalid()) {
-//                        //过期查询
-//                        MemExchange.getInstance().returnTokenToNormal();
-//                    }
                     break;
                 case ApiUtils.requestInit:
                     Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
@@ -966,21 +957,7 @@ public class MainActivity extends BaseActivity {
 
                 case ApiUtils.requestCheckSub:
 
-//                    //todo test
-//                    //todo mResult 去掉final
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            String total ="processReqError()，ApiUtils.requestCheckSub"+"\r\n";
-//                            total+=(JsonHelper.createJsonString(mResult+"\r\n"));
-//                            total+=("####################"+"\n");
-//                            Utils.WriteFile(total);
-//                        }
-//                    }).start();
-
-
-
-                    if(nowInitState < NOWInitState3 && MemExchange.getInstance().getInitData() == null){
+                    if(isInInitState && MemExchange.getInstance().getInitData() == null){
                         //初始化
                         Toast.makeText(context, context.getString(R.string.initial_error), Toast.LENGTH_SHORT).show();
                         finish();
@@ -1014,31 +991,12 @@ public class MainActivity extends BaseActivity {
         super.processRequest(msg);
         String result = getMessgeResult(msg);
 
-//        //todo test
-//        if(isInInitState){
-//            MemExchange.getInstance().bugText.add(result);
-//        }
-//        if(lastRequestData){
-//            MemExchange.getInstance().bugText.add(result);
-//            lastRequestData = false;
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    String total ="";
-//                    for( String itemString:MemExchange.getInstance().bugText){
-//                        total+=(itemString+"\r\n");
-//                    }
-//                    total+=("#####################################"+"\n");
-//                    Utils.WriteFile(total);
-//                    MemExchange.getInstance().bugText.clear();
-//                }
-//            }).start();
-//        }
-
         switch (msg.arg1){
             case ApiUtils.requestToken:
-                if(++nowInitState <= MainActivity.NOWInitState3){
-                    initApp(nowInitState);
+                if(isInInitState) {
+                    if (++nowInitState <= MainActivity.NOWInitState3) {
+                        initApp(nowInitState);
+                    }
                 }
                 break;
             case ApiUtils.requestInit:
@@ -1055,8 +1013,6 @@ public class MainActivity extends BaseActivity {
 
                 Logger.e(Logger.DEBUG_TAG,"查询订阅状态成功");
 
-
-
                 if(isInInitState) {
                     if (++nowInitState <= MainActivity.NOWInitState3) {
                         initApp(nowInitState);
@@ -1064,20 +1020,6 @@ public class MainActivity extends BaseActivity {
                     return;
                 }
                 if(isInCheck){
-
-//                    //todo test
-//                    //todo 去掉result 的final
-//                    new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            String total ="processRequest()，ApiUtils.requestCheckSub"+"\r\n";
-//                            total+=(JsonHelper.createJsonString(result)+"\r\n");
-//                            total+=("####################"+"\n");
-//                            Utils.WriteFile(total);
-//                        }
-//                    }).start();
-
-
                     if(!CheckSubBean.ifHaveSubscribe(subBean.getData())){
                         if(nowCheckTime<Config.maxCheckSubTimes){
                             nowCheckTime++;
@@ -1104,7 +1046,6 @@ public class MainActivity extends BaseActivity {
 //
 //                Logger.e(Logger.DEBUG_TAG,"获取所有激活分类数据成功");
 //                break;
-
 
             //图片
             case ApiUtils.requestPhotoPopular:
@@ -1602,7 +1543,8 @@ public class MainActivity extends BaseActivity {
 //        RefWatcher refWatcher = MixApp.getRefWatcher(this);
 //        refWatcher.watch(this);
 
-//        getCheckHandler().removeCallbacksAndMessages(null);
+        isInInitState = true;
+        getCheckHandler().removeCallbacksAndMessages(null);
         getMyHandler().removeCallbacksAndMessages(null);//推出时清空全部消息
     }
 
@@ -1611,85 +1553,6 @@ public class MainActivity extends BaseActivity {
         super.finish();
         MemExchange.getInstance().clear();
     }
-
-
-//    public static boolean checkPermission(Context context, String permission) {
-//        boolean result = false;
-//        if (Build.VERSION.SDK_INT >= 23) {
-//            try {
-//                Class<?> clazz = Class.forName("android.content.Context");
-//                Method method = clazz.getMethod("checkSelfPermission", String.class);
-//                int rest = (Integer) method.invoke(context, permission);
-//                if (rest == PackageManager.PERMISSION_GRANTED) {
-//                    result = true;
-//                } else {
-//                    result = false;
-//                }
-//            } catch (Exception e) {
-//                result = false;
-//            }
-//        } else {
-//            PackageManager pm = context.getPackageManager();
-//            if (pm.checkPermission(permission, context.getPackageName()) == PackageManager.PERMISSION_GRANTED) {
-//                result = true;
-//            }
-//        }
-//        return result;
-//    }
-//    public static String getDeviceInfo(Context context) {
-//        try {
-//            org.json.JSONObject json = new org.json.JSONObject();
-//            android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) context
-//                    .getSystemService(Context.TELEPHONY_SERVICE);
-//            String device_id = null;
-//            if (checkPermission(context, Manifest.permission.READ_PHONE_STATE)) {
-//                device_id = tm.getDeviceId();
-//            }
-//            String mac = null;
-//            FileReader fstream = null;
-//            try {
-//                fstream = new FileReader("/sys/class/net/wlan0/address");
-//            } catch (FileNotFoundException e) {
-//                fstream = new FileReader("/sys/class/net/eth0/address");
-//            }
-//            BufferedReader in = null;
-//            if (fstream != null) {
-//                try {
-//                    in = new BufferedReader(fstream, 1024);
-//                    mac = in.readLine();
-//                } catch (IOException e) {
-//                } finally {
-//                    if (fstream != null) {
-//                        try {
-//                            fstream.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                    if (in != null) {
-//                        try {
-//                            in.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            }
-//            json.put("mac", mac);
-//            if (TextUtils.isEmpty(device_id)) {
-//                device_id = mac;
-//            }
-//            if (TextUtils.isEmpty(device_id)) {
-//                device_id = android.provider.Settings.Secure.getString(context.getContentResolver(),
-//                        android.provider.Settings.Secure.ANDROID_ID);
-//            }
-//            json.put("device_id", device_id);
-//            return json.toString();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 
 
 }

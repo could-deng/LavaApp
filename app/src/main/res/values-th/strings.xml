@@ -16,7 +16,7 @@
     <!--视屏-->
     <string name="video_popular">เป็นที่นิยม</string>
     <string name="video_funny">สนุกสนาน</string>
-    <string name="video_sports">เคลื่อนไหว,ออกกำลังกาย</string>
+    <string name="video_sports">กีฬา</string>
 
     <!--卡通-->
     <string name="cartoon_popular">เป็นที่นิยม</string>
@@ -50,7 +50,7 @@
     <string name="initial_error">เกิดข้อผิดพลาดในการเริ่มต้น กรุณาทำรายการใหม่</string>
 
 
-    <string name="try_later">โปรดลองอีกครั้งในภายหลัง</string>
+    <string name="try_later">งานยุ่งอยู่โปรดรอสักครู่</string>
     <string name="have_no_network">ไม่มีเครือข่าย กรุณาลองอีกครั้งในภายหลัง</string>
 
 

@@ -3,6 +3,7 @@ package lava.bluepay.com.lavaapp.model;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import lava.bluepay.com.lavaapp.MixApp;
@@ -20,13 +21,13 @@ import lava.bluepay.com.lavaapp.model.api.bean.TokenData;
 
 public class MemExchange {
 
-    private boolean isTokenInvalid;//token是否失效
-    public void setIsTokenInvalid(boolean invalid){
-        isTokenInvalid = invalid;
-    }
-    public boolean getIsTokenInvalid(){
-        return isTokenInvalid;
-    }
+//    private boolean isTokenInvalid;//token是否失效
+//    public void setIsTokenInvalid(boolean invalid){
+//        isTokenInvalid = invalid;
+//    }
+//    public boolean getIsTokenInvalid(){
+//        return isTokenInvalid;
+//    }
     private int requestTokenTimes;
     public int getRequestTokenTimes(){
         return requestTokenTimes;
@@ -37,19 +38,40 @@ public class MemExchange {
 //    public void setRequestTokenTimes(int times){
 //        requestTokenTimes = times;
 //    }
-    private RequestBean requestBean;
+    private HashMap<Integer,RequestBean> requestBeanList = new HashMap<>();//RequestBean requestBean;
     public void saveLastestReqBean(RequestBean bean){
-        requestBean = bean;
+        if(bean == null){
+            return;
+        }
+        if(requestBeanList == null){
+            requestBeanList = new HashMap<>();
+        }
+        requestBeanList.put(bean.getRequestType(),bean);
     }
-    public RequestBean getLastestReqBean(){
+    public RequestBean getLastestReqBean(int key){
+        RequestBean requestBean = null;
+        if(requestBeanList!=null) {
+            requestBean = requestBeanList.get(key);
+        }
         return requestBean;
     }
-    public void returnTokenToNormal(){
-        isTokenInvalid = false;
+    public void returnTokenToNormal(int key){
+//        isTokenInvalid = false;
         requestTokenTimes = 0;
-        requestBean = null;
+        if(requestBeanList!=null){
+            requestBeanList.remove(key);
+        }
     }
-    public ArrayList<String> bugText = new ArrayList<>();
+    public void removeLastRequestBean(int key){
+        if(requestBeanList!=null){
+            requestBeanList.remove(key);
+        }
+    }
+    public void removeLastRequestAnyway(){
+        if(requestBeanList!=null) {
+            requestBeanList.clear();
+        }
+    }
 
     //region================手机相关====================================
 
@@ -122,9 +144,12 @@ public class MemExchange {
     public void clear(){
         Logger.e(Logger.DEBUG_TAG,"MemExchange,clear()");
 
-        requestBean = null;
+        requestBeanList.clear();
+        requestBeanList = null;
+
         requestTokenTimes = 0;
-        isTokenInvalid = false;
+//        isTokenInvalid = false;
+
         m_sPhoneNumber = "";
         canSee = false;
         haveUnsubscribed = false;
