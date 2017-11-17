@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.Build;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
+import com.tencent.bugly.crashreport.CrashReport;
+
 import lava.bluepay.com.lavaapp.common.FileUtils;
 
 /**
@@ -35,6 +37,7 @@ public class MixApp extends Application {
         FileUtils.makeFolders(Config.PHOTO_PATH);
         FileUtils.makeFolders(Config.db_path);
 
+        CrashReport.initCrashReport(getApplicationContext());//Bugly配置
 
 //        UmengAnalysisHelper.getInstance().onApplicationCreate(false);
 
@@ -63,5 +66,9 @@ public class MixApp extends Application {
         Fresco.initialize(getApplicationContext(), imagePipelineConfig);
     }
 
-
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+//        Multidex.install(this);
+    }
 }
