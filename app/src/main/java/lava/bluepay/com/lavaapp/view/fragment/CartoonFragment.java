@@ -173,7 +173,7 @@ public class CartoonFragment extends BaseFragment {
         //recyclerView
         rv_cartoon_popular = (EmptyRecyclerView) popularView.findViewById(R.id.swipe_target);
         rv_cartoon_popular.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_cartoon_popular.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_cartoon_popular.setItemAnimator(new DefaultItemAnimator());//动画
         rv_cartoon_popular.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_cartoon_popular.setAdapter(rvPopularAdapter);
 
@@ -237,7 +237,7 @@ public class CartoonFragment extends BaseFragment {
         //recyclerView
         rv_cartoon_funny = (EmptyRecyclerView) funnyView.findViewById(R.id.swipe_target);
         rv_cartoon_funny.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_cartoon_funny.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_cartoon_funny.setItemAnimator(new DefaultItemAnimator());//动画
         rv_cartoon_funny.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_cartoon_funny.setAdapter(rvFunnyAdapter);
 
@@ -299,7 +299,7 @@ public class CartoonFragment extends BaseFragment {
         //recyclerView
         rv_cartoon_horror = (EmptyRecyclerView) horrorView.findViewById(R.id.swipe_target);
         rv_cartoon_horror.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_cartoon_horror.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_cartoon_horror.setItemAnimator(new DefaultItemAnimator());//动画
         rv_cartoon_horror.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_cartoon_horror.setAdapter(rvHorrorAdapter);
 

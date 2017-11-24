@@ -464,6 +464,7 @@ public class MainActivity extends BaseActivity {
                         Manifest.permission.READ_PHONE_STATE});
             }else{
                 if (ApiUtils.isNetWorkAvailable()) {
+
                     isInInitState = true;
                     initApp(MainActivity.NOWInitState0);
                 } else {
@@ -930,6 +931,9 @@ public class MainActivity extends BaseActivity {
         }
 
         BaseBean bean = JsonHelper.getObject(mResult, BaseBean.class);
+        if(bean == null){
+            return;
+        }
         if(bean.getCode() == ApiUtils.HTTP_NETWORK_FAIL || bean.getCode() == ApiUtils.HTTP_REQUEST_EXCEPTION) {
             switch (msg.arg1) {
                 case ApiUtils.requestToken:

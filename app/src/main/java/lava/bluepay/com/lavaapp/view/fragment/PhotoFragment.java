@@ -149,7 +149,7 @@ public class PhotoFragment extends BaseFragment {
         rvPopular = (EmptyRecyclerView) popularView.findViewById(R.id.swipe_target);
         rvPopularAdapter = new RecyclerViewAdapter(getActivity(),Config.CategoryPhotoPopular);
         rvPopular.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
-        rvPopular.setItemAnimator(new DefaultItemAnimator());//动画
+//        rvPopular.setItemAnimator(new DefaultItemAnimator());//动画
         rvPopular.setEmptyView(inflater.inflate(R.layout.view_empty,null));
 
 //        popularScrollListener = new RecyclerView.OnScrollListener() {
@@ -286,7 +286,7 @@ public class PhotoFragment extends BaseFragment {
         //recyclerView
         rv_photo_portray = (EmptyRecyclerView) portrayView.findViewById(R.id.swipe_target);
         rv_photo_portray.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_photo_portray.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_photo_portray.setItemAnimator(new DefaultItemAnimator());//动画
         rv_photo_portray.setEmptyView(inflater.inflate(R.layout.view_empty,null));
 
 //        portrayScrollListener = new RecyclerView.OnScrollListener() {
@@ -373,7 +373,7 @@ public class PhotoFragment extends BaseFragment {
         //recyclerView
         rv_photo_scenery = (EmptyRecyclerView) sceneryView.findViewById(R.id.swipe_target);
         rv_photo_scenery.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_photo_scenery.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_photo_scenery.setItemAnimator(new DefaultItemAnimator());//动画
         rv_photo_scenery.setEmptyView(inflater.inflate(R.layout.view_empty,null));
 
 

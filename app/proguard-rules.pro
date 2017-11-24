@@ -42,12 +42,38 @@
 -keep public class * extends android.support.v4.**
 -keep public class * extends android.app.Fragment
 
+
+
+# 保留继承的
+-keep public class * extends android.support.v4.**
+-keep public class * extends android.support.v7.**
+-keep public class * extends android.support.annotation.**
+
+
 -dontwarn com.facebook.**
 -keep class com.facebook.**{*;}
 
 -keep class com.google.gson.**{*;}
 
+# OkHttp3
+-dontwarn com.squareup.okhttp3.**
+-keep class com.squareup.okhttp3.** { *;}
+-dontwarn okio.**
+
 -ignorewarnings
 
 -dontwarn com.tencent.bugly.**
 -keep public class com.tencent.bugly.**{*;}
+
+
+
+-keep class lava.bluepay.com.lavaapp.model.api.bean.**{*;}                                   #过滤掉自己编写的实体类
+
+#----------------保护指定的类和类的成员，但条件是所有指定的类和类成员是要存在------------------------------------
+-keepclasseswithmembernames class * {
+    public <init>(android.content.Context, android.util.AttributeSet);
+}
+
+-keepclasseswithmembernames class * {
+    public <init>(android.content.Context, android.util.AttributeSet, int);
+}

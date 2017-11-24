@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LavaApp</string>
-    <string name="AppTitle">LavaApp</string>
+    <string name="app_name">HappyTime</string>
+    <string name="AppTitle">HappyTime</string>
 
     <string name="title_photo">图片</string>
     <string name="title_video">视频</string>

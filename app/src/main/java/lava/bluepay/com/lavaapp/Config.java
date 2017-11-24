@@ -18,9 +18,8 @@ public class Config {
     public static final int ViewPagerMaxSize = 10;//viewpager最多显示的张数
     public static final int requestTokenMaxTimes = 3;//请求失败时重复请求token的最大次数
 
-//    public static final String API_HOST_TEST = "http://203.151.201.170:21801";//http://192.168.4.210:8168//http://58.250.250.116:8168////http://120.76.73.92:8168
-
-    public static final String API_HOST_TEST = "http://120.76.73.92:8168";
+    public static final String API_HOST_TEST = "http://203.151.201.170:21801";//http://192.168.4.210:8168//http://58.250.250.116:8168////http://120.76.73.92:8168
+//    public static final String API_HOST_TEST = "http://120.76.73.92:8168";
 
     //todo 暂时写死,后面需要改
     public static final String APPID = "wsgYatEx";

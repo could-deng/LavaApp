@@ -179,7 +179,7 @@ public class VideoFragment extends BaseFragment {
         //recyclerView
         rv_video_popular = (EmptyRecyclerView) popularView.findViewById(R.id.swipe_target);
         rv_video_popular.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_video_popular.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_video_popular.setItemAnimator(new DefaultItemAnimator());//动画
         rv_video_popular.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_video_popular.setAdapter(rvPopularAdapter);
 
@@ -248,7 +248,7 @@ public class VideoFragment extends BaseFragment {
         //recyclerView
         rv_video_funny = (EmptyRecyclerView) funnyView.findViewById(R.id.swipe_target);
         rv_video_funny.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_video_funny.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_video_funny.setItemAnimator(new DefaultItemAnimator());//动画
         rv_video_funny.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_video_funny.setAdapter(rvFunnyAdapter);
 
@@ -315,7 +315,7 @@ public class VideoFragment extends BaseFragment {
         //recyclerView
         rv_video_sport = (EmptyRecyclerView) sportsView.findViewById(R.id.swipe_target);
         rv_video_sport.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));//改为Horizontal则表现为滚动的GridView效果
-        rv_video_sport.setItemAnimator(new DefaultItemAnimator());//动画
+//        rv_video_sport.setItemAnimator(new DefaultItemAnimator());//动画
         rv_video_sport.setEmptyView(inflater.inflate(R.layout.view_empty,null));
         rv_video_sport.setAdapter(rvSportAdapter);
 
