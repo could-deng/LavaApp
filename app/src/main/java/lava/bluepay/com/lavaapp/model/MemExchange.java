@@ -350,7 +350,7 @@ public class MemExchange {
             photoPortrayHeights = new ArrayList<>();
             if(getPhotoPortrayList() != null && photoPortrayHeights.size() == 0) {
                 for (int i = 0; i < getPhotoPortrayList().size(); i++) {
-                    photoPortrayHeights.add((int) (450 + Math.random() * 200));
+                    photoPortrayHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
                 }
             }
         }
@@ -365,7 +365,7 @@ public class MemExchange {
             photoPortrayHeights.clear();
         }
         for (int i = 0; i < size; i++) {
-            photoPortrayHeights.add((int) (450 + Math.random() * 200));
+            photoPortrayHeights.add(Utils.getViewRandomHeight(MixApp.getContext()));
         }
 
     }

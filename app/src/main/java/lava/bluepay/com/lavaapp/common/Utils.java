@@ -453,6 +453,7 @@ public class Utils {
         return min;
     }
     public static int getViewRandomHeight(Context context){
+//        int height = ViewUtils.dp2px(context,(int) (170 + Math.random() * 60));
         int height = ViewUtils.dp2px(context,(int) (170 + Math.random() * 60));
         return height;
     }

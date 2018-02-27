@@ -23,9 +23,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"
-        fresco:actualImageScaleType="fitXY"
+        fresco:actualImageScaleType="centerCrop"
         fresco:fadeDuration="300"
-        fresco:placeholderImageScaleType="fitXY"
+        fresco:placeholderImageScaleType="centerCrop"
         fresco:placeholderImage="@drawable/pic_loading" />
 
 

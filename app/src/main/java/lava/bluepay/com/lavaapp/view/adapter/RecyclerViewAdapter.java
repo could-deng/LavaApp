@@ -161,17 +161,19 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ViewGroup.LayoutParams lp = ((MyViewHolder) holder).imageView.getLayoutParams();
         lp.height = mHeights.get(position);
 
-//        Logger.e(Logger.DEBUG_TAG,"screenWidth="+ViewUtils.getScreenWidth(context));
-//        Logger.e(Logger.DEBUG_TAG,"height="+lp.height+",width="+lp.width);
 
         ((MyViewHolder) holder).imageView.setLayoutParams(lp);
+
+        ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
         if (data == null ||  TextUtils.isEmpty(data.getThumb())) {//默认
-            ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+            ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             ((MyViewHolder)holder).imageView.setImageResource(R.drawable.pic_loading);
         } else {
 
             if(CheckSubBean.ifHaveSubscribe(MemExchange.m_iIMSI)) {
                 //订阅用户、正常显示
+                ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
             }else {
                 //非订阅用户
@@ -179,6 +181,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 //todo 图片的url一定要统一
                 if (data.getThumb().indexOf(".") == -1 ||data.getThumb().lastIndexOf(File.separator) == -1 || data.getThumb().lastIndexOf(FileUtils.FILE_EXTENSION_SEPARATOR) == -1) {
                     Logger.e(Logger.DEBUG_TAG, "pic url error");
+                    ((MyViewHolder)holder).imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     ((MyViewHolder)holder).imageView.setImageURI(Uri.parse(data.getThumb()));
                     return;
                 }
@@ -290,7 +293,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             @Override
             public void run() {
                 if (bitmap != null) {
-                    view.setScaleType(ImageView.ScaleType.FIT_XY);
+                    view.setScaleType(ImageView.ScaleType.CENTER_CROP);
                     view.setImageBitmap(bitmap);
                 } else {
                     Logger.e("TT", "RecyclerViewAdapter,setImageBlur(),bitmap == null");
